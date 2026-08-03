@@ -121,3 +121,37 @@ export type ReviewListQuery = {
   page?: number;
   limit?: number;
 };
+
+export type Role = "CUSTOMER" | "PROVIDER" | "ADMIN";
+
+// Public registration is limited to these two; ADMIN is created by an
+// existing admin through a separate protected endpoint.
+export type RegistrableRole = "CUSTOMER" | "PROVIDER";
+
+export type AuthTokens = {
+  accessToken: string;
+  refreshToken: string;
+};
+
+export type LoginInput = {
+  email: string;
+  password: string;
+};
+
+export type RegisterInput = {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  role: RegistrableRole;
+};
+
+// Discriminated result the auth Server Actions return to `useActionState`.
+// Success is signalled by a redirect, so the returned state is only ever
+// "idle" (no submission yet) or "error".
+export type AuthFormState = {
+  status: "idle" | "error";
+  message: string;
+  fieldErrors?: FieldErrors;
+  values?: Record<string, string>;
+};
