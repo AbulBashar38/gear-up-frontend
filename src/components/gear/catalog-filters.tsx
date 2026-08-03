@@ -1,0 +1,188 @@
+import { Filter, Info, RotateCcw } from "lucide-react";
+import Link from "next/link";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from "@/components/ui/native-select";
+import type { Category } from "@/lib/api/landing";
+
+export type CatalogFilterValues = {
+  category: string;
+  brand: string;
+  minPrice: string;
+  maxPrice: string;
+};
+
+type CatalogFiltersProps = {
+  categories: Category[];
+  categoriesError?: string;
+  values: CatalogFilterValues;
+};
+
+export function CatalogFilters({
+  categories,
+  categoriesError,
+  values,
+}: CatalogFiltersProps) {
+  const hasKnownCategory = categories.some(
+    (category) => category.id === values.category,
+  );
+
+  return (
+    <section aria-labelledby="catalog-filters-title" className="bg-mist">
+      <div className="mx-auto grid w-full max-w-[90rem] gap-6 px-5 py-8 sm:px-8 lg:grid-cols-12 lg:px-12 lg:py-10">
+        <div className="lg:col-span-9">
+          <div className="mb-5 flex items-center gap-3">
+            <span className="grid size-10 place-items-center bg-ink text-lime">
+              <Filter aria-hidden="true" className="size-4" />
+            </span>
+            <div>
+              <p className="section-kicker">Catalog controls // live API</p>
+              <h2
+                id="catalog-filters-title"
+                className="font-display text-3xl font-black uppercase tracking-tight"
+              >
+                Filter the full locker
+              </h2>
+            </div>
+          </div>
+
+          <form
+            action="/gear"
+            method="get"
+            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+          >
+            <div className="space-y-2">
+              <Label
+                htmlFor="category"
+                className="text-[0.68rem] font-extrabold uppercase tracking-[0.16em] text-ink/70"
+              >
+                Category
+              </Label>
+              <NativeSelect
+                id="category"
+                name="category"
+                defaultValue={values.category}
+                className="w-full"
+                aria-describedby={categoriesError ? "category-error" : undefined}
+              >
+                <NativeSelectOption value="">All categories</NativeSelectOption>
+                {categories.map((category) => (
+                  <NativeSelectOption key={category.id} value={category.id}>
+                    {category.name}
+                  </NativeSelectOption>
+                ))}
+                {values.category && !hasKnownCategory && (
+                  <NativeSelectOption value={values.category}>
+                    Current category filter
+                  </NativeSelectOption>
+                )}
+              </NativeSelect>
+              {categoriesError && (
+                <p id="category-error" className="text-xs text-signal">
+                  Category choices are reconnecting.
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label
+                htmlFor="brand"
+                className="text-[0.68rem] font-extrabold uppercase tracking-[0.16em] text-ink/70"
+              >
+                Exact brand
+              </Label>
+              <Input
+                id="brand"
+                name="brand"
+                defaultValue={values.brand}
+                maxLength={255}
+                placeholder="e.g. Coleman"
+                className="h-8 rounded-lg bg-paper"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label
+                htmlFor="minPrice"
+                className="text-[0.68rem] font-extrabold uppercase tracking-[0.16em] text-ink/70"
+              >
+                Minimum daily price
+              </Label>
+              <Input
+                id="minPrice"
+                name="minPrice"
+                type="number"
+                min="0"
+                step="0.01"
+                inputMode="decimal"
+                defaultValue={values.minPrice}
+                placeholder="0"
+                className="h-8 rounded-lg bg-paper"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label
+                htmlFor="maxPrice"
+                className="text-[0.68rem] font-extrabold uppercase tracking-[0.16em] text-ink/70"
+              >
+                Maximum daily price
+              </Label>
+              <Input
+                id="maxPrice"
+                name="maxPrice"
+                type="number"
+                min="0"
+                step="0.01"
+                inputMode="decimal"
+                defaultValue={values.maxPrice}
+                placeholder="No maximum"
+                className="h-8 rounded-lg bg-paper"
+              />
+            </div>
+
+            <div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row lg:col-span-4">
+              <Button
+                type="submit"
+                className="notch-button min-h-11 rounded-none bg-ink px-6 font-extrabold text-paper hover:bg-pine"
+              >
+                Apply filters
+                <Filter aria-hidden="true" />
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="min-h-11 rounded-none border-ink/25 bg-transparent px-6 font-extrabold text-ink hover:bg-paper"
+              >
+                <Link href="/gear">
+                  Clear all
+                  <RotateCcw aria-hidden="true" />
+                </Link>
+              </Button>
+            </div>
+          </form>
+        </div>
+
+        <Alert
+          role="note"
+          className="h-fit rounded-none border-ink/20 bg-paper/65 p-5 text-ink lg:col-span-3 lg:mt-15"
+        >
+          <Info aria-hidden="true" className="size-4 text-signal" />
+          <AlertTitle className="font-display text-xl font-black uppercase">
+            Search scope
+          </AlertTitle>
+          <AlertDescription className="mt-2 text-xs leading-5 text-ink/70">
+            These filters query the complete backend catalog. Keyword and date
+            availability search are not exposed by the current API; brand
+            matching is exact.
+          </AlertDescription>
+        </Alert>
+      </div>
+    </section>
+  );
+}

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">GearUp</title>
+  <rect width="64" height="64" rx="8" fill="#10261e"/>
+  <path d="M20 47 38 14h9L29 47h-9Z" fill="#ff6b35"/>
+  <path d="M14 20h13l-5 9H9l5-9Zm23 15h18l-5 9H32l5-9Z" fill="#d8f260"/>
+</svg>
