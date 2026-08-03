@@ -8,14 +8,8 @@ import {
   NativeSelect,
   NativeSelectOption,
 } from "@/components/ui/native-select";
-import type { Category } from "@/lib/api/landing";
-
-export type CatalogFilterValues = {
-  category: string;
-  brand: string;
-  minPrice: string;
-  maxPrice: string;
-};
+import type { Category } from "@/lib/api/types";
+import type { CatalogFilterValues } from "../../_utils/catalog-query";
 
 type CatalogFiltersProps = {
   categories: Category[];

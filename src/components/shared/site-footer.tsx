@@ -1,6 +1,6 @@
 import { ArrowUp } from "lucide-react";
 import Link from "next/link";
-import { BrandMark } from "./brand-mark";
+import { BrandMark } from "@/components/shared/brand-mark";
 import { Button } from "@/components/ui/button";
 
 const footerLinks = [

@@ -627,6 +627,14 @@ src/
 
 Route groups do not affect URLs. Underscore folders such as `_actions` and `_components` are acceptable for private route-local modules, as shown in the instructor reference. Keep backend access, envelope parsing, role/status rules, currency/date formatting, and form schemas out of page markup. Avoid components that combine every network call, business rule, and visual state in one file.
 
+The established public convention is `src/app/(public)/_components/` with
+`shared/`, `landing/`, and `gear/` subfolders. Keep public-only shell and feature
+components there. Put pure route-group helpers such as catalog URL parsing in
+`src/app/(public)/_utils/`; do not mislabel read helpers as Server Actions.
+Reserve `src/components/ui/` for global Shadcn primitives and
+`src/components/shared/` for components genuinely reused across route groups,
+such as `BrandMark` in both public and auth layouts.
+
 ## Deployment and credentials
 
 - Frontend `GEARUP_API_URL` should end at the backend `/api` base.

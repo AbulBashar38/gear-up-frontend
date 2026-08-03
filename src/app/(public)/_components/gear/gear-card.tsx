@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import type { GearItem } from "@/lib/api/landing";
+import type { GearItem } from "@/lib/api/types";
 
 const cardThemes = [
   "bg-orange text-ink",

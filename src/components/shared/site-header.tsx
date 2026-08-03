@@ -5,7 +5,7 @@ import { m, useMotionValueEvent, useScroll } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { BrandMark } from "./brand-mark";
+import { BrandMark } from "@/components/shared/brand-mark";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Sheet,

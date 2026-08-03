@@ -1,17 +1,19 @@
 import { ArrowUpRight, Boxes, Compass } from "lucide-react";
 import Link from "next/link";
-import { GearCard } from "@/components/gear/gear-card";
+import { GearCard } from "../gear/gear-card";
+import { GearCardSkeleton } from "../gear/gear-card-skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getLandingCategories, getRecentGear } from "@/lib/api/landing";
+import { listCategories } from "@/lib/api/categories";
+import { listGear } from "@/lib/api/gear";
 import { Reveal } from "./motion-primitives";
 
 export async function InventorySection() {
   const [categories, gear] = await Promise.all([
-    getLandingCategories(),
-    getRecentGear(),
+    listCategories(),
+    listGear({ page: 1, limit: 6 }),
   ]);
 
   return (
@@ -73,7 +75,7 @@ export async function InventorySection() {
               <AlertDescription className="text-ink/70">
                 {categories.ok
                   ? "New categories will appear here when providers start listing gear."
-                  : categories.message}
+                  : categories.error.message}
               </AlertDescription>
             </Alert>
           )}
@@ -131,7 +133,7 @@ export async function InventorySection() {
               <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-ink/70">
                 {gear.ok
                   ? "Check back soon for newly listed equipment."
-                  : gear.message}
+                  : gear.error.message}
               </p>
             </div>
           </div>
@@ -152,14 +154,7 @@ export function InventorySkeleton() {
         <Skeleton className="mt-6 h-28 max-w-3xl rounded-none bg-ink/10" />
         <div className="mt-12 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           {Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className="border border-ink/10">
-              <Skeleton className="h-56 rounded-none bg-ink/10" />
-              <div className="space-y-4 p-6">
-                <Skeleton className="h-3 w-2/3 rounded-none bg-ink/10" />
-                <Skeleton className="h-14 rounded-none bg-ink/10" />
-                <Skeleton className="h-3 rounded-none bg-ink/10" />
-              </div>
-            </div>
+            <GearCardSkeleton key={index} />
           ))}
         </div>
       </div>

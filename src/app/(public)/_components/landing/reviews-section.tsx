@@ -1,8 +1,9 @@
-import { BadgeCheck, Quote, Star } from "lucide-react";
+import { BadgeCheck, Quote, Star, TriangleAlert } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getRecentReviews } from "@/lib/api/landing";
+import { listReviews } from "@/lib/api/reviews";
 import { Reveal } from "./motion-primitives";
 
 const formatName = (name: string) =>
@@ -23,7 +24,7 @@ const formatRating = (value: string | number) => {
 };
 
 export async function ReviewsSection() {
-  const reviews = await getRecentReviews();
+  const reviews = await listReviews({ page: 1, limit: 3 });
   const returnedReviews = reviews.ok
     ? reviews.data.filter((review) => review.rentalOrder.status === "RETURNED")
     : [];
@@ -56,7 +57,24 @@ export async function ReviewsSection() {
         </Reveal>
 
         <div className="mt-10 grid gap-5 lg:grid-cols-12">
-          {hasReviews ? (
+          {!reviews.ok ? (
+            <Reveal className="lg:col-span-8">
+              <Alert
+                variant="destructive"
+                className="min-h-80 content-center rounded-none border-red-300 bg-red-50 p-8 text-left"
+              >
+                <TriangleAlert aria-hidden="true" className="size-6" />
+                <AlertTitle className="font-display text-3xl font-black uppercase">
+                  {reviews.error.retryable
+                    ? "Field reports are temporarily offline."
+                    : "Field reports could not be loaded."}
+                </AlertTitle>
+                <AlertDescription className="mt-2 max-w-xl leading-6">
+                  {reviews.error.message}
+                </AlertDescription>
+              </Alert>
+            </Reveal>
+          ) : hasReviews ? (
             returnedReviews.map((review, index) => {
               const rating = formatRating(review.rating);
               const comment = review.comment?.trim();
@@ -77,71 +95,71 @@ export async function ReviewsSection() {
                         className="route-grid absolute inset-0 opacity-20"
                       />
                       <CardContent className="relative p-7 sm:p-10">
-                      <div className="flex items-start justify-between gap-6">
-                        {comment ? (
-                          <Quote
-                            aria-hidden="true"
-                            className="size-10 fill-orange text-orange"
-                          />
-                        ) : (
-                          <Star
-                            aria-hidden="true"
-                            className="size-10 fill-orange text-orange"
-                          />
-                        )}
-                        <Badge className="flex min-h-10 rounded-none bg-lime px-3 py-2 text-ink hover:bg-lime">
-                          {rating ? (
-                            <>
-                              <Star
-                                aria-hidden="true"
-                                className="size-4 fill-ink"
-                              />
-                              <span className="font-display text-xl font-black">
-                                {rating}
-                              </span>
-                              <span className="text-[0.58rem] font-bold uppercase tracking-[0.14em]">
-                                / 5
-                              </span>
-                            </>
+                        <div className="flex items-start justify-between gap-6">
+                          {comment ? (
+                            <Quote
+                              aria-hidden="true"
+                              className="size-10 fill-orange text-orange"
+                            />
                           ) : (
-                            <span className="text-[0.62rem] font-extrabold uppercase tracking-[0.12em]">
-                              Rating unavailable
-                            </span>
+                            <Star
+                              aria-hidden="true"
+                              className="size-10 fill-orange text-orange"
+                            />
                           )}
-                        </Badge>
-                      </div>
-                      {comment ? (
-                        <blockquote className="mt-14 max-w-3xl font-display text-[clamp(2.2rem,4.5vw,4.8rem)] font-bold uppercase leading-[0.94] tracking-[-0.035em]">
-                          “{comment}”
-                        </blockquote>
-                      ) : (
-                        <div className="mt-14 max-w-2xl">
-                          <p className="font-display text-[clamp(2.2rem,4.5vw,4.8rem)] font-bold uppercase leading-[0.94] tracking-[-0.035em]">
-                            Rating-only field report
-                          </p>
-                          <p className="mt-5 text-sm leading-6 text-paper/70">
-                            This customer submitted a score without a written
-                            comment.
-                          </p>
+                          <Badge className="flex min-h-10 rounded-none bg-lime px-3 py-2 text-ink hover:bg-lime">
+                            {rating ? (
+                              <>
+                                <Star
+                                  aria-hidden="true"
+                                  className="size-4 fill-ink"
+                                />
+                                <span className="font-display text-xl font-black">
+                                  {rating}
+                                </span>
+                                <span className="text-[0.58rem] font-bold uppercase tracking-[0.14em]">
+                                  / 5
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-[0.62rem] font-extrabold uppercase tracking-[0.12em]">
+                                Rating unavailable
+                              </span>
+                            )}
+                          </Badge>
                         </div>
-                      )}
-                      <footer className="mt-10 flex flex-col justify-between gap-4 border-t border-paper/15 pt-5 sm:flex-row sm:items-end">
-                        <div>
-                          <p className="font-bold">
-                            {formatName(review.customer.name)}
-                          </p>
-                          <p className="mt-1 text-xs text-paper/60">
-                            Rented {review.gearItem.name}
-                          </p>
-                        </div>
-                        <Badge
-                          variant="outline"
-                          className="h-auto rounded-none border-lime/40 bg-transparent px-2 py-1 text-[0.62rem] font-extrabold uppercase tracking-[0.18em] text-lime"
-                        >
-                          <BadgeCheck aria-hidden="true" className="size-4" />
-                          Returned rental
-                        </Badge>
-                      </footer>
+                        {comment ? (
+                          <blockquote className="mt-14 max-w-3xl font-display text-[clamp(2.2rem,4.5vw,4.8rem)] font-bold uppercase leading-[0.94] tracking-[-0.035em]">
+                            “{comment}”
+                          </blockquote>
+                        ) : (
+                          <div className="mt-14 max-w-2xl">
+                            <p className="font-display text-[clamp(2.2rem,4.5vw,4.8rem)] font-bold uppercase leading-[0.94] tracking-[-0.035em]">
+                              Rating-only field report
+                            </p>
+                            <p className="mt-5 text-sm leading-6 text-paper/70">
+                              This customer submitted a score without a written
+                              comment.
+                            </p>
+                          </div>
+                        )}
+                        <footer className="mt-10 flex flex-col justify-between gap-4 border-t border-paper/15 pt-5 sm:flex-row sm:items-end">
+                          <div>
+                            <p className="font-bold">
+                              {formatName(review.customer.name)}
+                            </p>
+                            <p className="mt-1 text-xs text-paper/60">
+                              Rented {review.gearItem.name}
+                            </p>
+                          </div>
+                          <Badge
+                            variant="outline"
+                            className="h-auto rounded-none border-lime/40 bg-transparent px-2 py-1 text-[0.62rem] font-extrabold uppercase tracking-[0.18em] text-lime"
+                          >
+                            <BadgeCheck aria-hidden="true" className="size-4" />
+                            Returned rental
+                          </Badge>
+                        </footer>
                       </CardContent>
                     </article>
                   </Card>
@@ -157,16 +175,15 @@ export async function ReviewsSection() {
                     The first field report is on its way.
                   </h3>
                   <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-ink/70">
-                    {reviews.ok
-                      ? "Once a rental is returned, the customer can leave one verified review."
-                      : "Reviews are reconnecting. The completed-rental rule still applies."}
+                    Once a rental is returned, the customer can leave one
+                    verified review.
                   </p>
                 </div>
               </Card>
             </Reveal>
           )}
 
-          <Reveal className={hasReviews ? "lg:col-span-4" : "lg:col-span-4"}>
+          <Reveal className="lg:col-span-4">
             <Card
               asChild
               className="gear-tag h-full min-h-80 gap-0 rounded-none bg-lime py-0 text-ink ring-0 shadow-none"

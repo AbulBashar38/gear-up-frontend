@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BrandMark } from "@/components/landing/brand-mark";
+import { BrandMark } from "@/components/shared/brand-mark";
 
 export default function AuthLayout({
   children,

@@ -1,16 +1,16 @@
 import { Suspense } from "react";
-import { FinalCta } from "@/components/landing/final-cta";
-import { Hero } from "@/components/landing/hero";
+import { FinalCta } from "./_components/landing/final-cta";
+import { Hero } from "./_components/landing/hero";
 import {
   InventorySection,
   InventorySkeleton,
-} from "@/components/landing/inventory-section";
-import { ProviderCallout } from "@/components/landing/provider-callout";
-import { RentalFlow } from "@/components/landing/rental-flow";
+} from "./_components/landing/inventory-section";
+import { ProviderCallout } from "./_components/landing/provider-callout";
+import { RentalFlow } from "./_components/landing/rental-flow";
 import {
   ReviewsSection,
   ReviewsSkeleton,
-} from "@/components/landing/reviews-section";
+} from "./_components/landing/reviews-section";
 
 export default function HomePage() {
   return (

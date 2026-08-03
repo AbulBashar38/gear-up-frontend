@@ -1,6 +1,6 @@
-import { LandingMotionProvider } from "@/components/landing/motion-primitives";
-import { SiteFooter } from "@/components/landing/site-footer";
-import { SiteHeader } from "@/components/landing/site-header";
+import { SiteFooter } from "../../components/shared/site-footer";
+import { SiteHeader } from "../../components/shared/site-header";
+import { LandingMotionProvider } from "./_components/landing/motion-primitives";
 
 export default function PublicLayout({
   children,
