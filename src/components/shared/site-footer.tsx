@@ -11,7 +11,7 @@ const footerLinks = [
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-paper/10 bg-ink py-10 text-paper">
+    <footer className="surface-inverse border-t border-border bg-background py-10 text-foreground">
       <div className="mx-auto grid w-full max-w-[90rem] gap-10 px-5 sm:px-8 md:grid-cols-3 md:items-end lg:px-12">
         <div>
           <BrandMark inverse />
@@ -42,9 +42,9 @@ export function SiteFooter() {
           </p>
           <Button
             asChild
-            variant="ghost"
+            variant="outline"
             size="icon-lg"
-            className="size-11 shrink-0 rounded-none border border-paper/20 text-paper hover:border-lime hover:bg-lime hover:text-ink"
+            className="shrink-0"
           >
             <a href="#main-content" aria-label="Back to top">
               <ArrowUp aria-hidden="true" className="size-4" />

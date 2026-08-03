@@ -14,9 +14,9 @@ const cardThemes = [
   "bg-orange text-ink",
   "bg-pine text-paper",
   "bg-lime text-ink",
-  "bg-[#d7e5dd] text-ink",
-  "bg-[#f0c957] text-ink",
-  "bg-[#c9d4ff] text-ink",
+  "bg-gear-sage text-ink",
+  "bg-gear-sun text-ink",
+  "bg-gear-sky text-ink",
 ];
 
 function GearIcon({ gear }: { gear: Pick<GearItem, "name" | "category"> }) {
@@ -108,11 +108,8 @@ export function GearCard({ gear, index, eyebrow }: GearCardProps) {
               {gear.brand || "Independent gear"} · {gear.provider.name}
             </p>
             <Badge
-              className={`h-auto shrink-0 rounded-none px-2 py-1 text-[0.58rem] font-extrabold uppercase tracking-[0.12em] ${
-                canRequest
-                  ? "bg-lime text-ink hover:bg-lime"
-                  : "bg-red-100 text-red-800 hover:bg-red-100"
-              }`}
+              variant={canRequest ? "success" : "destructive"}
+              className="h-auto shrink-0 rounded-none px-2 py-1 text-[0.58rem] font-extrabold uppercase tracking-[0.12em]"
             >
               {canRequest ? "Open for requests" : "Currently paused"}
             </Badge>

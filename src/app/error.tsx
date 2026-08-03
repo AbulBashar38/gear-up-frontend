@@ -21,10 +21,10 @@ export default function ApplicationError({
     <main
       id="main-content"
       tabIndex={-1}
-      className="relative grid min-h-dvh place-items-center overflow-hidden bg-ink px-5 py-20 text-paper"
+      className="surface-inverse relative grid min-h-dvh place-items-center overflow-hidden bg-background px-5 py-20 text-foreground"
     >
       <div aria-hidden="true" className="route-grid absolute inset-0 opacity-25" />
-      <section className="relative w-full max-w-3xl border border-paper/15 bg-ink/90 p-7 sm:p-12">
+      <section className="relative w-full max-w-3xl border border-border bg-background/90 p-7 sm:p-12">
         <BrandMark inverse />
         <TriangleAlert
           aria-hidden="true"
@@ -45,7 +45,8 @@ export default function ApplicationError({
           <Button
             type="button"
             onClick={() => unstable_retry()}
-            className="notch-button min-h-12 rounded-none bg-lime px-6 font-extrabold text-ink hover:bg-lime/90"
+            variant="primary"
+            size="lg"
           >
             <RotateCcw aria-hidden="true" />
             Retry this route
@@ -53,7 +54,7 @@ export default function ApplicationError({
           <Button
             asChild
             variant="outline"
-            className="min-h-12 rounded-none border-paper/25 bg-transparent px-6 font-extrabold text-paper hover:bg-paper hover:text-ink"
+            size="lg"
           >
             <Link href="/gear">Open the gear locker</Link>
           </Button>

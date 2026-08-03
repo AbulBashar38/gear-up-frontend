@@ -70,7 +70,7 @@ export function CatalogResults({
         {validationErrors.length > 0 ? (
           <Alert
             variant="destructive"
-            className="mt-8 rounded-none border-red-300 bg-red-50 p-5"
+            className="mt-8 rounded-none p-5"
           >
             <TriangleAlert aria-hidden="true" />
             <AlertTitle>Check the price filters</AlertTitle>
@@ -83,7 +83,7 @@ export function CatalogResults({
         ) : catalog && !catalog.ok ? (
           <Alert
             variant="destructive"
-            className="mt-8 rounded-none border-red-300 bg-red-50 p-5"
+            className="mt-8 rounded-none p-5"
           >
             <TriangleAlert aria-hidden="true" />
             <AlertTitle>
@@ -126,12 +126,15 @@ export function CatalogResults({
                     <PaginationItem>
                       <PaginationPrevious
                         href={buildGearHref(values, page - 1)}
-                        className="rounded-none border border-ink/20 bg-transparent px-4 font-bold hover:bg-ink hover:text-paper"
+                        variant="outline"
                       />
                     </PaginationItem>
                   )}
                   <PaginationItem>
-                    <span className="grid min-h-8 min-w-16 place-items-center bg-lime px-3 font-mono text-xs font-bold text-ink">
+                    <span
+                      aria-current="page"
+                      className="grid min-h-11 min-w-16 place-items-center bg-accent px-3 font-mono text-xs font-bold text-accent-foreground"
+                    >
                       {page} / {totalPages}
                     </span>
                   </PaginationItem>
@@ -139,7 +142,7 @@ export function CatalogResults({
                     <PaginationItem>
                       <PaginationNext
                         href={buildGearHref(values, page + 1)}
-                        className="rounded-none border border-ink/20 bg-transparent px-4 font-bold hover:bg-ink hover:text-paper"
+                        variant="outline"
                       />
                     </PaginationItem>
                   )}
@@ -160,7 +163,8 @@ export function CatalogResults({
               </p>
               <Button
                 asChild
-                className="notch-button mt-6 min-h-11 rounded-none bg-ink px-6 font-extrabold text-paper hover:bg-pine"
+                variant="primary"
+                className="mt-6"
               >
                 <Link href="/gear">
                   <SlidersHorizontal aria-hidden="true" />

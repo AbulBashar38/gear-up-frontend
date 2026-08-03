@@ -61,7 +61,7 @@ export async function ReviewsSection() {
             <Reveal className="lg:col-span-8">
               <Alert
                 variant="destructive"
-                className="min-h-80 content-center rounded-none border-red-300 bg-red-50 p-8 text-left"
+                className="min-h-80 content-center rounded-none p-8 text-left"
               >
                 <TriangleAlert aria-hidden="true" className="size-6" />
                 <AlertTitle className="font-display text-3xl font-black uppercase">

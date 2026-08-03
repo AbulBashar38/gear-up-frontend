@@ -20,7 +20,7 @@ export default function GearCatalogPage({
 }) {
   return (
     <main id="main-content" tabIndex={-1} className="bg-paper text-ink">
-      <section className="relative overflow-hidden bg-ink pb-16 pt-36 text-paper sm:pb-20 sm:pt-40">
+      <section className="surface-inverse relative overflow-hidden bg-background pb-16 pt-36 text-foreground sm:pb-20 sm:pt-40">
         <div aria-hidden="true" className="route-grid absolute inset-0 opacity-35" />
         <div className="relative mx-auto grid w-full max-w-[90rem] gap-8 px-5 sm:px-8 lg:grid-cols-12 lg:items-end lg:px-12">
           <div className="lg:col-span-8">
@@ -41,7 +41,7 @@ export default function GearCatalogPage({
             <Button
               asChild
               variant="outline"
-              className="mt-6 min-h-11 rounded-none border-paper/30 bg-transparent px-5 font-extrabold text-paper hover:bg-paper hover:text-ink"
+              className="mt-6"
             >
               <Link href="/">
                 <ArrowLeft aria-hidden="true" />

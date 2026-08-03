@@ -40,7 +40,7 @@ export function ProviderCallout() {
       className="scroll-mt-20 bg-orange text-ink"
     >
       <div className="mx-auto grid w-full max-w-[90rem] lg:grid-cols-12">
-        <div className="relative overflow-hidden px-5 py-20 sm:px-8 sm:py-28 lg:col-span-7 lg:px-12">
+        <div className="surface-warm relative overflow-hidden px-5 py-20 sm:px-8 sm:py-28 lg:col-span-7 lg:px-12">
           <div aria-hidden="true" className="route-grid absolute inset-0 opacity-20" />
           <Reveal className="relative">
             <p className="text-[0.65rem] font-extrabold uppercase tracking-[0.25em]">
@@ -62,7 +62,9 @@ export function ProviderCallout() {
             </p>
             <Button
               asChild
-              className="notch-button mt-8 min-h-14 rounded-none bg-ink px-7 text-sm font-extrabold text-paper transition-transform duration-300 hover:-translate-y-1 hover:bg-pine"
+              variant="primary"
+              size="xl"
+              className="mt-8"
             >
               <a href="#provider-workflow">
                 See the provider workflow

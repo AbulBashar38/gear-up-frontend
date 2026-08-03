@@ -13,6 +13,9 @@
   --signal: #ad330e;
   --mist: #dce6dd;
   --line: #c8d1c8;
+  --gear-sage: #d7e5dd;
+  --gear-sun: #f0c957;
+  --gear-sky: #c9d4ff;
   color-scheme: light;
   --background: var(--paper);
   --foreground: var(--ink);
@@ -20,16 +23,21 @@
   --card-foreground: var(--ink);
   --popover: #fffdf7;
   --popover-foreground: var(--ink);
-  --primary: var(--pine);
+  --primary: var(--ink);
   --primary-foreground: var(--paper);
+  --primary-hover: var(--pine);
   --secondary: var(--mist);
   --secondary-foreground: var(--ink);
+  --secondary-hover: color-mix(in oklab, var(--secondary) 88%, var(--ink));
   --muted: #e7ebe5;
   --muted-foreground: #4f6158;
   --accent: var(--lime);
   --accent-foreground: var(--ink);
+  --accent-hover: color-mix(in oklab, var(--accent) 90%, var(--ink));
   --destructive: #b42318;
-  --border: #bcc8bf;
+  --success: #246b4d;
+  --success-foreground: #fffdf7;
+  --border: color-mix(in oklab, var(--ink) 46%, var(--paper));
   --input: #9eafa4;
   --ring: var(--signal);
   --chart-1: var(--orange);
@@ -58,6 +66,9 @@
   --color-orange: var(--orange);
   --color-signal: var(--signal);
   --color-mist: var(--mist);
+  --color-gear-sage: var(--gear-sage);
+  --color-gear-sun: var(--gear-sun);
+  --color-gear-sky: var(--gear-sky);
   --color-muted: var(--muted);
   --color-line: var(--line);
   --font-sans: var(--font-manrope);
@@ -81,13 +92,18 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
   --color-muted-foreground: var(--muted-foreground);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
+  --color-secondary-hover: var(--secondary-hover);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -135,9 +151,9 @@ a {
 }
 
 :focus-visible {
-  outline: 3px solid var(--ink);
+  outline: 3px solid var(--ring);
   outline-offset: 3px;
-  box-shadow: 0 0 0 6px var(--paper);
+  box-shadow: 0 0 0 6px var(--background);
 }
 
 .skip-link {
@@ -161,6 +177,12 @@ a {
     12px 100%,
     0 calc(100% - 12px)
   );
+}
+
+.notch-button:focus-visible {
+  outline-color: currentColor;
+  outline-offset: -6px;
+  box-shadow: none;
 }
 
 .gear-tag {
@@ -274,13 +296,18 @@ a {
   --popover-foreground: var(--paper);
   --primary: var(--lime);
   --primary-foreground: var(--ink);
+  --primary-hover: color-mix(in oklab, var(--lime) 88%, var(--ink));
   --secondary: var(--pine);
   --secondary-foreground: var(--paper);
+  --secondary-hover: color-mix(in oklab, var(--pine) 88%, var(--paper));
   --muted: #213d32;
   --muted-foreground: #c2cec6;
   --accent: var(--orange);
   --accent-foreground: var(--ink);
+  --accent-hover: color-mix(in oklab, var(--orange) 88%, var(--paper));
   --destructive: #ff8a72;
+  --success: #68c59b;
+  --success-foreground: var(--ink);
   --border: rgb(245 241 232 / 18%);
   --input: rgb(245 241 232 / 24%);
   --ring: var(--lime);
@@ -292,6 +319,40 @@ a {
   --sidebar-accent-foreground: var(--paper);
   --sidebar-border: rgb(245 241 232 / 16%);
   --sidebar-ring: var(--lime);
+}
+
+.surface-inverse {
+  --background: var(--ink);
+  --foreground: var(--paper);
+  --card: var(--pine);
+  --card-foreground: var(--paper);
+  --primary: var(--lime);
+  --primary-foreground: var(--ink);
+  --primary-hover: color-mix(in oklab, var(--lime) 88%, var(--ink));
+  --secondary: var(--pine);
+  --secondary-foreground: var(--paper);
+  --secondary-hover: color-mix(in oklab, var(--pine) 86%, var(--paper));
+  --muted: color-mix(in oklab, var(--paper) 12%, transparent);
+  --muted-foreground: color-mix(in oklab, var(--paper) 70%, transparent);
+  --accent: var(--orange);
+  --accent-foreground: var(--ink);
+  --accent-hover: color-mix(in oklab, var(--orange) 88%, var(--paper));
+  --border: color-mix(in oklab, var(--paper) 45%, transparent);
+  --input: color-mix(in oklab, var(--paper) 45%, transparent);
+  --ring: var(--paper);
+}
+
+.surface-warm {
+  --background: var(--orange);
+  --foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: var(--paper);
+  --primary-hover: var(--pine);
+  --accent: var(--lime);
+  --accent-foreground: var(--ink);
+  --accent-hover: color-mix(in oklab, var(--lime) 88%, var(--ink));
+  --border: color-mix(in oklab, var(--ink) 48%, transparent);
+  --ring: var(--ink);
 }
 
 @layer base {

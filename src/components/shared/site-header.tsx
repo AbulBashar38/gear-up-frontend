@@ -39,7 +39,7 @@ export function SiteHeader() {
   return (
     <m.header
       className={cn(
-        "fixed inset-x-0 top-0 z-50 border-b transition-colors duration-300",
+        "surface-inverse fixed inset-x-0 top-0 z-50 border-b transition-colors duration-300",
         hasSolidBackground
           ? "border-paper/10 bg-ink/95 shadow-[0_14px_35px_rgba(4,20,14,0.2)] backdrop-blur-xl"
           : "border-transparent bg-transparent",
@@ -56,6 +56,7 @@ export function SiteHeader() {
             <Link
               key={item.href}
               href={item.href}
+              aria-current={pathname === item.href ? "page" : undefined}
               className="nav-underline py-3 text-sm font-bold text-paper/75 transition-colors hover:text-paper"
             >
               {item.label}
@@ -69,7 +70,8 @@ export function SiteHeader() {
           </span>
           <Button
             asChild
-            className="notch-button min-h-12 rounded-none bg-lime px-5 text-sm font-extrabold text-ink hover:bg-lime/90"
+            variant="primary"
+            size="lg"
           >
             <Link href="/gear">
               Browse gear
@@ -82,17 +84,17 @@ export function SiteHeader() {
           <SheetTrigger asChild>
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="icon-lg"
               aria-label="Open navigation menu"
-              className="size-11 rounded-none border border-paper/25 text-paper hover:bg-paper/10 hover:text-paper lg:hidden"
+              className="lg:hidden"
             >
               <Menu aria-hidden="true" className="size-5" />
             </Button>
           </SheetTrigger>
           <SheetContent
             side="right"
-            className="w-[min(90vw,26rem)] border-paper/10 bg-ink p-0 text-paper sm:max-w-[26rem]"
+            className="surface-inverse w-[min(90vw,26rem)] border-border bg-background p-0 text-foreground sm:max-w-[26rem]"
           >
             <SheetHeader className="border-b border-paper/10 px-6 pb-5 pt-6 text-left">
               <SheetTitle className="font-display text-3xl font-black uppercase tracking-tight text-paper">
@@ -109,6 +111,7 @@ export function SiteHeader() {
                 <SheetClose asChild key={item.href}>
                   <Link
                     href={item.href}
+                    aria-current={pathname === item.href ? "page" : undefined}
                     className="flex min-h-16 items-center justify-between border-b border-paper/10 font-display text-2xl font-bold uppercase tracking-tight text-paper hover:text-lime"
                   >
                     {item.label}
@@ -123,8 +126,8 @@ export function SiteHeader() {
                 <Link
                   href="/gear"
                   className={cn(
-                    buttonVariants(),
-                    "notch-button mt-6 min-h-14 rounded-none bg-lime px-5 font-extrabold text-ink hover:bg-lime/90",
+                    buttonVariants({ variant: "primary", size: "xl" }),
+                    "mt-6",
                   )}
                 >
                   Browse the locker

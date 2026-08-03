@@ -42,7 +42,7 @@ export function RentalFlow() {
     <section
       id="rental-flow"
       aria-labelledby="flow-title"
-      className="scroll-mt-20 overflow-hidden bg-[#dce6dd] py-20 text-ink sm:py-28"
+      className="scroll-mt-20 overflow-hidden bg-mist py-20 text-ink sm:py-28"
     >
       <div className="mx-auto w-full max-w-[90rem] px-5 sm:px-8 lg:px-12">
         <div className="grid gap-8 border-b border-ink/20 pb-8 lg:grid-cols-12 lg:items-end">
@@ -115,7 +115,7 @@ export function RentalFlow() {
                 viewport={{ once: true, amount: 0.4 }}
                 transition={{ duration: 0.5, delay: index * 0.12 }}
               >
-                <div className="relative z-10 grid size-14 place-items-center border-4 border-[#dce6dd] bg-ink text-lime">
+                <div className="relative z-10 grid size-14 place-items-center border-4 border-mist bg-ink text-lime">
                   <Icon aria-hidden="true" className="size-5" />
                 </div>
                 <div className="border-t border-ink/15 pt-4 md:mt-9">

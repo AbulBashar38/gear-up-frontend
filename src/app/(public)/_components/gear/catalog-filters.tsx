@@ -143,7 +143,7 @@ export function CatalogFilters({
             <div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row lg:col-span-4">
               <Button
                 type="submit"
-                className="notch-button min-h-11 rounded-none bg-ink px-6 font-extrabold text-paper hover:bg-pine"
+                variant="primary"
               >
                 Apply filters
                 <Filter aria-hidden="true" />
@@ -151,7 +151,6 @@ export function CatalogFilters({
               <Button
                 asChild
                 variant="outline"
-                className="min-h-11 rounded-none border-ink/25 bg-transparent px-6 font-extrabold text-ink hover:bg-paper"
               >
                 <Link href="/gear">
                   Clear all

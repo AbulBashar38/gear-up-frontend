@@ -34,7 +34,8 @@ export default function NotFound() {
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Button
                 asChild
-                className="notch-button min-h-12 rounded-none bg-ink px-6 font-extrabold text-paper hover:bg-pine"
+                variant="primary"
+                size="lg"
               >
                 <Link href="/">
                   <MoveLeft aria-hidden="true" />
@@ -43,8 +44,8 @@ export default function NotFound() {
               </Button>
               <Button
                 asChild
-                variant="outline"
-                className="min-h-12 rounded-none border-ink/25 bg-transparent px-6 font-extrabold text-ink hover:bg-lime"
+                variant="outline-accent"
+                size="lg"
               >
                 <Link href="/gear">Browse all gear</Link>
               </Button>

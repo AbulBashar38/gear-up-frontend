@@ -18,7 +18,7 @@ export default function GearCatalogError({
     >
       <Alert
         variant="destructive"
-        className="max-w-2xl rounded-none border-red-300 bg-red-50 p-6"
+        className="max-w-2xl rounded-none p-6"
       >
         <TriangleAlert aria-hidden="true" />
         <AlertTitle className="font-display text-3xl font-black uppercase">
@@ -31,7 +31,8 @@ export default function GearCatalogError({
         <Button
           type="button"
           onClick={() => unstable_retry()}
-          className="notch-button mt-5 min-h-11 rounded-none bg-ink px-6 font-extrabold text-paper hover:bg-pine"
+          variant="primary"
+          className="mt-5"
         >
           Retry catalog
         </Button>

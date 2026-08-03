@@ -8,7 +8,7 @@ export function Hero() {
   return (
     <section
       aria-labelledby="hero-title"
-      className="relative isolate min-h-[760px] overflow-hidden bg-ink text-paper sm:min-h-[820px] lg:min-h-[900px]"
+      className="surface-inverse relative isolate min-h-[760px] overflow-hidden bg-background text-foreground sm:min-h-[820px] lg:min-h-[900px]"
     >
       <Image
         src="/images/gearup-hero.webp"
@@ -70,7 +70,8 @@ export function Hero() {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button
                 asChild
-                className="notch-button min-h-14 rounded-none bg-lime px-7 text-sm font-extrabold text-ink transition-transform duration-300 hover:-translate-y-1 hover:bg-lime/90"
+                variant="primary"
+                size="xl"
               >
                 <Link href="/gear">
                   Explore the locker
@@ -79,8 +80,8 @@ export function Hero() {
               </Button>
               <Button
                 asChild
-                variant="outline"
-                className="min-h-14 rounded-none border-paper/35 bg-ink/20 px-7 text-sm font-extrabold text-paper backdrop-blur-sm hover:border-orange hover:bg-orange hover:text-ink"
+                variant="outline-accent"
+                size="xl"
               >
                 <Link href="/#providers">Put your gear to work</Link>
               </Button>
@@ -128,7 +129,7 @@ export function Hero() {
         </Reveal>
 
         <Link
-          href="/gear"
+          href="#gear-locker"
           className="absolute bottom-6 right-5 flex min-h-11 items-center gap-2 text-[0.62rem] font-extrabold uppercase tracking-[0.22em] text-paper/55 transition-colors hover:text-lime sm:right-8 lg:bottom-9 lg:right-auto lg:left-12"
         >
           Scroll to dispatch

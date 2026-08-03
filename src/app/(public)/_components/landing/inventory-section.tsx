@@ -53,9 +53,10 @@ export async function InventorySection() {
               {categories.data.map((category, index) => (
                 <Button
                   asChild
-                  variant="outline"
+                  variant="outline-accent"
+                  size="xl"
                   key={category.id}
-                  className="min-h-16 min-w-[14rem] snap-start justify-between rounded-none border-ink/20 bg-white/35 px-4 text-ink hover:border-ink hover:bg-lime"
+                  className="min-h-16 min-w-[14rem] snap-start justify-between bg-card/35"
                 >
                   <Link href={`/gear?category=${encodeURIComponent(category.id)}`}>
                     <span className="font-display text-xl font-black uppercase">
@@ -94,7 +95,7 @@ export async function InventorySection() {
             <Button
               asChild
               variant="outline"
-              className="min-h-10 rounded-none border-ink/25 bg-transparent px-4 font-extrabold text-ink hover:bg-ink hover:text-paper"
+              size="compact"
             >
               <Link href="/gear">
                 View all gear
