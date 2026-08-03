@@ -1,7 +1,7 @@
 import "server-only";
 
 import { gearUpFetch } from "./server-client";
-import type { Category } from "./types";
+import type { Category } from "@/lib/types";
 
 export function listCategories() {
   return gearUpFetch<Category[]>("/categories", {

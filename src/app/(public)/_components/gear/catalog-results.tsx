@@ -12,7 +12,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import type { ApiResult, GearItem } from "@/lib/api/types";
+import type { ApiResult, GearItem } from "@/lib/types";
 import {
   buildGearHref,
   type CatalogFilterValues,

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
-import { listCategories } from "@/lib/api/categories";
-import { listGear } from "@/lib/api/gear";
+import { listCategories } from "@/services/categories";
+import { listGear } from "@/services/gear";
 import {
   buildGearHref,
   parseCatalogQuery,

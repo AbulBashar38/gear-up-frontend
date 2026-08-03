@@ -1,7 +1,7 @@
 import "server-only";
 
 import { gearUpFetch } from "./server-client";
-import type { Review, ReviewListQuery } from "./types";
+import type { Review, ReviewListQuery } from "@/lib/types";
 
 export function listReviews(query: ReviewListQuery = {}) {
   return gearUpFetch<Review[]>("/reviews", {

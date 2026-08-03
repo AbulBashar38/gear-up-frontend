@@ -8,7 +8,7 @@ import {
   NativeSelect,
   NativeSelectOption,
 } from "@/components/ui/native-select";
-import type { Category } from "@/lib/api/types";
+import type { Category } from "@/lib/types";
 import type { CatalogFilterValues } from "../../_utils/catalog-query";
 
 type CatalogFiltersProps = {

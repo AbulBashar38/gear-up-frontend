@@ -3,7 +3,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { listReviews } from "@/lib/api/reviews";
+import { listReviews } from "@/services/reviews";
 import { Reveal } from "./motion-primitives";
 
 const formatName = (name: string) =>

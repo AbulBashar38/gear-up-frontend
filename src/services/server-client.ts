@@ -1,7 +1,7 @@
 import "server-only";
 
 import { isRecord, normalizeApiProblem, parseJsonText } from "./errors";
-import type { ApiMeta, ApiResult } from "./types";
+import type { ApiMeta, ApiResult } from "@/lib/types";
 
 type QueryValue = string | number | boolean | null | undefined;
 

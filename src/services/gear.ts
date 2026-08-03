@@ -1,7 +1,7 @@
 import "server-only";
 
 import { gearUpFetch } from "./server-client";
-import type { GearCatalogQuery, GearItem } from "./types";
+import type { GearCatalogQuery, GearItem } from "@/lib/types";
 
 export function listGear(query: GearCatalogQuery = {}) {
   return gearUpFetch<GearItem[]>("/gear", {

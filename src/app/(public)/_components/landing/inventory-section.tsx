@@ -6,8 +6,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { listCategories } from "@/lib/api/categories";
-import { listGear } from "@/lib/api/gear";
+import { listCategories } from "@/services/categories";
+import { listGear } from "@/services/gear";
 import { Reveal } from "./motion-primitives";
 
 export async function InventorySection() {

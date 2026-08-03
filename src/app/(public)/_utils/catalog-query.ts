@@ -1,4 +1,4 @@
-import type { GearCatalogQuery } from "@/lib/api/types";
+import type { GearCatalogQuery } from "@/lib/types";
 
 type SearchParamValue = string | string[] | undefined;
 

@@ -1,4 +1,4 @@
-import type { ApiProblem, FieldErrors } from "./types";
+import type { ApiProblem, FieldErrors } from "@/lib/types";
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
