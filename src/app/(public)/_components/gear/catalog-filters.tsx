@@ -61,7 +61,7 @@ export function CatalogFilters({
                 id="category"
                 name="category"
                 defaultValue={values.category}
-                className="w-full"
+                className="w-full [&>select]:h-10"
                 aria-describedby={categoriesError ? "category-error" : undefined}
               >
                 <NativeSelectOption value="">All categories</NativeSelectOption>
@@ -96,7 +96,7 @@ export function CatalogFilters({
                 defaultValue={values.brand}
                 maxLength={255}
                 placeholder="e.g. Coleman"
-                className="h-8 rounded-lg bg-paper"
+                className="h-10 rounded-lg bg-paper"
               />
             </div>
 
@@ -116,7 +116,7 @@ export function CatalogFilters({
                 inputMode="decimal"
                 defaultValue={values.minPrice}
                 placeholder="0"
-                className="h-8 rounded-lg bg-paper"
+                className="h-10 rounded-lg bg-paper"
               />
             </div>
 
@@ -136,7 +136,7 @@ export function CatalogFilters({
                 inputMode="decimal"
                 defaultValue={values.maxPrice}
                 placeholder="No maximum"
-                className="h-8 rounded-lg bg-paper"
+                className="h-10 rounded-lg bg-paper"
               />
             </div>
 
