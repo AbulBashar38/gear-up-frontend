@@ -4,6 +4,7 @@ import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { PackagePlus, Save } from "lucide-react";
 import type { AdminUser, Category, GearItem } from "@/lib/types";
+import { PhotoUpload } from "@/components/shared/photo-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +13,11 @@ import {
   NativeSelectOption,
 } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  GEAR_IMAGE_ACCEPT,
+  GEAR_IMAGE_MAX_BYTES,
+  GEAR_IMAGE_MIME_TYPES,
+} from "@/lib/image-upload";
 import { createGearAction, updateGearAction } from "../_actions/admin-actions";
 import {
   AdminActionMessage,
@@ -116,11 +122,20 @@ export function AdminGearForm({ categories, providers = [], gear }: AdminGearFor
           <AdminFieldError id="gear-brand-error" messages={fields.brand} />
         </div>
 
-        <div>
-          <Label htmlFor="gear-image" className="font-bold">Image URL <span className="font-normal text-ink/55">(optional)</span></Label>
-          <Input id="gear-image" name="imageUrl" type="url" disabled={pending} defaultValue={values.imageUrl ?? gear?.imageUrl ?? ""} aria-invalid={Boolean(fields.imageUrl)} aria-describedby={fields.imageUrl ? "gear-image-error" : undefined} className="mt-2 h-11 rounded-none" />
-          <AdminFieldError id="gear-image-error" messages={fields.imageUrl} />
-        </div>
+        <PhotoUpload
+          id="gear-image"
+          name="image"
+          label="Gear photo"
+          hint="Use a clear landscape photo showing the complete item. JPEG, PNG, WebP, or AVIF; maximum 5 MB."
+          accept={GEAR_IMAGE_ACCEPT}
+          acceptedTypes={GEAR_IMAGE_MIME_TYPES}
+          maxBytes={GEAR_IMAGE_MAX_BYTES}
+          disabled={pending}
+          optional
+          defaultPreviewUrl={gear?.imageUrl}
+          errors={fields.image}
+          className="lg:col-span-2"
+        />
 
         <label className="flex min-h-14 items-center gap-3 border border-ink/15 bg-mist/45 px-4 lg:col-span-2">
           <input name="isAvailable" type="checkbox" defaultChecked={initialAvailability} disabled={pending} className="size-5 accent-[var(--signal)]" />
@@ -135,7 +150,7 @@ export function AdminGearForm({ categories, providers = [], gear }: AdminGearFor
       <div className="mt-7 flex flex-wrap gap-3 border-t border-ink/12 pt-6">
         <Button type="submit" size="lg" disabled={pending || categories.length === 0 || (!gear && providers.length === 0)}>
           {gear ? <Save aria-hidden="true" /> : <PackagePlus aria-hidden="true" />}
-          {pending ? "Saving…" : gear ? "Save listing" : "Create listing"}
+          {pending ? "Uploading & saving…" : gear ? "Save listing" : "Create listing"}
         </Button>
         <Button type="button" variant="outline" size="lg" disabled={pending} onClick={() => router.back()}>Cancel</Button>
       </div>

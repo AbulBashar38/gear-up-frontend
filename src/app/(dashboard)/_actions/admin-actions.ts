@@ -13,6 +13,10 @@ import {
 } from "../validation/admin.schema";
 import { getZodFieldErrors } from "@/lib/validations/zod-errors";
 import {
+  removeUploadedGearImage,
+  uploadGearImage,
+} from "@/services/cloudinary";
+import {
   createCategory,
   deleteCategory,
   updateCategory,
@@ -242,6 +246,7 @@ export async function deleteReviewAction(
 }
 
 function readGearForm(formData: FormData) {
+  const imageValue = formData.get("image");
   const input = {
     categoryId: readTrimmed(formData, "categoryId"),
     providerId: readTrimmed(formData, "providerId"),
@@ -250,7 +255,10 @@ function readGearForm(formData: FormData) {
     stock: readTrimmed(formData, "stock"),
     pricePerDay: readTrimmed(formData, "pricePerDay"),
     brand: readTrimmed(formData, "brand"),
-    imageUrl: readTrimmed(formData, "imageUrl"),
+    image:
+      imageValue instanceof File && imageValue.size === 0
+        ? undefined
+        : (imageValue ?? undefined),
     isAvailable: formData.get("isAvailable") === "on",
   };
   const values = {
@@ -261,7 +269,6 @@ function readGearForm(formData: FormData) {
     stock: input.stock,
     pricePerDay: input.pricePerDay,
     brand: input.brand,
-    imageUrl: input.imageUrl,
     isAvailable: String(input.isAvailable),
   };
 
@@ -283,8 +290,22 @@ export async function createGearAction(
     );
   }
 
-  const result = await createGearItem(parsed.data);
+  const { image, ...gearData } = parsed.data;
+  const uploaded = image ? await uploadGearImage(image) : null;
+  if (uploaded && !uploaded.ok) {
+    return errorState(
+      uploaded.message,
+      { image: [uploaded.message] },
+      form.values,
+    );
+  }
+
+  const result = await createGearItem({
+    ...gearData,
+    imageUrl: uploaded?.url ?? null,
+  });
   if (!result.ok) {
+    if (uploaded) await removeUploadedGearImage(uploaded.publicId);
     return errorState(result.error.message, result.error.fieldErrors, form.values);
   }
 
@@ -311,8 +332,22 @@ export async function updateGearAction(
     );
   }
 
-  const result = await updateGearItem(gearId, parsed.data);
+  const { image, ...gearData } = parsed.data;
+  const uploaded = image ? await uploadGearImage(image) : null;
+  if (uploaded && !uploaded.ok) {
+    return errorState(
+      uploaded.message,
+      { image: [uploaded.message] },
+      form.values,
+    );
+  }
+
+  const result = await updateGearItem(gearId, {
+    ...gearData,
+    ...(uploaded ? { imageUrl: uploaded.url } : {}),
+  });
   if (!result.ok) {
+    if (uploaded) await removeUploadedGearImage(uploaded.publicId);
     return errorState(result.error.message, result.error.fieldErrors, form.values);
   }
 

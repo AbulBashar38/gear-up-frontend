@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+  GEAR_IMAGE_MAX_BYTES,
+  GEAR_IMAGE_MIME_TYPES,
+} from "@/lib/image-upload";
 
 const PHONE_PATTERN = /^\+?[0-9\s-]{7,20}$/;
 
@@ -63,19 +67,27 @@ const priceSchema = z
       .max(99999999.99, "Price per day is too large."),
   );
 
-const optionalImageUrlSchema = z
-  .string()
-  .trim()
-  .refine((value) => {
-    if (!value) return true;
-    try {
-      const url = new URL(value);
-      return url.protocol === "http:" || url.protocol === "https:";
-    } catch {
-      return false;
+const gearImageSchema = z
+  .unknown()
+  .superRefine((value, context) => {
+    if (typeof File === "undefined" || !(value instanceof File)) {
+      context.addIssue({ code: "custom", message: "Choose a valid image file." });
+      return;
     }
-  }, "Enter a valid HTTP or HTTPS image URL.")
-  .transform((value) => value || null);
+    if (!GEAR_IMAGE_MIME_TYPES.some((type) => type === value.type)) {
+      context.addIssue({
+        code: "custom",
+        message: "Use a JPEG, PNG, WebP, or AVIF image.",
+      });
+    }
+    if (value.size > GEAR_IMAGE_MAX_BYTES) {
+      context.addIssue({
+        code: "custom",
+        message: "Image must be 5 MB or smaller.",
+      });
+    }
+  })
+  .transform((value) => value as File);
 
 const optionalBrandSchema = z
   .string()
@@ -97,7 +109,7 @@ const gearFields = {
   stock: stockSchema,
   pricePerDay: priceSchema,
   brand: optionalBrandSchema,
-  imageUrl: optionalImageUrlSchema,
+  image: gearImageSchema.optional(),
   isAvailable: z.boolean(),
 };
 

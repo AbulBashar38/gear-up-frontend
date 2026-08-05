@@ -47,6 +47,7 @@ Before changing framework behavior, read the relevant Next.js 16 guide. Useful s
 - Tailwind CSS v4 via `@import "tailwindcss"`
 - Native Next.js-enhanced `fetch` for all backend data access; do not add TanStack Query or SWR by default
 - Zod `4.x` for Server Action form parsing, coercion, and field validation
+- Cloudinary Node SDK for signed, server-side gear-image uploads; the API secret must never reach client code
 - Source root `src/`; alias `@/*` maps to `src/*`
 - npm and the committed `package-lock.json`
 - Checks: `npm run lint` and `npm run build`
@@ -104,6 +105,15 @@ The example is instructional, not production-complete. Do **not** copy these sho
 - Errors use `{ success: false, statusCode, name?, message, errorDetails?, stack? }`
 
 The frontend should use one server-only base URL such as `GEARUP_API_URL=http://localhost:8080/api`. Do not expose it as `NEXT_PUBLIC_*` unless direct browser access is deliberately required. Keep `.env` untracked and document safe placeholders in `.env.example`.
+
+Cloudinary is the external media adapter because the GearUp backend has no
+binary upload endpoint. Accept the image through the protected gear Server
+Action, validate its MIME type and size with Zod, upload it with signed
+server-only Cloudinary credentials, and send only the returned HTTPS
+`secure_url` to the backend as `imageUrl`. If the backend write fails after an
+upload, delete the newly uploaded asset as best-effort compensation. Never
+expose `CLOUDINARY_API_SECRET`, accept arbitrary raw file types, or treat an
+unsigned browser upload as a completed gear mutation.
 
 ## Mandatory assignment deliverables
 
@@ -552,7 +562,7 @@ Create this file early and update it in the same commit as integrations. It must
 - One row for every consumed endpoint: method/path, frontend route/component, role, request/query, response fields used, loading/empty/error UI, and invalidation/refetch behavior.
 - The native fetch cache policy and tags used by each cacheable public request; private requests should record `no-store`.
 - Stripe Checkout response, pending context, return parameters, webhook polling, and cancel semantics.
-- Known backend limitations: no gear text search, no date-availability endpoint, no stats endpoint, no session-ID payment lookup, no image upload endpoint.
+- Known backend limitations: no gear text search, no date-availability endpoint, no stats endpoint, no session-ID payment lookup, and no backend binary upload endpoint; document the separate Cloudinary adapter when media upload is consumed.
 - Any deliberate frontend route changes.
 
 Do not list suggested assignment endpoints that the application does not call.
@@ -601,7 +611,8 @@ The browser validates for usability; the backend remains authoritative. Preserve
 - Mobile-first design must work on narrow phones through desktops. Convert complex tables into cards, scrollable regions, or compact rows on small screens.
 - Use consistent public navigation and distinct role-aware dashboard shells.
 - Define customer/provider/admin sidebar items in typed configuration modules and select them from the authenticated role, following the example's navigation pattern without copying its USER/AUTHOR roles.
-- Use `next/image` with stable dimensions/sizes, useful alt text, fallback imagery, and trusted `remotePatterns`. The backend stores only an `imageUrl`; there is no upload API, so label the form as an image URL unless another service is explicitly added.
+- Use `next/image` with stable dimensions/sizes, useful alt text, fallback imagery, and trusted `remotePatterns`. The backend stores only an `imageUrl`; gear forms upload validated images through the server-side Cloudinary adapter and must never ask users to paste secrets or expose unsigned upload credentials.
+- Reuse `src/components/shared/photo-upload.tsx` for image-file form fields so users get a local preview plus replace/cancel controls before submission; keep MIME/size enforcement duplicated at the trusted Zod/Server Action boundary.
 - Make focus visible, labels explicit, icon buttons named, dialogs keyboard/focus safe, and dynamic updates announced.
 - Do not communicate status only with color.
 - Reuse buttons, inputs, cards, badges, skeletons, dialogs, toasts, pagination, date fields, and tables, but avoid premature abstraction.

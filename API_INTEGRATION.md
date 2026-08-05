@@ -9,6 +9,10 @@ modules. The browser never receives the backend base URL or a backend secret.
 | --- | --- | --- |
 | `GEARUP_API_URL` | Server only | Backend base URL including `/api` |
 | `GEARUP_CURRENCY` | Server only | Currency used to format backend decimal prices; must match Stripe/backend configuration |
+| `CLOUDINARY_CLOUD_NAME` | Server only | Cloudinary product-environment name used by signed image uploads |
+| `CLOUDINARY_API_KEY` | Server only | Cloudinary API key used by the Node SDK |
+| `CLOUDINARY_API_SECRET` | Server only | Cloudinary signing secret; never exposed through `NEXT_PUBLIC_*` or action state |
+| `CLOUDINARY_GEAR_FOLDER` | Server only, optional | Upload folder; defaults to `gearup/gear` |
 
 Local placeholders are documented in `.env.example`; `.env` remains untracked.
 
@@ -25,12 +29,15 @@ sharing one server-only client; domain and envelope types live in
 | --- | --- |
 | `src/lib/types.ts` | Backend envelopes, pagination metadata, normalized result/error types, auth form state, and current GearUp wire models |
 | `src/app/(auth)/validation/auth.schema.ts` | Route-owned Zod schemas matching backend login and customer/provider registration constraints |
-| `src/app/(dashboard)/validation/admin.schema.ts` | Dashboard-owned Zod schemas for admin creation, categories, gear coercion, statuses, and bound UUID validation |
+| `src/app/(dashboard)/validation/admin.schema.ts` | Dashboard-owned Zod schemas for admin creation, categories, gear/file coercion, statuses, and bound UUID validation |
+| `src/components/shared/photo-upload.tsx` | Reusable accessible image picker with local object-URL preview, instant type/size feedback, replace, and cancel controls |
+| `src/lib/image-upload.ts` | Browser-safe accepted image MIME types, file-input accept value, and the 5 MB limit |
 | `src/lib/validations/zod-errors.ts` | Cross-route adapter from flattened Zod failures to the shared `FieldErrors` action-state shape |
 | `src/services/errors.ts` | Safe JSON/object guards, validation-detail mapping, retryability, and sanitized user-facing problems |
 | `src/services/server-client.ts` | Server-only URL construction, `URLSearchParams`, centralized Bearer forwarding from the frontend HttpOnly cookie, cache checks, one-time response parsing, and HTTP plus envelope validation |
 | `src/services/auth.ts` | Login/register token exchange plus request-cached, no-store `/auth/me` session resolution |
 | `src/services/categories.ts` | Category reads plus protected admin create, rename, and delete operations |
+| `src/services/cloudinary.ts` | Server-only signed Cloudinary stream upload, secure URL validation, and best-effort orphan cleanup |
 | `src/services/gear.ts` | Reusable gear reads, filters, pagination, and protected create/update/delete operations |
 | `src/services/orders.ts` | Authenticated, role-scoped order reads, dashboard counts, and protected status transitions |
 | `src/services/payments.ts` | Authenticated, role-scoped payment lists and dashboard counts |
@@ -65,6 +72,21 @@ the same `FieldErrors` shape used for normalized backend validation failures,
 so client forms render consistent inline feedback and toasts. Passwords and
 other secret values are never copied into returned action state.
 
+## External media integration
+
+Gear images use Cloudinary because the GearUp backend accepts an `imageUrl` but
+does not accept multipart files. The protected gear form submits a `File` to
+the Next.js Server Action. Zod accepts JPEG, PNG, WebP, or AVIF up to 5 MB;
+Next.js permits 6 MB action bodies to leave room for multipart overhead. The
+shared `PhotoUpload` component previews the selected browser file locally and
+lets the user replace or cancel it before any network request. During edits,
+canceling a replacement restores the currently saved Cloudinary preview. The
+server-only Cloudinary SDK performs a signed `image/upload` stream and returns
+an HTTPS `secure_url`. The action sends only that URL in `POST /gear` or
+`PATCH /gear/:id`. If the backend mutation fails after upload, the action calls
+Cloudinary `destroy` for the new public ID as best-effort compensation. No
+Cloudinary secret or raw image is forwarded to the GearUp API.
+
 ## Consumed endpoints
 
 Only endpoints currently called by the application are listed here.
@@ -87,7 +109,7 @@ Only endpoints currently called by the application are listed here.
 | Implemented | Admin user register `AdminUserStatusForm` via `updateUserStatusAction` | `updateUserStatus()` | `PATCH /users/:id/status` | Admin; `{ status: "ACTIVE" | "INACTIVE" | "SUSPENDED" }` | Updated user and backend message | The action revalidates the admin role, blocks self-deactivation in the UI and action, preserves backend `409` feedback, refreshes the register, and shows pending, inline, and toast feedback |
 | Implemented | `/dashboard/admins/new` `AdminCreateAdminForm` via `createAdminAction` | `createAdmin()` | `POST /users/admins` | Admin; `{ name, email, phone, password }` | Created admin identity and backend message | Server validation mirrors the backend; duplicate email/phone details map to fields/toasts; successful creation invalidates user data and returns to `/dashboard/users` |
 | Implemented | Admin category manager via category Server Actions | `createCategory()`, `updateCategory()`, `deleteCategory()` | `POST /categories`, `PATCH /categories/:id`, `DELETE /categories/:id` | Admin; create/update `{ name }`, delete UUID path | Created/updated category or deletion confirmation | Inline create/rename/delete controls use pending states, confirmation before deletion, field errors, and toasts; used-category `409` responses remain visible; `categories` and `gear` tags are invalidated after applicable writes |
-| Implemented | `/dashboard/gear/new`, `/dashboard/gear/[id]/edit`, and admin controls on `/dashboard/gear` | `createGearItem()`, `updateGearItem()`, `deleteGearItem()` | `POST /gear`, `PATCH /gear/:id`, `DELETE /gear/:id` | Admin; each route/action explicitly requires admin; create includes an active `providerId`; update sends only editable fields | Created/updated gear or deletion confirmation | Shared gear URLs render controls conditionally; forms validate category/provider, description, stock, price, URL, and availability; destructive actions require confirmation; affected gear paths/tags refresh |
+| Implemented | `/dashboard/gear/new`, `/dashboard/gear/[id]/edit`, and admin controls on `/dashboard/gear` | `uploadGearImage()` then `createGearItem()`/`updateGearItem()`; `deleteGearItem()` | Signed Cloudinary `image/upload`, then `POST /gear`, `PATCH /gear/:id`, or `DELETE /gear/:id` | Admin; file is optional and limited to approved image types/5 MB; create includes active `providerId`; backend receives only Cloudinary `secure_url` as `imageUrl` | Cloudinary HTTPS URL plus created/updated gear, or deletion confirmation | Upload and backend errors share inline/toast feedback; submit remains pending through both operations; a new Cloudinary asset is destroyed if the backend write fails; affected gear paths/tags refresh |
 | Implemented | Admin order registers and overview `AdminOrderAction` via `updateOrderStatusAction` | `updateOrderStatus()` | `PATCH /orders/:id/status` | Admin; exact lifecycle-controlled `{ status }` | Updated order and backend message | Controls expose only valid manual transitions, never `PAID`; stale-state/backend `409` errors show inline and as toasts; order/payment paths are revalidated after success |
 | Implemented | Admin review register `AdminReviewDeleteControl` via `deleteReviewAction` | `deleteReview()` | `DELETE /reviews/:id` | Admin; UUID path | Deletion confirmation | Requires explicit browser confirmation, disables while pending, surfaces the real backend error, and invalidates review pages/tags on success |
 
@@ -175,8 +197,10 @@ Only endpoints currently called by the application are listed here.
 - Checkout is not initiated by the current dashboard milestone. The future
   customer flow must call `POST /orders/:id/checkout-session` only after the
   order is `CONFIRMED` and must treat webhook-updated backend state as truth.
-- There is no image-upload endpoint. Current cards use code-owned category
-  visuals instead of an unsafe catch-all image allowlist.
+- The backend still has no binary image-upload endpoint. Protected gear forms
+  therefore use the documented server-side Cloudinary adapter and persist only
+  the returned HTTPS URL; public fallback visuals remain available when a gear
+  record has no image.
 - Admin gear, category, user, order, and review mutations now consume their real
   protected endpoints. Payments intentionally remain read-only, and no admin
   control can author `PAID`; Stripe's signed webhook remains authoritative.
