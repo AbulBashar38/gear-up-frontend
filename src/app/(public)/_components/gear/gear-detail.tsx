@@ -1,9 +1,7 @@
 import {
   ArrowLeft,
-  ArrowUpRight,
   BadgeCheck,
   Boxes,
-  CalendarCheck2,
   Clock3,
   PackageCheck,
   ShieldCheck,
@@ -19,6 +17,7 @@ import type { GearDetail as GearDetailType } from "@/lib/types";
 import { getTrustedGearImageUrl } from "../../_utils/gear-image";
 import { Reveal } from "../landing/motion-primitives";
 import { formatGearPrice, GearIcon } from "./gear-card";
+import { RentalRequestCard } from "./rental-request-card";
 
 function formatReviewDate(value: string) {
   const date = new Date(value);
@@ -48,7 +47,6 @@ export function GearDetail({ gear }: { gear: GearDetailType }) {
   const averageRating = ratings.length
     ? ratings.reduce((total, rating) => total + rating, 0) / ratings.length
     : null;
-  const returnTo = encodeURIComponent(`/gear/${gear.id}`);
 
   return (
     <main id="main-content" tabIndex={-1} className="bg-paper text-ink">
@@ -196,44 +194,7 @@ export function GearDetail({ gear }: { gear: GearDetailType }) {
 
           <aside className="lg:col-span-5">
             <Reveal className="lg:sticky lg:top-28">
-              <Card className="gear-tag gap-0 rounded-none bg-lime py-0 text-ink ring-0 shadow-none">
-                <CardContent className="p-7 sm:p-9">
-                  <p className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.2em] text-ink/70">
-                    Rental dispatch // request first
-                  </p>
-                  <h2 className="mt-7 font-display text-5xl font-black uppercase leading-[0.86] tracking-[-0.04em]">
-                    Dates are confirmed by the provider.
-                  </h2>
-                  <p className="mt-5 text-sm leading-6 text-ink/70">
-                    A request does not reserve stock. The provider checks your
-                    dates and quantity before payment becomes available.
-                  </p>
-
-                  {canRequest ? (
-                    <Button asChild variant="primary" size="xl" className="mt-7 w-full">
-                      <Link href={`/login?returnTo=${returnTo}`}>
-                        Sign in to request dates
-                        <ArrowUpRight aria-hidden="true" />
-                      </Link>
-                    </Button>
-                  ) : (
-                    <Button type="button" variant="primary" size="xl" className="mt-7 w-full" disabled>
-                      Requests are paused
-                    </Button>
-                  )}
-
-                  <div className="mt-7 space-y-4 border-t border-ink/20 pt-6">
-                    <p className="flex gap-3 text-xs font-bold leading-5 text-ink/70">
-                      <CalendarCheck2 aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-signal" />
-                      Select date-only rental dates; same-day rental counts as one day.
-                    </p>
-                    <p className="flex gap-3 text-xs font-bold leading-5 text-ink/70">
-                      <ShieldCheck aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-signal" />
-                      The backend calculates the final total and confirms real stock.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              <RentalRequestCard gearId={gear.id} canRequest={canRequest} />
             </Reveal>
           </aside>
         </div>

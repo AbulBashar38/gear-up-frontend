@@ -28,8 +28,10 @@ sharing one server-only client; domain and envelope types live in
 | Module | Responsibility |
 | --- | --- |
 | `src/lib/types.ts` | Backend envelopes, pagination metadata, normalized result/error types, auth form state, and current GearUp wire models |
+| `src/components/providers/auth-session-provider.tsx` | Client-safe React Context hydrated from the server-resolved `/auth/me` result; exposes authenticated, anonymous, or temporarily unavailable state without exposing either JWT |
 | `src/app/(auth)/validation/auth.schema.ts` | Route-owned Zod schemas matching backend login and customer/provider registration constraints |
 | `src/app/(dashboard)/validation/admin.schema.ts` | Dashboard-owned Zod schemas for admin creation, categories, gear/file coercion, statuses, and bound UUID validation |
+| `src/app/(dashboard)/validation/order.schema.ts` | Customer rental-request validation for UUID, real date-only values, non-past start, ordered dates, and positive integer quantity |
 | `src/components/shared/photo-upload.tsx` | Reusable accessible image picker with local object-URL preview, instant type/size feedback, replace, and cancel controls |
 | `src/lib/image-upload.ts` | Browser-safe accepted image MIME types, file-input accept value, and the 5 MB limit |
 | `src/lib/validations/zod-errors.ts` | Cross-route adapter from flattened Zod failures to the shared `FieldErrors` action-state shape |
@@ -72,6 +74,22 @@ the same `FieldErrors` shape used for normalized backend validation failures,
 so client forms render consistent inline feedback and toasts. Passwords and
 other secret values are never copied into returned action state.
 
+## Global client session state
+
+React Context is intentionally the only global client store. The public layout
+resolves the current user through the HttpOnly-cookie-backed `GET /auth/me`
+service and hydrates `AuthSessionProvider` with one of three explicit states:
+`authenticated`, `anonymous`, or `unavailable`. The dashboard layout reuses the
+same provider with its already-required canonical user, avoiding a duplicate
+request. The Context contains only the safe `CurrentUser` response and never a
+JWT, cookie, password, or backend secret.
+
+`SiteHeader` uses the snapshot for account-aware navigation, and
+`RentalRequestCard` uses it for immediate customer/guest/other-role routing.
+This client state is presentation and navigation assistance only. Protected
+pages and every mutation still resolve `/auth/me` and enforce the role on the
+server because Context can be stale or modified in browser memory.
+
 ## External media integration
 
 Gear images use Cloudinary because the GearUp backend accepts an `imageUrl` but
@@ -102,6 +120,7 @@ Only endpoints currently called by the application are listed here.
 | Implemented | `/register` `RegisterForm` via `registerAction` | `registerRequest()` | `POST /auth/register` | Public; `{ name, email, phone, password, role }` where role is `CUSTOMER` or `PROVIDER` | `data.accessToken`, `data.refreshToken` | `no-store`; validates name/email/phone(`^\+?[0-9\s-]{7,20}$`)/password(≥6); maps backend 400 details to fields and 409 duplicate email/phone to a toast; role selector never offers `ADMIN`; sets session cookies and redirects on success |
 | Implemented | `(dashboard)/dashboard/layout.tsx`, dashboard shell, overview pages, and `/dashboard` role redirect | `getCurrentUser()` | `GET /auth/me` | Authenticated with centralized Bearer forwarding | Canonical user id, name, email, phone, role, status, and timestamps | `no-store`; React request cache deduplicates layout/page reads; missing or rejected sessions redirect to `/login` with a sanitized `returnTo`; each role overview explicitly calls `requireDashboardRole()` and redirects cross-role navigation to the actor's own dashboard |
 | Implemented | Role overviews and shared `/dashboard/orders` register | `listOrders(query)` | `GET /orders?status?&paymentStatus?&page=&limit=` | Authenticated; backend automatically scopes customer/provider/admin records | Order, gear, provider, customer, payment, status, totals, dates, and pagination metadata | `no-store`; one shared page selects role-specific copy and authorized controls; dashboard totals use `meta.total`; the register paginates through URL state |
+| Implemented | Gear-detail `RentalRequestCard`, `/dashboard/orders/new` `CustomerOrderForm`, and `createRentalOrderAction` | `createRentalOrder(input)` | `POST /orders` | Customer only; `{ gearItemId, startDate, endDate, quantity }` | Authoritative `orderId`, `PLACED` status, inclusive `rentalDays`, quantity, total price, and `PENDING` payment status | Context routes guests through login and blocks non-customer UI; the page and action independently require `CUSTOMER`; Zod rejects invalid/past/reversed dates and non-integer quantity; backend availability/stock conflicts remain inline and toast errors; success refreshes real order views |
 | Implemented | Role overviews and shared `/dashboard/payments` register | `listPayments(query)` | `GET /payments?status?&page=&limit=` | Authenticated; backend automatically scopes records by role | Payment amount/status, linked order and gear, timestamps, and pagination metadata | `no-store`; one shared page presents the backend-scoped records; completed/pending totals come from metadata; Stripe/webhook status is backend truth |
 | Implemented | Admin overview and `/dashboard/users` | `listUsers(query)` | `GET /users?search?&role?&status?&page=&limit=` | Admin only | User identity, role, account status, timestamps, resource counts, and pagination metadata | `no-store`; the page explicitly requires `ADMIN` and backend authorization remains authoritative; failures never render as an empty user list |
 | Implemented | Shared `/dashboard/gear` plus provider/admin overviews | `listGear({ providerId?, page, limit })` | `GET /gear?providerId?&page=&limit=` | Authenticated dashboard page over a public read; provider passes the canonical current-user id, customer/admin omit it | Listing, stock, availability, category, provider, price, and metadata | One shared page renders customer discovery, provider-owned inventory, or admin platform inventory; mutations remain role-conditional and backend-authorized |
@@ -157,6 +176,10 @@ Only endpoints currently called by the application are listed here.
   record scoping, and conditionally selects role copy and permitted controls.
   This follows the instructor reference's one dashboard group and role-selected
   typed navigation without maintaining three copies of the same register page.
+- `/dashboard/orders/new?gearItemId=<uuid>` is the customer-only create route.
+  Guests arrive through login with this internal return path preserved; the
+  page and Server Action both require the CUSTOMER role before reading or
+  creating an order.
 - `/dashboard/users`, `/dashboard/categories`, `/dashboard/reviews`, and
   `/dashboard/admins/new` use role-neutral URLs but explicitly require `ADMIN`
   inside their pages and actions.
@@ -200,8 +223,8 @@ Only endpoints currently called by the application are listed here.
   filter one returned page and call that global search.
 - The public item page shows the backend's current stock and availability flag,
   but explicitly avoids claiming date-specific availability because no lookup
-  endpoint exists. Its rental CTA establishes the authentication entry point;
-  the future request form must still submit the real `POST /orders` operation.
+  endpoint exists. Its session-aware rental CTA now enters the real protected
+  `POST /orders` form, where backend conflict responses remain authoritative.
 - `PLACED` orders do not reserve stock. Landing copy says a provider confirms
   dates before payment.
 - Checkout is not initiated by the current dashboard milestone. The future
@@ -214,6 +237,6 @@ Only endpoints currently called by the application are listed here.
 - Admin gear, category, user, order, and review mutations now consume their real
   protected endpoints. Payments intentionally remain read-only, and no admin
   control can author `PAID`; Stripe's signed webhook remains authoritative.
-- Customer/provider mutations and real Stripe Checkout are not part of this
-  admin-mutation milestone. Their dashboards do not present placeholder CRUD,
-  invented paid states, or fake success data.
+- Customer order creation now uses the real backend mutation. Provider inventory
+  mutations and real Stripe Checkout remain future milestones; their dashboards
+  do not present placeholder CRUD, invented paid states, or fake success data.

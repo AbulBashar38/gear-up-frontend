@@ -5,6 +5,7 @@ import { m, useMotionValueEvent, useScroll } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useAuthSession } from "@/components/providers/auth-session-provider";
 import { BrandMark } from "@/components/shared/brand-mark";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -25,6 +26,7 @@ const navigation = [
 ];
 
 export function SiteHeader() {
+  const session = useAuthSession();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -35,6 +37,14 @@ export function SiteHeader() {
   });
 
   const hasSolidBackground = pathname !== "/" || scrolled || menuOpen;
+  const accountHref =
+    session.status === "authenticated" ? "/dashboard" : "/login";
+  const accountLabel =
+    session.status === "authenticated" ? "Open dashboard" : "Sign in";
+  const firstName =
+    session.status === "authenticated"
+      ? session.user.name.trim().split(/\s+/)[0]
+      : null;
 
   return (
     <m.header
@@ -66,15 +76,15 @@ export function SiteHeader() {
 
         <div className="hidden items-center gap-4 lg:flex">
           <span className="text-[0.65rem] font-bold uppercase tracking-[0.22em] text-paper/65">
-            Adventure, on request
+            {firstName ? `Field access // ${firstName}` : "Adventure, on request"}
           </span>
           <Button
             asChild
             variant="primary"
             size="lg"
           >
-            <Link href="/gear">
-              Browse gear
+            <Link href={accountHref}>
+              {accountLabel}
               <ArrowUpRight aria-hidden="true" className="size-4" />
             </Link>
           </Button>
@@ -124,13 +134,13 @@ export function SiteHeader() {
 
               <SheetClose asChild>
                 <Link
-                  href="/gear"
+                  href={accountHref}
                   className={cn(
                     buttonVariants({ variant: "primary", size: "xl" }),
                     "mt-6",
                   )}
                 >
-                  Browse the locker
+                  {accountLabel}
                   <ArrowUpRight aria-hidden="true" className="size-4" />
                 </Link>
               </SheetClose>

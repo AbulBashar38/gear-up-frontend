@@ -169,6 +169,21 @@ export type CurrentUser = {
   updatedAt: string;
 };
 
+export type AuthSessionSnapshot =
+  | {
+      status: "authenticated";
+      user: CurrentUser;
+    }
+  | {
+      status: "anonymous";
+      user: null;
+    }
+  | {
+      status: "unavailable";
+      user: null;
+      message: string;
+    };
+
 export type PaymentSummary = {
   id: string;
   rentalOrderId: string;
@@ -209,6 +224,32 @@ export type RentalOrder = {
 
 export type Payment = PaymentSummary & {
   rentalOrder: Omit<RentalOrder, "payment">;
+};
+
+export type CreateRentalOrderInput = {
+  gearItemId: string;
+  startDate: string;
+  endDate: string;
+  quantity: number;
+};
+
+export type CreatedRentalOrder = {
+  orderId: string;
+  status: "PLACED";
+  startDate: string;
+  endDate: string;
+  rentalDays: number;
+  quantity: number;
+  totalPrice: DecimalValue;
+  paymentStatus: "PENDING";
+};
+
+export type OrderMutationState = {
+  status: "idle" | "success" | "error";
+  message: string;
+  fieldErrors?: FieldErrors;
+  values?: Record<string, string>;
+  data?: CreatedRentalOrder;
 };
 
 export type AdminUser = CurrentUser & {

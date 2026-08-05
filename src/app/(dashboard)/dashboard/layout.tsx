@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AuthSessionProvider } from "@/components/providers/auth-session-provider";
 import { DashboardShell } from "../_components/dashboard-shell";
 import { requireDashboardUser } from "../_utils/dashboard-access";
 
@@ -13,5 +14,9 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }>) {
   const user = await requireDashboardUser();
-  return <DashboardShell user={user}>{children}</DashboardShell>;
+  return (
+    <AuthSessionProvider initialSession={{ status: "authenticated", user }}>
+      <DashboardShell user={user}>{children}</DashboardShell>
+    </AuthSessionProvider>
+  );
 }

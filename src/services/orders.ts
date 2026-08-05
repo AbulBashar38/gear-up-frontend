@@ -1,6 +1,8 @@
 import "server-only";
 
 import type {
+  CreatedRentalOrder,
+  CreateRentalOrderInput,
   OrderListQuery,
   RentalOrder,
   RentalOrderStatus,
@@ -19,6 +21,17 @@ export function listOrders(query: OrderListQuery = {}) {
     },
     fallbackMessage:
       "Your rental orders couldn't be loaded. Try again shortly.",
+  });
+}
+
+export function createRentalOrder(input: CreateRentalOrderInput) {
+  return gearUpFetch<CreatedRentalOrder>("/orders", {
+    method: "POST",
+    auth: true,
+    cache: "no-store",
+    json: input,
+    fallbackMessage:
+      "Your rental request couldn't be placed. Check the dates and try again.",
   });
 }
 
