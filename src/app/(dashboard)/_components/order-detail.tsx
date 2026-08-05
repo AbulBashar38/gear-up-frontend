@@ -7,6 +7,7 @@ import {
   formatDashboardMoney,
 } from "../_utils/dashboard-format";
 import { OrderStatusActions } from "./order-status-actions";
+import { PayNowButton } from "./pay-now-button";
 import {
   OrderStatusBadge,
   PaymentStatusBadge,
@@ -60,6 +61,11 @@ export function OrderDetail({
 }) {
   const rentalDays = inclusiveRentalDays(order.startDate, order.endDate);
   const showParties = role === "PROVIDER" || role === "ADMIN";
+  const paymentStatus = order.payment?.status ?? "PENDING";
+  const canPay =
+    role === "CUSTOMER" &&
+    order.status === "CONFIRMED" &&
+    paymentStatus === "PENDING";
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6 px-5 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-14">
@@ -93,7 +99,15 @@ export function OrderDetail({
           {formatDashboardDate(order.updatedAt)}
         </p>
 
-        <div className="mt-6 border-t border-ink/12 pt-6">
+        <div className="mt-6 space-y-4 border-t border-ink/12 pt-6">
+          {canPay && (
+            <div className="flex flex-col gap-3 border border-primary/25 bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm font-medium text-ink/80">
+                This order is confirmed and ready for payment.
+              </p>
+              <PayNowButton orderId={order.id} totalPrice={order.totalPrice} />
+            </div>
+          )}
           <OrderStatusActions order={order} role={role} />
         </div>
       </header>

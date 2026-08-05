@@ -122,6 +122,9 @@ Only endpoints currently called by the application are listed here.
 | Implemented | Role overviews and shared `/dashboard/orders` register | `listOrders(query)` | `GET /orders?status?&paymentStatus?&page=&limit=` | Authenticated; backend automatically scopes customer/provider/admin records | Order, gear, provider, customer, payment, status, totals, dates, and pagination metadata | `no-store`; one shared page selects role-specific copy and authorized controls; dashboard totals use `meta.total`; the register paginates through URL state |
 | Implemented | Gear-detail `RentalRequestCard`, `/dashboard/orders/new` `CustomerOrderForm`, and `createRentalOrderAction` | `createRentalOrder(input)` | `POST /orders` | Customer only; `{ gearItemId, startDate, endDate, quantity }` | Authoritative `orderId`, `PLACED` status, inclusive `rentalDays`, quantity, total price, and `PENDING` payment status | Context routes guests through login and blocks non-customer UI; the page and action independently require `CUSTOMER`; Zod rejects invalid/past/reversed dates and non-integer quantity; backend availability/stock conflicts remain inline and toast errors; success refreshes real order views |
 | Implemented | Shared `/dashboard/orders/[id]` detail page `OrderDetail` | `getOrder(id)` | `GET /orders/:id` | Authenticated; backend scopes the record to the customer, owning provider, or admin | Order status, inclusive rental period, quantity, authoritative total, gear/category/provider, customer contact (provider/admin), and linked payment | `no-store`; invalid UUID and backend `404`/`403` render `notFound()`; other failures show a retry alert; parties/payment cards render conditionally by role |
+| Implemented | Order detail `PayNowButton` and `/payment/cancel` retry via `startCheckoutAction` | `createCheckoutSession(id)` | `POST /orders/:id/checkout-session` | Customer owner; no body; only while order is `CONFIRMED` and payment `PENDING` | `orderId`, `paymentId`, `stripeSessionId`, `checkoutUrl`, and `reused` flag | `no-store`; the action requires `CUSTOMER`; `checkoutUrl` must be HTTPS on a Stripe host before the direct redirect; `{ orderId, paymentId }` are saved to an HttpOnly `gearup_pending_checkout` cookie; backend `409` (state/reused/expired) and `502` (Stripe) surface as inline/toast errors |
+| Implemented | `/payment/success` `PaymentSuccessPoller` via `refreshCheckoutStatusAction` | `getOrder(id)` | `GET /orders/:id` | Customer; order id read from the pending-checkout cookie (never from `session_id`) | Order status and linked payment status | `no-store`; polls up to ~25s while the webhook moves payment `PENDING→COMPLETED` / order `CONFIRMED→PAID`; renders the paid screen on success and a non-committal "processing" screen on timeout; on a detected failure (`FAILED`/`CANCELLED`) it clears the pending cookie and `router.replace`s to `/payment/failed?order_id=` |
+| Implemented | `/payment/failed` outcome screen | `getOrder(id)` | `GET /orders/:id` | Customer; order id from the URL (refresh-safe) | Gear name for context | `no-store`; best-effort read only for copy; terminal screen (order is `CANCELLED`) so it offers view-order and browse-gear, not retry |
 | Implemented | Role overviews and shared `/dashboard/payments` register | `listPayments(query)` | `GET /payments?status?&page=&limit=` | Authenticated; backend automatically scopes records by role | Payment amount/status, linked order and gear, timestamps, and pagination metadata | `no-store`; one shared page presents the backend-scoped records; completed/pending totals come from metadata; Stripe/webhook status is backend truth |
 | Implemented | Admin overview and `/dashboard/users` | `listUsers(query)` | `GET /users?search?&role?&status?&page=&limit=` | Admin only | User identity, role, account status, timestamps, resource counts, and pagination metadata | `no-store`; the page explicitly requires `ADMIN` and backend authorization remains authoritative; failures never render as an empty user list |
 | Implemented | Shared `/dashboard/gear` plus provider/admin overviews | `listGear({ providerId?, page, limit })` | `GET /gear?providerId?&page=&limit=` | Authenticated dashboard page over a public read; provider passes the canonical current-user id, customer/admin omit it | Listing, stock, availability, category, provider, price, and metadata | One shared page renders customer discovery, provider-owned inventory, or admin platform inventory; mutations remain role-conditional and backend-authorized |
@@ -229,9 +232,21 @@ Only endpoints currently called by the application are listed here.
   `POST /orders` form, where backend conflict responses remain authoritative.
 - `PLACED` orders do not reserve stock. Landing copy says a provider confirms
   dates before payment.
-- Checkout is not initiated by the current dashboard milestone. The future
-  customer flow must call `POST /orders/:id/checkout-session` only after the
-  order is `CONFIRMED` and must treat webhook-updated backend state as truth.
+- Checkout is now wired end to end. The customer calls
+  `POST /orders/:id/checkout-session` only after the order is `CONFIRMED` and the
+  payment is `PENDING`; the returned `checkoutUrl` is verified as an HTTPS Stripe
+  host and the `{ orderId, paymentId }` context is stored in a short-lived
+  HttpOnly cookie before redirecting. The backend hardcodes the return URLs
+  (`/payment/success?session_id=...`, `/payment/cancel?order_id=...`). There is
+  no frontend payment-create or session-id lookup; `session_id` is never treated
+  as proof and the success screen only trusts polled `GET /orders/:id` state.
+  Because Stripe Checkout has no failure URL, the browser always lands on
+  `/payment/success`; when polling detects a webhook-set `FAILED`/`CANCELLED`
+  result, the customer is redirected to a dedicated, refresh-safe
+  `/payment/failed?order_id=` screen.
+  `/payment/cancel` explains that leaving Checkout does not cancel the order and
+  offers retry (reuses the open session), back-to-order, and an explicit
+  `PATCH /orders/:id/status { CANCELLED }` action.
 - The backend still has no binary image-upload endpoint. Protected gear forms
   therefore use the documented server-side Cloudinary adapter and persist only
   the returned HTTPS URL; public fallback visuals remain available when a gear
@@ -239,6 +254,7 @@ Only endpoints currently called by the application are listed here.
 - Admin gear, category, user, order, and review mutations now consume their real
   protected endpoints. Payments intentionally remain read-only, and no admin
   control can author `PAID`; Stripe's signed webhook remains authoritative.
-- Customer order creation now uses the real backend mutation. Provider inventory
-  mutations and real Stripe Checkout remain future milestones; their dashboards
-  do not present placeholder CRUD, invented paid states, or fake success data.
+- Customer order creation and the real Stripe Checkout return flow now use the
+  backend mutations end to end. No dashboard presents placeholder CRUD, invented
+  paid states, COD/Pay-Later, or fake success data; `PAID` only ever arrives from
+  the signed webhook.

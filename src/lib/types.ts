@@ -226,6 +226,15 @@ export type Payment = PaymentSummary & {
   rentalOrder: Omit<RentalOrder, "payment">;
 };
 
+export type CheckoutSession = {
+  orderId: string;
+  paymentId: string;
+  paymentStatus: PaymentStatus;
+  stripeSessionId: string;
+  checkoutUrl: string;
+  reused: boolean;
+};
+
 export type CreateRentalOrderInput = {
   gearItemId: string;
   startDate: string;

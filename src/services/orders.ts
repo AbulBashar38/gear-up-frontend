@@ -1,6 +1,7 @@
 import "server-only";
 
 import type {
+  CheckoutSession,
   CreatedRentalOrder,
   CreateRentalOrderInput,
   OrderListQuery,
@@ -40,6 +41,16 @@ export function createRentalOrder(input: CreateRentalOrderInput) {
     json: input,
     fallbackMessage:
       "Your rental request couldn't be placed. Check the dates and try again.",
+  });
+}
+
+export function createCheckoutSession(id: string) {
+  return gearUpFetch<CheckoutSession>(`/orders/${id}/checkout-session`, {
+    method: "POST",
+    auth: true,
+    cache: "no-store",
+    fallbackMessage:
+      "Checkout couldn't be started. Confirm the order is ready to pay and try again.",
   });
 }
 
