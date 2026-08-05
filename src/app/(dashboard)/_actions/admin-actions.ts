@@ -1,14 +1,17 @@
 "use server";
 
 import { revalidatePath, updateTag } from "next/cache";
-import type {
-  AdminMutationState,
-  CreateGearInput,
-  FieldErrors,
-  RentalOrderStatus,
-  UpdateGearInput,
-  UserStatus,
-} from "@/lib/types";
+import type { AdminMutationState, FieldErrors } from "@/lib/types";
+import {
+  adminOrderStatusFormSchema,
+  categoryFormSchema,
+  createAdminFormSchema,
+  createGearFormSchema,
+  idSchema,
+  updateGearFormSchema,
+  userStatusFormSchema,
+} from "../validation/admin.schema";
+import { getZodFieldErrors } from "@/lib/validations/zod-errors";
 import {
   createCategory,
   deleteCategory,
@@ -24,21 +27,14 @@ import { deleteReview } from "@/services/reviews";
 import { createAdmin, updateUserStatus } from "@/services/users";
 import { requireDashboardRole } from "../_utils/dashboard-access";
 
-const UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_PATTERN = /^\+?[0-9\s-]{7,20}$/;
-const USER_STATUSES: UserStatus[] = ["ACTIVE", "INACTIVE", "SUSPENDED"];
-const ADMIN_ORDER_STATUSES: RentalOrderStatus[] = [
-  "CONFIRMED",
-  "PICKED_UP",
-  "RETURNED",
-  "CANCELLED",
-];
-
 function readTrimmed(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value.trim() : "";
+}
+
+function readString(formData: FormData, key: string) {
+  const value = formData.get(key);
+  return typeof value === "string" ? value : "";
 }
 
 function errorState(
@@ -58,7 +54,10 @@ function successState(message: string): AdminMutationState {
 }
 
 function validateId(id: string, label: string) {
-  return UUID_PATTERN.test(id) ? null : `${label} is not valid.`;
+  const parsed = idSchema(label).safeParse(id);
+  return parsed.success
+    ? null
+    : (parsed.error.issues[0]?.message ?? `${label} is not valid.`);
 }
 
 function invalidateAdmin(paths: string[], tags: string[] = []) {
@@ -75,14 +74,16 @@ export async function updateUserStatusAction(
   const invalidId = validateId(userId, "User ID");
   if (invalidId) return errorState(invalidId);
 
-  const rawStatus = readTrimmed(formData, "status");
-  if (!USER_STATUSES.includes(rawStatus as UserStatus)) {
+  const parsed = userStatusFormSchema.safeParse({
+    status: readTrimmed(formData, "status"),
+  });
+  if (!parsed.success) {
     return errorState("Choose a valid account status.", {
-      status: ["Choose active, inactive, or suspended."],
+      ...getZodFieldErrors(parsed.error),
     });
   }
 
-  const status = rawStatus as UserStatus;
+  const { status } = parsed.data;
   if (admin.id === userId && status !== "ACTIVE") {
     return errorState("You cannot deactivate or suspend your own admin account.");
   }
@@ -100,44 +101,30 @@ export async function createAdminAction(
 ): Promise<AdminMutationState> {
   await requireDashboardRole("ADMIN", "/dashboard/admins/new");
 
-  const name = readTrimmed(formData, "name");
-  const email = readTrimmed(formData, "email").toLowerCase();
-  const phone = readTrimmed(formData, "phone");
-  const passwordValue = formData.get("password");
-  const password = typeof passwordValue === "string" ? passwordValue : "";
-  const fieldErrors: FieldErrors = {};
+  const input = {
+    name: readTrimmed(formData, "name"),
+    email: readTrimmed(formData, "email").toLowerCase(),
+    phone: readTrimmed(formData, "phone"),
+    password: readString(formData, "password"),
+  };
+  const values = { name: input.name, email: input.email, phone: input.phone };
+  const parsed = createAdminFormSchema.safeParse(input);
 
-  if (name.length < 2 || name.length > 255) {
-    fieldErrors.name = ["Name must be between 2 and 255 characters."];
-  }
-  if (!EMAIL_PATTERN.test(email)) {
-    fieldErrors.email = ["Enter a valid email address."];
-  }
-  if (!PHONE_PATTERN.test(phone)) {
-    fieldErrors.phone = ["Enter a valid phone number (7–20 digits)."];
-  }
-  if (password.length < 6) {
-    fieldErrors.password = ["Password must be at least 6 characters."];
+  if (!parsed.success) {
+    return errorState(
+      "Check the highlighted fields and try again.",
+      getZodFieldErrors(parsed.error),
+      values,
+    );
   }
 
-  const values = { name, email, phone };
-  if (Object.keys(fieldErrors).length > 0) {
-    return errorState("Check the highlighted fields and try again.", fieldErrors, values);
-  }
-
-  const result = await createAdmin({ name, email, phone, password });
+  const result = await createAdmin(parsed.data);
   if (!result.ok) {
     return errorState(result.error.message, result.error.fieldErrors, values);
   }
 
   invalidateAdmin(["/dashboard/admin", "/dashboard/users"]);
   return successState(result.message);
-}
-
-function validateCategoryName(name: string) {
-  if (name.length < 2) return "Category name must be at least 2 characters.";
-  if (name.length > 255) return "Category name cannot exceed 255 characters.";
-  return null;
 }
 
 export async function createCategoryAction(
@@ -147,14 +134,16 @@ export async function createCategoryAction(
   void _previousState;
   await requireDashboardRole("ADMIN", "/dashboard/categories");
   const name = readTrimmed(formData, "name");
-  const validationMessage = validateCategoryName(name);
-  if (validationMessage) {
-    return errorState("Check the category name and try again.", {
-      name: [validationMessage],
-    }, { name });
+  const parsed = categoryFormSchema.safeParse({ name });
+  if (!parsed.success) {
+    return errorState(
+      "Check the category name and try again.",
+      getZodFieldErrors(parsed.error),
+      { name },
+    );
   }
 
-  const result = await createCategory(name);
+  const result = await createCategory(parsed.data.name);
   if (!result.ok) return errorState(result.error.message, result.error.fieldErrors, { name });
 
   invalidateAdmin(["/dashboard/categories"], ["categories"]);
@@ -171,14 +160,16 @@ export async function updateCategoryAction(
   if (invalidId) return errorState(invalidId);
 
   const name = readTrimmed(formData, "name");
-  const validationMessage = validateCategoryName(name);
-  if (validationMessage) {
-    return errorState("Check the category name and try again.", {
-      name: [validationMessage],
-    }, { name });
+  const parsed = categoryFormSchema.safeParse({ name });
+  if (!parsed.success) {
+    return errorState(
+      "Check the category name and try again.",
+      getZodFieldErrors(parsed.error),
+      { name },
+    );
   }
 
-  const result = await updateCategory(categoryId, name);
+  const result = await updateCategory(categoryId, parsed.data.name);
   if (!result.ok) return errorState(result.error.message, result.error.fieldErrors, { name });
 
   invalidateAdmin(["/dashboard/categories", "/dashboard/gear"], [
@@ -215,15 +206,17 @@ export async function updateOrderStatusAction(
   const invalidId = validateId(orderId, "Order ID");
   if (invalidId) return errorState(invalidId);
 
-  const rawStatus = readTrimmed(formData, "status");
-  if (!ADMIN_ORDER_STATUSES.includes(rawStatus as RentalOrderStatus)) {
-    return errorState("Choose a valid order transition. Paid status is webhook-only.");
+  const parsed = adminOrderStatusFormSchema.safeParse({
+    status: readTrimmed(formData, "status"),
+  });
+  if (!parsed.success) {
+    return errorState(
+      "Choose a valid order transition. Paid status is webhook-only.",
+      getZodFieldErrors(parsed.error),
+    );
   }
 
-  const result = await updateOrderStatus(
-    orderId,
-    rawStatus as RentalOrderStatus,
-  );
+  const result = await updateOrderStatus(orderId, parsed.data.status);
   if (!result.ok) return apiState(result);
 
   invalidateAdmin(["/dashboard/admin", "/dashboard/orders"]);
@@ -248,79 +241,31 @@ export async function deleteReviewAction(
   return successState(result.message);
 }
 
-function parseGearForm(formData: FormData, requireProvider: boolean) {
-  const categoryId = readTrimmed(formData, "categoryId");
-  const providerId = readTrimmed(formData, "providerId");
-  const name = readTrimmed(formData, "name");
-  const description = readTrimmed(formData, "description");
-  const stockRaw = readTrimmed(formData, "stock");
-  const priceRaw = readTrimmed(formData, "pricePerDay");
-  const brand = readTrimmed(formData, "brand");
-  const imageUrl = readTrimmed(formData, "imageUrl");
-  const isAvailable = formData.get("isAvailable") === "on";
-  const stock = Number(stockRaw);
-  const pricePerDay = Number(priceRaw);
-  const fieldErrors: FieldErrors = {};
-
-  if (!UUID_PATTERN.test(categoryId)) {
-    fieldErrors.categoryId = ["Choose a valid category."];
-  }
-  if (requireProvider && !UUID_PATTERN.test(providerId)) {
-    fieldErrors.providerId = ["Choose an active provider."];
-  }
-  if (name.length < 2 || name.length > 255) {
-    fieldErrors.name = ["Name must be between 2 and 255 characters."];
-  }
-  if (description.length < 10) {
-    fieldErrors.description = ["Description must be at least 10 characters."];
-  }
-  if (!/^\d+$/.test(stockRaw) || !Number.isSafeInteger(stock) || stock < 0) {
-    fieldErrors.stock = ["Stock must be a non-negative integer."];
-  }
-  if (!Number.isFinite(pricePerDay) || pricePerDay <= 0 || pricePerDay > 99999999.99) {
-    fieldErrors.pricePerDay = ["Enter a daily price greater than 0."];
-  }
-  if (brand.length > 255) {
-    fieldErrors.brand = ["Brand cannot exceed 255 characters."];
-  }
-  if (imageUrl) {
-    try {
-      const parsedUrl = new URL(imageUrl);
-      if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
-        fieldErrors.imageUrl = ["Image URL must use HTTP or HTTPS."];
-      }
-    } catch {
-      fieldErrors.imageUrl = ["Enter a valid image URL."];
-    }
-  }
-
+function readGearForm(formData: FormData) {
+  const input = {
+    categoryId: readTrimmed(formData, "categoryId"),
+    providerId: readTrimmed(formData, "providerId"),
+    name: readTrimmed(formData, "name"),
+    description: readTrimmed(formData, "description"),
+    stock: readTrimmed(formData, "stock"),
+    pricePerDay: readTrimmed(formData, "pricePerDay"),
+    brand: readTrimmed(formData, "brand"),
+    imageUrl: readTrimmed(formData, "imageUrl"),
+    isAvailable: formData.get("isAvailable") === "on",
+  };
   const values = {
-    categoryId,
-    providerId,
-    name,
-    description,
-    stock: stockRaw,
-    pricePerDay: priceRaw,
-    brand,
-    imageUrl,
-    isAvailable: String(isAvailable),
+    categoryId: input.categoryId,
+    providerId: input.providerId,
+    name: input.name,
+    description: input.description,
+    stock: input.stock,
+    pricePerDay: input.pricePerDay,
+    brand: input.brand,
+    imageUrl: input.imageUrl,
+    isAvailable: String(input.isAvailable),
   };
 
-  return {
-    fieldErrors,
-    values,
-    data: {
-      categoryId,
-      providerId,
-      name,
-      description,
-      stock,
-      pricePerDay,
-      brand: brand || null,
-      imageUrl: imageUrl || null,
-      isAvailable,
-    },
-  };
+  return { input, values };
 }
 
 export async function createGearAction(
@@ -328,18 +273,19 @@ export async function createGearAction(
   formData: FormData,
 ): Promise<AdminMutationState> {
   await requireDashboardRole("ADMIN", "/dashboard/gear/new");
-  const parsed = parseGearForm(formData, true);
-  if (Object.keys(parsed.fieldErrors).length > 0) {
+  const form = readGearForm(formData);
+  const parsed = createGearFormSchema.safeParse(form.input);
+  if (!parsed.success) {
     return errorState(
       "Check the highlighted gear fields and try again.",
-      parsed.fieldErrors,
-      parsed.values,
+      getZodFieldErrors(parsed.error),
+      form.values,
     );
   }
 
-  const result = await createGearItem(parsed.data as CreateGearInput);
+  const result = await createGearItem(parsed.data);
   if (!result.ok) {
-    return errorState(result.error.message, result.error.fieldErrors, parsed.values);
+    return errorState(result.error.message, result.error.fieldErrors, form.values);
   }
 
   invalidateAdmin(["/dashboard/admin", "/dashboard/gear"], ["gear"]);
@@ -355,28 +301,19 @@ export async function updateGearAction(
   const invalidId = validateId(gearId, "Gear ID");
   if (invalidId) return errorState(invalidId);
 
-  const parsed = parseGearForm(formData, false);
-  if (Object.keys(parsed.fieldErrors).length > 0) {
+  const form = readGearForm(formData);
+  const parsed = updateGearFormSchema.safeParse(form.input);
+  if (!parsed.success) {
     return errorState(
       "Check the highlighted gear fields and try again.",
-      parsed.fieldErrors,
-      parsed.values,
+      getZodFieldErrors(parsed.error),
+      form.values,
     );
   }
 
-  const data: UpdateGearInput = {
-    categoryId: parsed.data.categoryId,
-    name: parsed.data.name,
-    description: parsed.data.description,
-    stock: parsed.data.stock,
-    pricePerDay: parsed.data.pricePerDay,
-    brand: parsed.data.brand,
-    imageUrl: parsed.data.imageUrl,
-    isAvailable: parsed.data.isAvailable,
-  };
-  const result = await updateGearItem(gearId, data);
+  const result = await updateGearItem(gearId, parsed.data);
   if (!result.ok) {
-    return errorState(result.error.message, result.error.fieldErrors, parsed.values);
+    return errorState(result.error.message, result.error.fieldErrors, form.values);
   }
 
   invalidateAdmin(["/dashboard/admin", "/dashboard/gear"], [

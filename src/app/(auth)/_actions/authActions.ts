@@ -5,20 +5,17 @@ import { redirect } from "next/navigation";
 import type {
   AuthFormState,
   AuthTokens,
-  FieldErrors,
   RegistrableRole,
 } from "@/lib/types";
+import { getZodFieldErrors } from "@/lib/validations/zod-errors";
 import { loginRequest, registerRequest } from "@/services/auth";
+import { loginFormSchema, registerFormSchema } from "../validation/auth.schema";
 
 // Access token lives ~1 day, refresh ~7 days, matching the backend's own
 // cookie lifetimes. These are frontend-domain HttpOnly cookies; the JWTs
 // are never exposed to client JavaScript.
 const ACCESS_MAX_AGE = 60 * 60 * 24;
 const REFRESH_MAX_AGE = 60 * 60 * 24 * 7;
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_PATTERN = /^\+?[0-9\s-]{7,20}$/;
-const REGISTRABLE_ROLES: RegistrableRole[] = ["CUSTOMER", "PROVIDER"];
 
 async function setSessionCookies(tokens: AuthTokens) {
   const cookieStore = await cookies();
@@ -48,42 +45,39 @@ function readTrimmed(formData: FormData, key: string): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function readString(formData: FormData, key: string): string {
+  const value = formData.get(key);
+  return typeof value === "string" ? value : "";
+}
+
 export async function loginAction(
   redirectTo: string,
   _prevState: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
-  const email = readTrimmed(formData, "email").toLowerCase();
-  const password =
-    typeof formData.get("password") === "string"
-      ? (formData.get("password") as string)
-      : "";
+  const input = {
+    email: readTrimmed(formData, "email").toLowerCase(),
+    password: readString(formData, "password"),
+  };
+  const parsed = loginFormSchema.safeParse(input);
 
-  const fieldErrors: FieldErrors = {};
-  if (!EMAIL_PATTERN.test(email)) {
-    fieldErrors.email = ["Enter a valid email address."];
-  }
-  if (password.length < 6) {
-    fieldErrors.password = ["Password must be at least 6 characters."];
-  }
-
-  if (Object.keys(fieldErrors).length > 0) {
+  if (!parsed.success) {
     return {
       status: "error",
       message: "Check the highlighted fields and try again.",
-      fieldErrors,
-      values: { email },
+      fieldErrors: getZodFieldErrors(parsed.error),
+      values: { email: input.email },
     };
   }
 
-  const result = await loginRequest({ email, password });
+  const result = await loginRequest(parsed.data);
 
   if (!result.ok) {
     return {
       status: "error",
       message: result.error.message,
       fieldErrors: result.error.fieldErrors,
-      values: { email },
+      values: { email: parsed.data.email },
     };
   }
 
@@ -98,45 +92,35 @@ export async function registerAction(
   _prevState: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
-  const name = readTrimmed(formData, "name");
-  const email = readTrimmed(formData, "email").toLowerCase();
-  const phone = readTrimmed(formData, "phone");
-  const password =
-    typeof formData.get("password") === "string"
-      ? (formData.get("password") as string)
-      : "";
-  const roleValue = readTrimmed(formData, "role");
-  const role = REGISTRABLE_ROLES.includes(roleValue as RegistrableRole)
-    ? (roleValue as RegistrableRole)
-    : "CUSTOMER";
-
-  const fieldErrors: FieldErrors = {};
-  if (!name) {
-    fieldErrors.name = ["Name is required."];
-  }
-  if (!EMAIL_PATTERN.test(email)) {
-    fieldErrors.email = ["Enter a valid email address."];
-  }
-  if (!PHONE_PATTERN.test(phone)) {
-    fieldErrors.phone = ["Enter a valid phone number (7–20 digits)."];
-  }
-  if (password.length < 6) {
-    fieldErrors.password = ["Password must be at least 6 characters."];
-  }
+  const input = {
+    name: readTrimmed(formData, "name"),
+    email: readTrimmed(formData, "email").toLowerCase(),
+    phone: readTrimmed(formData, "phone"),
+    password: readString(formData, "password"),
+    role: readTrimmed(formData, "role"),
+  };
+  const parsed = registerFormSchema.safeParse(input);
+  const safeRole: RegistrableRole =
+    input.role === "PROVIDER" ? "PROVIDER" : "CUSTOMER";
 
   // Preserve safe input on failure; never echo the password back.
-  const values = { name, email, phone, role };
+  const values = {
+    name: input.name,
+    email: input.email,
+    phone: input.phone,
+    role: safeRole,
+  };
 
-  if (Object.keys(fieldErrors).length > 0) {
+  if (!parsed.success) {
     return {
       status: "error",
       message: "Check the highlighted fields and try again.",
-      fieldErrors,
+      fieldErrors: getZodFieldErrors(parsed.error),
       values,
     };
   }
 
-  const result = await registerRequest({ name, email, phone, password, role });
+  const result = await registerRequest(parsed.data);
 
   if (!result.ok) {
     return {

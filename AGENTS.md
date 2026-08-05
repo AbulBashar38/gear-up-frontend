@@ -46,6 +46,7 @@ Before changing framework behavior, read the relevant Next.js 16 guide. Useful s
 - Strict TypeScript; application files must be `.ts`/`.tsx`
 - Tailwind CSS v4 via `@import "tailwindcss"`
 - Native Next.js-enhanced `fetch` for all backend data access; do not add TanStack Query or SWR by default
+- Zod `4.x` for Server Action form parsing, coercion, and field validation
 - Source root `src/`; alias `@/*` maps to `src/*`
 - npm and the committed `package-lock.json`
 - Checks: `npm run lint` and `npm run build`
@@ -502,7 +503,7 @@ The shared fetch function must:
 ### Mutation and form pattern
 
 - Put `"use server"` actions close to their route in `_actions/` when route-specific; share only genuinely reusable actions/services.
-- Parse and validate `FormData` on the server before calling the backend. Do not send `$ACTION_*` fields from a blind `Object.fromEntries()` payload.
+- Parse every submitted form with a reusable Zod schema and `safeParse()` inside the Server Action before calling the backend. Colocate route-owned schemas in the route group's `validation/` folder—for example, `(auth)/validation/auth.schema.ts` and `(dashboard)/validation/admin.schema.ts`; keep only genuinely cross-route validation helpers in `src/lib/validations/`. Mirror the actual backend constraints, map `z.flattenError(error).fieldErrors` to the action state, and preserve only safe non-secret values. Do not duplicate regex/length validation throughout actions or send `$ACTION_*` fields from a blind `Object.fromEntries()` payload.
 - Verify the authenticated user/role inside every protected action even though Proxy and the UI already guard the route.
 - Return a discriminated action state such as `{ success, message, fieldErrors?, data? }` for expected API/validation errors.
 - In the smallest practical Client Component, use `useActionState` to show pending UI, inline errors, and a success/error toast. Disable the submit control while pending.

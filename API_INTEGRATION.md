@@ -24,6 +24,9 @@ sharing one server-only client; domain and envelope types live in
 | Module | Responsibility |
 | --- | --- |
 | `src/lib/types.ts` | Backend envelopes, pagination metadata, normalized result/error types, auth form state, and current GearUp wire models |
+| `src/app/(auth)/validation/auth.schema.ts` | Route-owned Zod schemas matching backend login and customer/provider registration constraints |
+| `src/app/(dashboard)/validation/admin.schema.ts` | Dashboard-owned Zod schemas for admin creation, categories, gear coercion, statuses, and bound UUID validation |
+| `src/lib/validations/zod-errors.ts` | Cross-route adapter from flattened Zod failures to the shared `FieldErrors` action-state shape |
 | `src/services/errors.ts` | Safe JSON/object guards, validation-detail mapping, retryability, and sanitized user-facing problems |
 | `src/services/server-client.ts` | Server-only URL construction, `URLSearchParams`, centralized Bearer forwarding from the frontend HttpOnly cookie, cache checks, one-time response parsing, and HTTP plus envelope validation |
 | `src/services/auth.ts` | Login/register token exchange plus request-cached, no-store `/auth/me` session resolution |
@@ -55,6 +58,12 @@ The client checks both `response.ok` and `payload.success === true`, reads the
 body only once, tolerates non-JSON responses, never exposes backend stacks or
 gateway HTML, and does not convert connection failures into successful empty
 lists.
+
+Every form Server Action validates an explicitly selected input object with a
+reusable Zod schema before calling a service. Zod failures are flattened into
+the same `FieldErrors` shape used for normalized backend validation failures,
+so client forms render consistent inline feedback and toasts. Passwords and
+other secret values are never copied into returned action state.
 
 ## Consumed endpoints
 
