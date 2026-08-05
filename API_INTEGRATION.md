@@ -96,6 +96,7 @@ Only endpoints currently called by the application are listed here.
 | Implemented | Landing `InventorySection` category rail and `/gear` `CatalogContent` filters | `listCategories()` | `GET /categories` | Public; no query | Category `id` and `name` | Revalidates every 60 seconds with `categories` tag; independent skeleton/empty state; a category failure does not hide gear results |
 | Implemented | Landing `InventorySection` recent grid | `listGear({ page: 1, limit: 6 })` | `GET /gear?page=1&limit=6` | Public | Gear identity, category, provider, brand, description, stock/availability, daily price, and pagination metadata | Revalidates every 60 seconds with `gear` tag; labels rows recently listed because the backend sorts newest-first; independent loading, empty, and connection-failure UI |
 | Implemented | `/gear` `CatalogContent`, `CatalogFilters`, and `CatalogResults` | `listGear(query)` | `GET /gear?category?&brand?&minPrice?&maxPrice?&page=1&limit=12` | Public; URL-owned category, exact brand, inclusive price range, and page | Filtered gear rows plus `meta.page`, `meta.limit`, and `meta.total` | Revalidates every 60 seconds with `gear` tag; route-level and granular skeletons; distinct validation, successful-empty, retryable API failure, and unexpected-error states; impossible pages recover to the last real page |
+| Implemented | `/gear/[id]` `GearDetail` and catalog-card links | `getGearItem(id)` | `GET /gear/:id` | Public; UUID path validated before the request | Full listing, category, provider name, stock/availability, price, trusted Cloudinary URL, and newest embedded customer reviews | Revalidates every 60 seconds with `gear` and item tags; route-shaped skeleton and error boundary; backend `404` or malformed UUID renders the contextual not-found screen, while other failures retain retry/catalog recovery actions |
 | Implemented | Landing `ReviewsSection` | `listReviews({ page: 1, limit: 3 })` | `GET /reviews?page=1&limit=3` | Public | Rating/comment, customer, gear item, and returned-order status | Revalidates every 60 seconds with `reviews` tag; renders only real returned-order reviews and never fabricates testimonials |
 | Implemented | `/login` `LoginForm` via `loginAction` | `loginRequest()` | `POST /auth/login` | Public; `{ email, password }` | `data.accessToken`, `data.refreshToken` | `no-store`; server-side field validation then backend; inline field errors + error toast; on success sets HttpOnly `accessToken`/`refreshToken` cookies and redirects to a sanitized `returnTo` or `/dashboard` |
 | Implemented | `/register` `RegisterForm` via `registerAction` | `registerRequest()` | `POST /auth/register` | Public; `{ name, email, phone, password, role }` where role is `CUSTOMER` or `PROVIDER` | `data.accessToken`, `data.refreshToken` | `no-store`; validates name/email/phone(`^\+?[0-9\s-]{7,20}$`)/password(≥6); maps backend 400 details to fields and 409 duplicate email/phone to a toast; role selector never offers `ADMIN`; sets session cookies and redirects on success |
@@ -124,6 +125,11 @@ Only endpoints currently called by the application are listed here.
   validation, and pagination URLs. It is a pure helper, not a Server Action.
 - `/gear/page.tsx` is a thin route shell. It streams the async
   `CatalogContent` through Suspense, following the instructor's list pattern.
+- `/gear/[id]/page.tsx` validates its dynamic UUID, resolves the exact backend
+  listing, and delegates the composed product experience to the public-only
+  `GearDetail` component. Its colocated loading, error, and not-found files
+  provide route-specific recovery without converting an API failure into an
+  empty product state.
 - The brand mark remains in `src/components/shared` because both public and auth
   shells use it. Shadcn primitives remain globally reusable in
   `src/components/ui`.
@@ -192,6 +198,10 @@ Only endpoints currently called by the application are listed here.
 - `GET /gear` has no keyword or date-availability query. The frontend exposes
   category, exact-brand, price, provider, and pagination only; it does not
   filter one returned page and call that global search.
+- The public item page shows the backend's current stock and availability flag,
+  but explicitly avoids claiming date-specific availability because no lookup
+  endpoint exists. Its rental CTA establishes the authentication entry point;
+  the future request form must still submit the real `POST /orders` operation.
 - `PLACED` orders do not reserve stock. Landing copy says a provider confirms
   dates before payment.
 - Checkout is not initiated by the current dashboard milestone. The future

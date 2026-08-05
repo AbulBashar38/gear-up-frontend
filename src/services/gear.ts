@@ -4,6 +4,7 @@ import { gearUpFetch } from "./server-client";
 import type {
   CreateGearInput,
   GearCatalogQuery,
+  GearDetail,
   GearItem,
   UpdateGearInput,
 } from "@/lib/types";
@@ -29,7 +30,7 @@ export function listGear(query: GearCatalogQuery = {}) {
 }
 
 export function getGearItem(id: string) {
-  return gearUpFetch<GearItem>(`/gear/${id}`, {
+  return gearUpFetch<GearDetail>(`/gear/${id}`, {
     next: {
       revalidate: 60,
       tags: ["gear", `gear:${id}`],

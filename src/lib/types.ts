@@ -79,6 +79,28 @@ export type GearItem = {
   };
 };
 
+export type GearDetailReview = {
+  id: string;
+  rentalOrderId: string;
+  gearItemId: string;
+  customerId: string;
+  rating: DecimalValue;
+  comment: string | null;
+  createdAt: string;
+  updatedAt: string;
+  customer: {
+    id: string;
+    name: string;
+  };
+};
+
+export type GearDetail = Omit<GearItem, "provider"> & {
+  provider: GearItem["provider"] & {
+    email: string;
+  };
+  reviews: GearDetailReview[];
+};
+
 export type Review = {
   id: string;
   rentalOrderId: string;

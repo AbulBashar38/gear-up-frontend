@@ -1,4 +1,5 @@
 import {
+  ArrowUpRight,
   Backpack,
   Bike,
   Dumbbell,
@@ -6,9 +7,13 @@ import {
   TentTree,
   Waves,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import type { GearItem } from "@/lib/types";
+import { getTrustedGearImageUrl } from "../../_utils/gear-image";
 
 const cardThemes = [
   "bg-orange text-ink",
@@ -19,13 +24,21 @@ const cardThemes = [
   "bg-gear-sky text-ink",
 ];
 
-function GearIcon({ gear }: { gear: Pick<GearItem, "name" | "category"> }) {
+export function GearIcon({
+  gear,
+  className,
+}: {
+  gear: Pick<GearItem, "name" | "category">;
+  className?: string;
+}) {
   const descriptor = `${gear.category.name} ${gear.name}`.toLowerCase();
   const iconProps = {
     "aria-hidden": true,
     strokeWidth: 1.25,
-    className:
+    className: cn(
       "relative size-28 transition-transform duration-500 group-hover/card:rotate-[-4deg] group-hover/card:scale-105",
+      className,
+    ),
   } as const;
 
   if (descriptor.includes("cycl") || descriptor.includes("bike")) {
@@ -73,13 +86,17 @@ type GearCardProps = {
 
 export function GearCard({ gear, index, eyebrow }: GearCardProps) {
   const canRequest = gear.isAvailable && gear.stock > 0;
+  const imageUrl = getTrustedGearImageUrl(gear.imageUrl);
 
   return (
     <Card
       asChild
       className="h-full gap-0 rounded-none bg-paper py-0 text-ink ring-1 ring-ink/15 shadow-none transition-transform duration-300 hover:-translate-y-1"
     >
-      <article>
+      <Link
+        href={`/gear/${gear.id}`}
+        aria-label={`View ${gear.name} details`}
+      >
         <div
           className={`relative grid min-h-56 place-items-center overflow-hidden p-8 ${cardThemes[index % cardThemes.length]}`}
         >
@@ -89,14 +106,30 @@ export function GearCard({ gear, index, eyebrow }: GearCardProps) {
           />
           <Badge
             variant="outline"
-            className="absolute left-4 top-4 h-auto rounded-none border-current/30 bg-transparent px-2 py-1 font-mono text-[0.62rem] font-bold uppercase tracking-[0.18em] text-current"
+            className={cn(
+              "absolute left-4 top-4 z-10 h-auto rounded-none border-current/30 bg-transparent px-2 py-1 font-mono text-[0.62rem] font-bold uppercase tracking-[0.18em] text-current",
+              imageUrl && "border-ink/20 bg-paper/90 text-ink",
+            )}
           >
             {eyebrow ?? `Field item // ${String(index + 1).padStart(2, "0")}`}
           </Badge>
-          <GearIcon gear={gear} />
+          {imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt={gear.name}
+              fill
+              sizes="(min-width: 1280px) 30vw, (min-width: 640px) 50vw, 100vw"
+              className="object-cover transition-transform duration-700 group-hover/card:scale-105"
+            />
+          ) : (
+            <GearIcon gear={gear} />
+          )}
           <Badge
             variant="outline"
-            className="absolute bottom-4 right-4 h-auto rounded-none border-current/30 bg-transparent px-2 py-1 text-[0.58rem] font-extrabold uppercase tracking-[0.18em] text-current"
+            className={cn(
+              "absolute bottom-4 right-4 z-10 h-auto rounded-none border-current/30 bg-transparent px-2 py-1 text-[0.58rem] font-extrabold uppercase tracking-[0.18em] text-current",
+              imageUrl && "border-ink/20 bg-paper/90 text-ink",
+            )}
           >
             {gear.category.name}
           </Badge>
@@ -132,12 +165,13 @@ export function GearCard({ gear, index, eyebrow }: GearCardProps) {
                 per rental day
               </p>
             </div>
-            <p className="max-w-24 text-right text-[0.66rem] font-bold leading-4 text-ink/70">
-              Provider confirms your dates
-            </p>
+            <span className="flex items-center gap-1 text-right text-[0.66rem] font-extrabold uppercase tracking-[0.12em] text-ink">
+              View details
+              <ArrowUpRight aria-hidden="true" className="size-4" />
+            </span>
           </div>
         </CardContent>
-      </article>
+      </Link>
     </Card>
   );
 }
