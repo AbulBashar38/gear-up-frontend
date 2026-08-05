@@ -89,7 +89,7 @@ export async function loginAction(
 
   await setSessionCookies(result.data);
 
-  const destination = safeReturnTo(redirectTo) ?? "/";
+  const destination = safeReturnTo(redirectTo) ?? "/dashboard";
   redirect(destination);
 }
 
@@ -149,6 +149,6 @@ export async function registerAction(
 
   await setSessionCookies(result.data);
 
-  const destination = safeReturnTo(redirectTo) ?? "/";
+  const destination = safeReturnTo(redirectTo) ?? "/dashboard";
   redirect(destination);
 }

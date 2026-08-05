@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cookies } from "next/headers";
 import { isRecord, normalizeApiProblem, parseJsonText } from "./errors";
 import type { ApiMeta, ApiResult } from "@/lib/types";
 
@@ -15,6 +16,7 @@ type GearUpFetchOptions = Omit<RequestInit, "body"> & {
   json?: unknown;
   next?: NextFetchOptions;
   fallbackMessage?: string;
+  auth?: boolean;
 };
 
 const DEFAULT_FAILURE_MESSAGE =
@@ -79,6 +81,7 @@ export async function gearUpFetch<T>(
     query,
     json,
     fallbackMessage = DEFAULT_FAILURE_MESSAGE,
+    auth = false,
     headers: initialHeaders,
     next,
     cache,
@@ -108,6 +111,25 @@ export async function gearUpFetch<T>(
   }
 
   const headers = new Headers(initialHeaders);
+
+  if (auth && !headers.has("Authorization")) {
+    const accessToken = (await cookies()).get("accessToken")?.value;
+
+    if (!accessToken) {
+      return {
+        ok: false,
+        error: normalizeApiProblem({
+          status: 401,
+          payload: { message: "Sign in to access your GearUp workspace." },
+          code: "http",
+          fallbackMessage: "Sign in to access your GearUp workspace.",
+        }),
+      };
+    }
+
+    headers.set("Authorization", `Bearer ${accessToken}`);
+  }
+
   if (json !== undefined && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }

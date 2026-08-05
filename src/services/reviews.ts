@@ -18,3 +18,12 @@ export function listReviews(query: ReviewListQuery = {}) {
     fallbackMessage: "Field reports are reconnecting. Try again shortly.",
   });
 }
+
+export function deleteReview(id: string) {
+  return gearUpFetch<Review>(`/reviews/${id}`, {
+    method: "DELETE",
+    auth: true,
+    cache: "no-store",
+    fallbackMessage: "The review couldn't be deleted. Try again shortly.",
+  });
+}

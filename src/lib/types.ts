@@ -124,6 +124,128 @@ export type ReviewListQuery = {
 
 export type Role = "CUSTOMER" | "PROVIDER" | "ADMIN";
 
+export type UserStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED";
+
+export type RentalOrderStatus =
+  | "PLACED"
+  | "CONFIRMED"
+  | "PAID"
+  | "PICKED_UP"
+  | "RETURNED"
+  | "CANCELLED";
+
+export type PaymentStatus = "PENDING" | "COMPLETED" | "FAILED";
+
+export type CurrentUser = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: Role;
+  status: UserStatus;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PaymentSummary = {
+  id: string;
+  rentalOrderId: string;
+  amount: DecimalValue;
+  stripePaymentIntentId: string | null;
+  stripeSessionId: string | null;
+  status: PaymentStatus;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type RentalOrder = {
+  id: string;
+  gearItemId: string;
+  customerId: string;
+  startDate: string;
+  endDate: string;
+  totalPrice: DecimalValue;
+  quantity: number;
+  status: RentalOrderStatus;
+  createdAt: string;
+  updatedAt: string;
+  gearItem: GearItem & {
+    provider: {
+      id: string;
+      name: string;
+      email: string;
+    };
+  };
+  customer: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+  };
+  payment: PaymentSummary | null;
+};
+
+export type Payment = PaymentSummary & {
+  rentalOrder: Omit<RentalOrder, "payment">;
+};
+
+export type AdminUser = CurrentUser & {
+  _count: {
+    gearItems: number;
+    rentalOrders: number;
+    reviews: number;
+  };
+};
+
+export type OrderListQuery = {
+  status?: RentalOrderStatus;
+  paymentStatus?: PaymentStatus;
+  page?: number;
+  limit?: number;
+};
+
+export type PaymentListQuery = {
+  status?: PaymentStatus;
+  page?: number;
+  limit?: number;
+};
+
+export type UserListQuery = {
+  search?: string;
+  role?: Role;
+  status?: UserStatus;
+  page?: number;
+  limit?: number;
+};
+
+export type CreateAdminInput = {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+};
+
+export type CreateGearInput = {
+  categoryId: string;
+  providerId: string;
+  name: string;
+  description: string;
+  stock: number;
+  isAvailable: boolean;
+  pricePerDay: number;
+  imageUrl?: string | null;
+  brand?: string | null;
+};
+
+export type UpdateGearInput = Omit<Partial<CreateGearInput>, "providerId">;
+
+export type AdminMutationState = {
+  status: "idle" | "success" | "error";
+  message: string;
+  fieldErrors?: FieldErrors;
+  values?: Record<string, string>;
+};
+
 // Public registration is limited to these two; ADMIN is created by an
 // existing admin through a separate protected endpoint.
 export type RegistrableRole = "CUSTOMER" | "PROVIDER";

@@ -1,7 +1,12 @@
 import "server-only";
 
 import { gearUpFetch } from "./server-client";
-import type { GearCatalogQuery, GearItem } from "@/lib/types";
+import type {
+  CreateGearInput,
+  GearCatalogQuery,
+  GearItem,
+  UpdateGearInput,
+} from "@/lib/types";
 
 export function listGear(query: GearCatalogQuery = {}) {
   return gearUpFetch<GearItem[]>("/gear", {
@@ -20,5 +25,44 @@ export function listGear(query: GearCatalogQuery = {}) {
       tags: ["gear"],
     },
     fallbackMessage: "The gear catalog is reconnecting. Try again shortly.",
+  });
+}
+
+export function getGearItem(id: string) {
+  return gearUpFetch<GearItem>(`/gear/${id}`, {
+    next: {
+      revalidate: 60,
+      tags: ["gear", `gear:${id}`],
+    },
+    fallbackMessage: "The gear listing couldn't be loaded. Try again shortly.",
+  });
+}
+
+export function createGearItem(input: CreateGearInput) {
+  return gearUpFetch<GearItem>("/gear", {
+    method: "POST",
+    auth: true,
+    cache: "no-store",
+    json: input,
+    fallbackMessage: "The gear listing couldn't be created. Try again shortly.",
+  });
+}
+
+export function updateGearItem(id: string, input: UpdateGearInput) {
+  return gearUpFetch<GearItem>(`/gear/${id}`, {
+    method: "PATCH",
+    auth: true,
+    cache: "no-store",
+    json: input,
+    fallbackMessage: "The gear listing couldn't be updated. Try again shortly.",
+  });
+}
+
+export function deleteGearItem(id: string) {
+  return gearUpFetch<GearItem>(`/gear/${id}`, {
+    method: "DELETE",
+    auth: true,
+    cache: "no-store",
+    fallbackMessage: "The gear listing couldn't be deleted. Try again shortly.",
   });
 }
