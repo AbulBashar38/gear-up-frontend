@@ -37,7 +37,7 @@ export function ProviderCallout() {
     <section
       id="providers"
       aria-labelledby="provider-title"
-      className="scroll-mt-20 bg-orange text-ink"
+      className="surface-warm scroll-mt-20 bg-orange text-ink"
     >
       <div className="mx-auto grid w-full max-w-[90rem] lg:grid-cols-12">
         <div className="surface-warm relative overflow-hidden px-5 py-20 sm:px-8 sm:py-28 lg:col-span-7 lg:px-12">
@@ -76,7 +76,7 @@ export function ProviderCallout() {
 
         <div
           id="provider-workflow"
-          className="bg-ink px-5 py-16 text-paper sm:px-8 lg:col-span-5 lg:px-12 lg:py-24"
+          className="surface-inverse bg-ink px-5 py-16 text-paper sm:px-8 lg:col-span-5 lg:px-12 lg:py-24"
         >
           <Reveal>
             <div className="mb-8 flex items-center justify-between border-b border-paper/15 pb-4">

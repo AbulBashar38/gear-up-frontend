@@ -26,7 +26,7 @@ export function AuthShell({
       {/* Marketing panel — decorative, hidden on small screens. */}
       <section
         aria-hidden="true"
-        className="hidden flex-col justify-between overflow-hidden rounded-2xl bg-ink p-10 text-paper lg:flex"
+        className="surface-inverse hidden flex-col justify-between overflow-hidden rounded-2xl bg-ink p-10 text-paper lg:flex"
       >
         <div>
           <p className="section-kicker text-lime">GearUp // field desk</p>

@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useAuthSession } from "@/components/providers/auth-session-provider";
 import { BrandMark } from "@/components/shared/brand-mark";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Sheet,
@@ -75,6 +76,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-4 lg:flex">
+          <ThemeToggle />
           <span className="text-[0.65rem] font-bold uppercase tracking-[0.22em] text-paper/65">
             {firstName ? `Field access // ${firstName}` : "Adventure, on request"}
           </span>
@@ -89,6 +91,8 @@ export function SiteHeader() {
             </Link>
           </Button>
         </div>
+
+        <ThemeToggle className="ml-auto lg:hidden" />
 
         <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
           <SheetTrigger asChild>

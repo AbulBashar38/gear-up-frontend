@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Barlow_Condensed, Manrope, Space_Mono } from "next/font/google";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -44,16 +45,24 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${manrope.variable} ${barlowCondensed.variable} ${spaceMono.variable} h-full`}
     >
       <body className="min-h-full">
-        {children}
-        <Toaster
-          theme="light"
-          position="top-right"
-          richColors
-          closeButton
-        />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+          storageKey="gearup-theme"
+        >
+          {children}
+          <Toaster
+            position="top-right"
+            richColors
+            closeButton
+          />
+        </ThemeProvider>
       </body>
     </html>
   );

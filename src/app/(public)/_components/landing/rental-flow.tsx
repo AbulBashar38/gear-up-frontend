@@ -115,7 +115,7 @@ export function RentalFlow() {
                 viewport={{ once: true, amount: 0.4 }}
                 transition={{ duration: 0.5, delay: index * 0.12 }}
               >
-                <div className="relative z-10 grid size-14 place-items-center border-4 border-mist bg-ink text-lime">
+                <div className="relative z-10 grid size-14 place-items-center border-4 border-mist bg-[var(--brand-ink)] text-lime">
                   <Icon aria-hidden="true" className="size-5" />
                 </div>
                 <div className="border-t border-ink/15 pt-4 md:mt-9">

@@ -30,7 +30,7 @@ export function RentalRequestCard({
   }
 
   return (
-    <Card className="gear-tag gap-0 rounded-none bg-lime py-0 text-ink ring-0 shadow-none">
+    <Card className="surface-accent gear-tag gap-0 rounded-none bg-lime py-0 text-ink ring-0 shadow-none">
       <CardContent className="p-7 sm:p-9">
         <p className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.2em] text-ink/70">
           Rental dispatch // request first

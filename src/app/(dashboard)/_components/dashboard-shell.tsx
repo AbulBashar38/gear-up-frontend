@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { ArrowUpRight, LogOut, Menu } from "lucide-react";
 import type { CurrentUser } from "@/lib/types";
 import { BrandMark } from "@/components/shared/brand-mark";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -89,7 +90,7 @@ function UserSummary({ user }: { user: CurrentUser }) {
     <div className="flex min-w-0 items-center gap-3">
       <span
         aria-hidden="true"
-        className="grid size-10 shrink-0 place-items-center bg-orange font-mono text-xs font-bold text-ink"
+        className="surface-accent grid size-10 shrink-0 place-items-center bg-orange font-mono text-xs font-bold text-ink"
       >
         {initials || "GU"}
       </span>
@@ -108,7 +109,7 @@ export function DashboardShell({ user, children }: DashboardShellProps) {
     <div className="min-h-dvh bg-paper text-ink">
       <a
         href="#dashboard-content"
-        className="skip-link fixed left-4 top-3 z-[100] -translate-y-24 bg-lime px-4 py-3 font-bold text-ink focus-visible:translate-y-0"
+        className="surface-accent skip-link fixed left-4 top-3 z-[100] -translate-y-24 bg-lime px-4 py-3 font-bold text-ink focus-visible:translate-y-0"
       >
         Skip to dashboard content
       </a>
@@ -155,6 +156,7 @@ export function DashboardShell({ user, children }: DashboardShellProps) {
           </div>
 
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <div className="hidden md:block">
               <UserSummary user={user} />
             </div>

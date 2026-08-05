@@ -98,7 +98,7 @@ export function GearCard({ gear, index, eyebrow }: GearCardProps) {
         aria-label={`View ${gear.name} details`}
       >
         <div
-          className={`relative grid min-h-56 place-items-center overflow-hidden p-8 ${cardThemes[index % cardThemes.length]}`}
+          className={`surface-accent relative grid min-h-56 place-items-center overflow-hidden p-8 ${cardThemes[index % cardThemes.length]}`}
         >
           <div
             aria-hidden="true"

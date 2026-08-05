@@ -87,7 +87,7 @@ export async function ReviewsSection() {
                 >
                   <Card
                     asChild
-                    className="relative h-full gap-0 rounded-none bg-ink py-0 text-paper ring-0 shadow-none"
+                    className="surface-inverse relative h-full gap-0 rounded-none bg-ink py-0 text-paper ring-0 shadow-none"
                   >
                     <article>
                       <div
@@ -186,7 +186,7 @@ export async function ReviewsSection() {
           <Reveal className="lg:col-span-4">
             <Card
               asChild
-              className="gear-tag h-full min-h-80 gap-0 rounded-none bg-lime py-0 text-ink ring-0 shadow-none"
+              className="surface-accent gear-tag h-full min-h-80 gap-0 rounded-none bg-lime py-0 text-ink ring-0 shadow-none"
             >
               <aside>
                 <CardContent className="flex h-full flex-col justify-between p-7 sm:p-9">

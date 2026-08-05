@@ -74,7 +74,7 @@ export default async function NewOrderPage({ searchParams }: NewOrderPageProps) 
               </Card>
             )}
 
-            <Card className="gap-0 rounded-none bg-ink py-0 text-paper ring-0 shadow-none">
+            <Card className="surface-inverse gap-0 rounded-none bg-ink py-0 text-paper ring-0 shadow-none">
               <CardContent className="p-6">
                 <p className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.18em] text-orange">Selected item</p>
                 <h2 className="mt-5 font-display text-4xl font-black uppercase leading-[0.9]">{gear.name}</h2>

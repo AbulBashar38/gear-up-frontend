@@ -5,8 +5,11 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --paper: #f5f1e8;
-  --ink: #10261e;
+  --brand-paper: #f5f1e8;
+  --brand-ink: #10261e;
+  --brand-pine: #173f32;
+  --paper: var(--brand-paper);
+  --ink: var(--brand-ink);
   --pine: #173f32;
   --lime: #d8f260;
   --orange: #ff6b35;
@@ -122,7 +125,7 @@
 }
 
 html {
-  background: var(--ink);
+  background: var(--background);
   scroll-behavior: smooth;
   scroll-padding-top: 5rem;
 }
@@ -288,40 +291,55 @@ a {
 
 .dark {
   color-scheme: dark;
-  --background: #081912;
-  --foreground: var(--paper);
-  --card: var(--ink);
-  --card-foreground: var(--paper);
-  --popover: var(--ink);
-  --popover-foreground: var(--paper);
+  --paper: #081912;
+  --ink: #edf4ef;
+  --pine: #15372c;
+  --mist: #132c23;
+  --line: #365247;
+  --gear-sage: #1b3a30;
+  --gear-sun: #5a491d;
+  --gear-sky: #243655;
+  --signal: #ff8a62;
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: #10261e;
+  --card-foreground: var(--ink);
+  --popover: #10261e;
+  --popover-foreground: var(--ink);
   --primary: var(--lime);
-  --primary-foreground: var(--ink);
-  --primary-hover: color-mix(in oklab, var(--lime) 88%, var(--ink));
+  --primary-foreground: var(--brand-ink);
+  --primary-hover: color-mix(in oklab, var(--lime) 88%, var(--brand-ink));
   --secondary: var(--pine);
-  --secondary-foreground: var(--paper);
-  --secondary-hover: color-mix(in oklab, var(--pine) 88%, var(--paper));
+  --secondary-foreground: var(--ink);
+  --secondary-hover: color-mix(in oklab, var(--pine) 88%, var(--ink));
   --muted: #213d32;
   --muted-foreground: #c2cec6;
   --accent: var(--orange);
-  --accent-foreground: var(--ink);
-  --accent-hover: color-mix(in oklab, var(--orange) 88%, var(--paper));
+  --accent-foreground: var(--brand-ink);
+  --accent-hover: color-mix(in oklab, var(--orange) 88%, var(--brand-paper));
   --destructive: #ff8a72;
   --success: #68c59b;
-  --success-foreground: var(--ink);
-  --border: rgb(245 241 232 / 18%);
-  --input: rgb(245 241 232 / 24%);
+  --success-foreground: var(--brand-ink);
+  --border: rgb(237 244 239 / 24%);
+  --input: rgb(237 244 239 / 28%);
   --ring: var(--lime);
   --sidebar: #06130e;
-  --sidebar-foreground: var(--paper);
+  --sidebar-foreground: var(--brand-paper);
   --sidebar-primary: var(--lime);
-  --sidebar-primary-foreground: var(--ink);
-  --sidebar-accent: var(--pine);
-  --sidebar-accent-foreground: var(--paper);
+  --sidebar-primary-foreground: var(--brand-ink);
+  --sidebar-accent: var(--brand-pine);
+  --sidebar-accent-foreground: var(--brand-paper);
   --sidebar-border: rgb(245 241 232 / 16%);
   --sidebar-ring: var(--lime);
 }
 
 .surface-inverse {
+  --paper: var(--brand-paper);
+  --ink: var(--brand-ink);
+  --pine: var(--brand-pine);
+  --mist: #dce6dd;
+  --line: #c8d1c8;
+  --signal: #ad330e;
   --background: var(--ink);
   --foreground: var(--paper);
   --card: var(--pine);
@@ -343,6 +361,12 @@ a {
 }
 
 .surface-warm {
+  --paper: var(--brand-paper);
+  --ink: var(--brand-ink);
+  --pine: var(--brand-pine);
+  --mist: #dce6dd;
+  --line: #c8d1c8;
+  --signal: #ad330e;
   --background: var(--orange);
   --foreground: var(--ink);
   --primary: var(--ink);
@@ -353,6 +377,15 @@ a {
   --accent-hover: color-mix(in oklab, var(--lime) 88%, var(--ink));
   --border: color-mix(in oklab, var(--ink) 48%, transparent);
   --ring: var(--ink);
+}
+
+.surface-accent {
+  --paper: var(--brand-paper);
+  --ink: var(--brand-ink);
+  --pine: var(--brand-pine);
+  --mist: #dce6dd;
+  --line: #c8d1c8;
+  --signal: #ad330e;
 }
 
 @layer base {

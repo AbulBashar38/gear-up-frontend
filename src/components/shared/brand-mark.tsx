@@ -17,7 +17,7 @@ export function BrandMark({
     >
       <span
         aria-hidden="true"
-        className="grid size-9 rotate-3 place-items-center bg-orange text-xl font-black text-ink transition-transform duration-300 group-hover:-rotate-3"
+        className="surface-accent grid size-9 rotate-3 place-items-center bg-orange text-xl font-black text-ink transition-transform duration-300 group-hover:-rotate-3"
       >
         /
       </span>

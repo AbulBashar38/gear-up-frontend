@@ -26,7 +26,7 @@ export default async function PublicLayout({
       <LandingMotionProvider>
         <a
           href="#main-content"
-          className="skip-link fixed left-4 top-3 z-[100] -translate-y-24 bg-lime px-4 py-3 font-bold text-ink focus-visible:translate-y-0"
+          className="surface-accent skip-link fixed left-4 top-3 z-[100] -translate-y-24 bg-lime px-4 py-3 font-bold text-ink focus-visible:translate-y-0"
         >
           Skip to main content
         </a>

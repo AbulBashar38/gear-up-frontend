@@ -16,8 +16,8 @@ type DashboardMetricCardProps = {
 
 const toneClasses = {
   paper: "bg-card text-ink",
-  lime: "bg-lime text-ink",
-  orange: "bg-orange text-ink",
+  lime: "surface-accent bg-lime text-ink",
+  orange: "surface-accent bg-orange text-ink",
   ink: "surface-inverse bg-background text-foreground",
 } as const;
 
