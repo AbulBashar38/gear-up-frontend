@@ -24,6 +24,14 @@ export function listOrders(query: OrderListQuery = {}) {
   });
 }
 
+export function getOrder(id: string) {
+  return gearUpFetch<RentalOrder>(`/orders/${id}`, {
+    auth: true,
+    cache: "no-store",
+    fallbackMessage: "This order couldn't be loaded. Try again shortly.",
+  });
+}
+
 export function createRentalOrder(input: CreateRentalOrderInput) {
   return gearUpFetch<CreatedRentalOrder>("/orders", {
     method: "POST",

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Pencil } from "lucide-react";
+import { ArrowRight, Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type {
@@ -68,7 +68,12 @@ export function OrderList({
                 )}
               </div>
               <h3 className="mt-4 truncate font-display text-2xl font-black uppercase">
-                {order.gearItem.name}
+                <Link
+                  href={`/dashboard/orders/${order.id}`}
+                  className="underline-offset-4 hover:underline"
+                >
+                  {order.gearItem.name}
+                </Link>
               </h3>
               <p className="mt-1 truncate text-xs text-ink/60">
                 Customer: {order.customer.name} · Provider: {order.gearItem.provider.name}
@@ -88,6 +93,17 @@ export function OrderList({
               <p className="mt-1 font-mono text-[0.58rem] uppercase tracking-[0.13em] text-ink/55">
                 #{order.id.slice(0, 8)}
               </p>
+              <Button
+                asChild
+                variant="ghost"
+                size="compact"
+                className="mt-2 -mr-2 lg:ml-auto"
+              >
+                <Link href={`/dashboard/orders/${order.id}`}>
+                  View order
+                  <ArrowRight aria-hidden="true" />
+                </Link>
+              </Button>
               {adminActions && (
                 <div className="mt-4">
                   <AdminOrderAction order={order} />

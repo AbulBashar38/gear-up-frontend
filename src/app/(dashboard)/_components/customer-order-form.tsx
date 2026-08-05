@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AlertCircle, CalendarDays, PackageCheck } from "lucide-react";
 import { toast } from "sonner";
 import type { GearDetail, OrderMutationState } from "@/lib/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { DatePickerField } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createRentalOrderAction } from "../_actions/order-actions";
@@ -42,6 +43,9 @@ export function CustomerOrderForm({
   const fields = state.fieldErrors ?? {};
   const values = state.values ?? {};
 
+  const [startDate, setStartDate] = useState(values.startDate ?? "");
+  const [endDate, setEndDate] = useState(values.endDate ?? "");
+
   useEffect(() => {
     if (state.status === "error" && state.message) {
       toast.error(state.message);
@@ -74,18 +78,22 @@ export function CustomerOrderForm({
           <Label htmlFor="rental-start-date" className="font-bold">
             Start date
           </Label>
-          <Input
-            id="rental-start-date"
-            name="startDate"
-            type="date"
-            min={minimumDate}
-            required
-            disabled={pending}
-            defaultValue={values.startDate}
-            aria-invalid={Boolean(fields.startDate)}
-            aria-describedby={fields.startDate ? "rental-start-date-error" : undefined}
-            className="mt-2 h-12 rounded-none"
-          />
+          <div className="mt-2">
+            <DatePickerField
+              id="rental-start-date"
+              name="startDate"
+              value={startDate}
+              onValueChange={(next) => {
+                setStartDate(next);
+                if (endDate && next && endDate < next) setEndDate("");
+              }}
+              min={minimumDate}
+              disabled={pending}
+              placeholder="Pick a start date"
+              aria-invalid={Boolean(fields.startDate)}
+              aria-describedby={fields.startDate ? "rental-start-date-error" : undefined}
+            />
+          </div>
           <FieldError id="rental-start-date-error" messages={fields.startDate} />
         </div>
 
@@ -93,18 +101,19 @@ export function CustomerOrderForm({
           <Label htmlFor="rental-end-date" className="font-bold">
             End date
           </Label>
-          <Input
-            id="rental-end-date"
-            name="endDate"
-            type="date"
-            min={minimumDate}
-            required
-            disabled={pending}
-            defaultValue={values.endDate}
-            aria-invalid={Boolean(fields.endDate)}
-            aria-describedby={fields.endDate ? "rental-end-date-error" : undefined}
-            className="mt-2 h-12 rounded-none"
-          />
+          <div className="mt-2">
+            <DatePickerField
+              id="rental-end-date"
+              name="endDate"
+              value={endDate}
+              onValueChange={setEndDate}
+              min={startDate || minimumDate}
+              disabled={pending}
+              placeholder="Pick an end date"
+              aria-invalid={Boolean(fields.endDate)}
+              aria-describedby={fields.endDate ? "rental-end-date-error" : undefined}
+            />
+          </div>
           <FieldError id="rental-end-date-error" messages={fields.endDate} />
         </div>
 

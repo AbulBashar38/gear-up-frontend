@@ -57,3 +57,17 @@ export const createRentalOrderFormSchema = z
 export const rentalOrderGearQuerySchema = z.uuid(
   "Choose a valid gear item before requesting a rental.",
 );
+
+export const idSchema = z.uuid("This order reference is not valid.");
+
+/**
+ * Status values the frontend is allowed to request. `PAID` is webhook-only and
+ * `PLACED` is only reachable through order creation, so neither is accepted
+ * here. The backend remains authoritative on role and lifecycle eligibility.
+ */
+export const orderStatusTransitionSchema = z.enum([
+  "CONFIRMED",
+  "CANCELLED",
+  "PICKED_UP",
+  "RETURNED",
+]);

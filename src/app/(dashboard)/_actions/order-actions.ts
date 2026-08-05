@@ -1,11 +1,23 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type { FieldErrors, OrderMutationState } from "@/lib/types";
+import type {
+  AdminMutationState,
+  FieldErrors,
+  OrderMutationState,
+  RentalOrderStatus,
+} from "@/lib/types";
 import { getZodFieldErrors } from "@/lib/validations/zod-errors";
-import { createRentalOrder } from "@/services/orders";
-import { requireDashboardRole } from "../_utils/dashboard-access";
-import { createRentalOrderFormSchema } from "../validation/order.schema";
+import { createRentalOrder, updateOrderStatus } from "@/services/orders";
+import {
+  requireDashboardRole,
+  requireDashboardUser,
+} from "../_utils/dashboard-access";
+import {
+  createRentalOrderFormSchema,
+  idSchema,
+  orderStatusTransitionSchema,
+} from "../validation/order.schema";
 
 function readTrimmed(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -69,4 +81,48 @@ export async function createRentalOrderAction(
     message: result.message,
     data: result.data,
   };
+}
+
+/**
+ * Shared, role-aware order transition used by the order detail page. Any
+ * authenticated dashboard user may submit it; the backend enforces which
+ * role/state combinations are actually permitted and returns 403/409 otherwise.
+ */
+export async function changeOrderStatusAction(
+  orderId: string,
+  _previousState: AdminMutationState,
+  formData: FormData,
+): Promise<AdminMutationState> {
+  await requireDashboardUser(`/dashboard/orders/${orderId}`);
+
+  const parsedId = idSchema.safeParse(orderId);
+  if (!parsedId.success) {
+    return { status: "error", message: "This order reference is not valid." };
+  }
+
+  const parsedStatus = orderStatusTransitionSchema.safeParse(
+    readTrimmed(formData, "status"),
+  );
+  if (!parsedStatus.success) {
+    return {
+      status: "error",
+      message: "That order transition isn't allowed from here.",
+    };
+  }
+
+  const result = await updateOrderStatus(
+    parsedId.data,
+    parsedStatus.data as RentalOrderStatus,
+  );
+  if (!result.ok) {
+    return { status: "error", message: result.error.message };
+  }
+
+  revalidatePath("/dashboard/orders");
+  revalidatePath(`/dashboard/orders/${orderId}`);
+  revalidatePath("/dashboard/customer");
+  revalidatePath("/dashboard/provider");
+  revalidatePath("/dashboard/admin");
+
+  return { status: "success", message: result.message };
 }
