@@ -33,7 +33,7 @@ export default async function AdminDashboardPage() {
         description="Review platform totals, inspect recent role-scoped activity, and enter each operational register. Values come from backend pagination metadata—not from a single page length."
         actions={
           <Button asChild size="lg">
-            <Link href="/dashboard/admin/users">Manage users</Link>
+            <Link href="/dashboard/users">Manage users</Link>
           </Button>
         }
       />
@@ -45,10 +45,10 @@ export default async function AdminDashboardPage() {
       )}
 
       <section aria-label="Admin dashboard totals" className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <DashboardMetricCard code="ADM—01" label="Users" value={getResultTotal(users)} detail="Customer, provider, and admin accounts." href="/dashboard/admin/users" icon={Users} />
-        <DashboardMetricCard code="ADM—02" label="Gear" value={getResultTotal(gear)} detail="All inventory published across providers." href="/dashboard/admin/gear" icon={Boxes} tone="orange" />
-        <DashboardMetricCard code="ADM—03" label="Orders" value={getResultTotal(orders)} detail="All rental requests across the platform." href="/dashboard/admin/orders" icon={ClipboardList} tone="lime" />
-        <DashboardMetricCard code="ADM—04" label="Payments" value={getResultTotal(payments)} detail="Stripe-backed payment records at every status." href="/dashboard/admin/payments" icon={CreditCard} tone="ink" />
+        <DashboardMetricCard code="ADM—01" label="Users" value={getResultTotal(users)} detail="Customer, provider, and admin accounts." href="/dashboard/users" icon={Users} />
+        <DashboardMetricCard code="ADM—02" label="Gear" value={getResultTotal(gear)} detail="All inventory published across providers." href="/dashboard/gear" icon={Boxes} tone="orange" />
+        <DashboardMetricCard code="ADM—03" label="Orders" value={getResultTotal(orders)} detail="All rental requests across the platform." href="/dashboard/orders" icon={ClipboardList} tone="lime" />
+        <DashboardMetricCard code="ADM—04" label="Payments" value={getResultTotal(payments)} detail="Stripe-backed payment records at every status." href="/dashboard/payments" icon={CreditCard} tone="ink" />
       </section>
 
       <section className="mt-12" aria-labelledby="admin-recent-orders">
@@ -57,7 +57,7 @@ export default async function AdminDashboardPage() {
             <p className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.18em] text-signal">Platform register // newest first</p>
             <h2 id="admin-recent-orders" className="mt-2 font-display text-4xl font-black uppercase">Recent rental activity</h2>
           </div>
-          <Button asChild variant="outline" size="compact"><Link href="/dashboard/admin/orders">View all orders</Link></Button>
+          <Button asChild variant="outline" size="compact"><Link href="/dashboard/orders">View all orders</Link></Button>
         </div>
         {orders.ok && <OrderList orders={orders.data} adminActions />}
       </section>

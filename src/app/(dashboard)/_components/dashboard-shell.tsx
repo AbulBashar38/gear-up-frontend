@@ -60,7 +60,7 @@ function NavigationLinks({
               </span>
               <item.icon aria-hidden="true" className="size-4" />
               <span>{item.label}</span>
-              {item.href === "/gear" && (
+              {item.href === "/dashboard/gear" && user.role === "CUSTOMER" && (
                 <ArrowUpRight aria-hidden="true" className="ml-auto size-3.5" />
               )}
             </Link>

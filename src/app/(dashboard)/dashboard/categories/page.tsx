@@ -1,9 +1,11 @@
-import { AdminCategoryManager } from "../../../_components/admin-category-manager";
-import { DashboardRegisterPage } from "../../../_components/dashboard-register-page";
-import { getResultTotal } from "../../../_utils/dashboard-results";
 import { listCategories } from "@/services/categories";
+import { AdminCategoryManager } from "../../_components/admin-category-manager";
+import { DashboardRegisterPage } from "../../_components/dashboard-register-page";
+import { requireDashboardRole } from "../../_utils/dashboard-access";
+import { getResultTotal } from "../../_utils/dashboard-results";
 
 export default async function AdminCategoriesPage() {
+  await requireDashboardRole("ADMIN", "/dashboard/categories");
   const result = await listCategories();
 
   return (

@@ -10,7 +10,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 Build a polished frontend for the GearUp sports and outdoor equipment rental API in this repository. Customers discover gear and request rentals, providers manage their inventory and fulfill orders, and admins operate the platform.
 
-This is a frontend assignment. The sibling `backend/` directory is a read-only contract/reference unless the user explicitly asks for backend work. The sibling `example-frontend/` directory is the instructor's read-only teaching reference; learn from its patterns but do not edit or copy it wholesale. Never change the backend merely to make a frontend assumption work. If a required product capability is not supported, document the gap and ask before expanding scope.
+This is a frontend assignment. The local `backend/` directory is a read-only contract/reference unless the user explicitly asks for backend work. The local `example-frontend/` directory is the instructor's read-only teaching reference; learn from its patterns but do not edit or copy it wholesale. Never change the backend merely to make a frontend assumption work. If a required product capability is not supported, document the gap and ask before expanding scope.
 
 Never replace a real API operation with hardcoded success data, browser-only CRUD, an invented endpoint, or a fake payment result.
 
@@ -55,6 +55,15 @@ The frontend began as a minimal Create Next App starter. Inspect `package.json` 
 ### Instructor reference: what to follow
 
 The instructor's `example-frontend/` demonstrates the intended Next.js style. Adapt these patterns to `src/` and the GearUp domain:
+
+**Mandatory implementation workflow:** Before writing or restructuring any
+frontend feature, first inspect the closest relevant implementation in
+`example-frontend/`—its route group, page/component split, service, Server
+Action, form, loading state, and navigation configuration as applicable. Then
+implement the GearUp version using the actual backend contract and current
+Next.js documentation. If the example has no corresponding feature, state that
+in the working notes and use the established GearUp conventions. Never skip
+this inspection merely because a similar GearUp file already exists.
 
 - Use native `fetch` from async Server Components and server-only service functions.
 - Use Server Actions (`"use server"`) for form submissions and authenticated mutations.
@@ -373,7 +382,12 @@ User search covers name, email, and phone. The backend prevents an admin from ma
 
 ## Frontend information architecture
 
-Frontend paths may evolve for better UX; they do not need to mimic API paths. Maintain role-specific dashboard shells and link every reachable action consistently.
+Frontend paths may evolve for better UX; they do not need to mimic API paths.
+Use one shared dashboard shell and canonical resource routes. Only the three
+role-specific overview pages carry a role segment; orders, payments, gear, and
+other registers must not be duplicated under customer/provider/admin folders.
+Their page resolves the authenticated user and conditionally selects copy, API
+scope, and permitted actions while the backend remains authoritative.
 
 ### Public and auth
 
@@ -384,35 +398,39 @@ Frontend paths may evolve for better UX; they do not need to mimic API paths. Ma
 - `/auth/register` — customer/provider registration only, including required phone
 - `/unauthorized` and root `not-found.tsx`
 
-### Customer
+### Dashboard overviews
 
 - `/dashboard/customer` — real summary and recent orders/payments
-- `/dashboard/customer/orders` — own role-scoped paginated history/filtering
-- `/dashboard/customer/orders/[id]` — detail, cancel/pay/review action according to status
-- `/dashboard/customer/orders/[id]/pay` — order review and real Checkout initiation
-- `/dashboard/customer/payments` — role-scoped payment history
-- `/dashboard/customer/reviews/[id]/edit` — optional owned review edit experience
-- `/payment/success` and `/payment/cancel` — Stripe return experiences
-
-### Provider
-
 - `/dashboard/provider` — counts and actionable recent orders
-- `/dashboard/provider/gear` — `GET /gear?providerId=<me.id>` inventory
-- `/dashboard/provider/gear/new`
-- `/dashboard/provider/gear/[id]/edit`
-- `/dashboard/provider/orders` — role-scoped order table and valid transitions
-- `/dashboard/provider/payments` — role-scoped payments for own gear
-
-### Admin
-
 - `/dashboard/admin` — platform overview derived from real paginated totals
-- `/dashboard/admin/users` and optional `/users/[id]`
-- `/dashboard/admin/categories`
-- `/dashboard/admin/gear` plus create/edit flows; admin selects an active provider
-- `/dashboard/admin/orders`
-- `/dashboard/admin/payments`
-- `/dashboard/admin/reviews` for review moderation
-- `/dashboard/admin/admins/new` for protected admin creation when appropriate
+
+Each role directory contains its overview only. Do not nest shared resource
+screens beneath these role directories.
+
+### Shared role-aware resources
+
+- `/dashboard/orders` — backend role-scoped order register; controls come from the current role and transition map
+- `/dashboard/orders/[id]` — future shared detail page; customer/provider/admin actions render conditionally
+- `/dashboard/orders/[id]/pay` — customer-only Checkout action guarded inside the shared route
+- `/dashboard/payments` — backend role-scoped payment history for every role
+- `/dashboard/gear` — customer discovery, provider-owned inventory using `providerId=<me.id>`, or admin platform inventory
+- `/dashboard/gear/new` and `/dashboard/gear/[id]/edit` — protected create/edit routes; forms vary by role, and admin selects an active provider
+- `/dashboard/reviews` — admin moderation now; future customer-owned views/actions may share the route conditionally
+- `/dashboard/reviews/[id]/edit` — future customer-owned review edit experience
+
+### Admin-only resources
+
+- `/dashboard/users` and optional `/dashboard/users/[id]`
+- `/dashboard/categories`
+- `/dashboard/admins/new` for protected admin creation when appropriate
+
+These URLs do not include `/admin`, but their pages and every mutation must call
+`requireDashboardRole("ADMIN", ...)`; hiding a navigation item is never the
+authorization boundary.
+
+### Payment returns
+
+- `/payment/success` and `/payment/cancel` — Stripe return experiences
 
 Do not create dead routes just to match this list. A smaller number of well-composed dashboard routes with tabs is acceptable if every required capability is discoverable, responsive, and URL-addressable where useful.
 

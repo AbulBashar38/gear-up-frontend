@@ -1,7 +1,10 @@
-import { AdminCreateAdminForm } from "../../../../_components/admin-create-admin-form";
-import { DashboardPageHeader } from "../../../../_components/dashboard-page-header";
+import { AdminCreateAdminForm } from "../../../_components/admin-create-admin-form";
+import { DashboardPageHeader } from "../../../_components/dashboard-page-header";
+import { requireDashboardRole } from "../../../_utils/dashboard-access";
 
-export default function NewAdminPage() {
+export default async function NewAdminPage() {
+  await requireDashboardRole("ADMIN", "/dashboard/admins/new");
+
   return (
     <div className="p-5 sm:p-8 lg:p-10 xl:p-14">
       <DashboardPageHeader

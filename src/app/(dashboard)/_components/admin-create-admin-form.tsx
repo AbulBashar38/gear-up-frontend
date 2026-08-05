@@ -24,7 +24,7 @@ export function AdminCreateAdminForm() {
 
   useEffect(() => {
     if (state.status === "success") {
-      router.push("/dashboard/admin/users");
+      router.push("/dashboard/users");
       router.refresh();
     }
   }, [router, state.status]);

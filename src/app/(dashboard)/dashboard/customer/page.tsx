@@ -61,10 +61,10 @@ export default async function CustomerDashboardPage() {
       )}
 
       <section aria-label="Customer dashboard totals" className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <DashboardMetricCard code="CUS—01" label="Requests" value={getResultTotal(orders)} detail="Every rental request in your account." href="/dashboard/customer/orders" icon={ClipboardList} />
-        <DashboardMetricCard code="CUS—02" label="Ready to pay" value={getResultTotal(confirmed)} detail="Provider-confirmed orders waiting for Checkout." href="/dashboard/customer/orders" icon={CreditCard} tone="orange" />
-        <DashboardMetricCard code="CUS—03" label="In the field" value={activeTotal} detail="Paid or picked-up rentals still in progress." href="/dashboard/customer/orders" icon={PackageCheck} tone="lime" />
-        <DashboardMetricCard code="CUS—04" label="Paid records" value={getResultTotal(completedPayments)} detail="Payments completed by the Stripe webhook." href="/dashboard/customer/payments" icon={CheckCircle2} tone="ink" />
+        <DashboardMetricCard code="CUS—01" label="Requests" value={getResultTotal(orders)} detail="Every rental request in your account." href="/dashboard/orders" icon={ClipboardList} />
+        <DashboardMetricCard code="CUS—02" label="Ready to pay" value={getResultTotal(confirmed)} detail="Provider-confirmed orders waiting for Checkout." href="/dashboard/orders" icon={CreditCard} tone="orange" />
+        <DashboardMetricCard code="CUS—03" label="In the field" value={activeTotal} detail="Paid or picked-up rentals still in progress." href="/dashboard/orders" icon={PackageCheck} tone="lime" />
+        <DashboardMetricCard code="CUS—04" label="Paid records" value={getResultTotal(completedPayments)} detail="Payments completed by the Stripe webhook." href="/dashboard/payments" icon={CheckCircle2} tone="ink" />
       </section>
 
       <section className="mt-12" aria-labelledby="recent-customer-orders">
@@ -73,7 +73,7 @@ export default async function CustomerDashboardPage() {
             <p className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.18em] text-signal">Live register // newest first</p>
             <h2 id="recent-customer-orders" className="mt-2 font-display text-4xl font-black uppercase">Recent requests</h2>
           </div>
-          <Button asChild variant="outline" size="compact"><Link href="/dashboard/customer/orders">View all orders</Link></Button>
+          <Button asChild variant="outline" size="compact"><Link href="/dashboard/orders">View all orders</Link></Button>
         </div>
         {orders.ok && <OrderList orders={orders.data} />}
       </section>

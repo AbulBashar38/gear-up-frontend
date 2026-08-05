@@ -1,11 +1,13 @@
-import { DashboardApiFeedback } from "../../../../_components/dashboard-feedback";
-import { AdminGearForm } from "../../../../_components/admin-gear-form";
-import { DashboardPageHeader } from "../../../../_components/dashboard-page-header";
-import { collectApiProblems } from "../../../../_utils/dashboard-results";
 import { listCategories } from "@/services/categories";
 import { listUsers } from "@/services/users";
+import { DashboardApiFeedback } from "../../../_components/dashboard-feedback";
+import { AdminGearForm } from "../../../_components/admin-gear-form";
+import { DashboardPageHeader } from "../../../_components/dashboard-page-header";
+import { requireDashboardRole } from "../../../_utils/dashboard-access";
+import { collectApiProblems } from "../../../_utils/dashboard-results";
 
 export default async function NewAdminGearPage() {
+  await requireDashboardRole("ADMIN", "/dashboard/gear/new");
   const [categories, providers] = await Promise.all([
     listCategories(),
     listUsers({ role: "PROVIDER", status: "ACTIVE", page: 1, limit: 100 }),
@@ -25,7 +27,10 @@ export default async function NewAdminGearPage() {
         ) : (
           categories.ok &&
           providers.ok && (
-            <AdminGearForm categories={categories.data} providers={providers.data} />
+            <AdminGearForm
+              categories={categories.data}
+              providers={providers.data}
+            />
           )
         )}
       </div>

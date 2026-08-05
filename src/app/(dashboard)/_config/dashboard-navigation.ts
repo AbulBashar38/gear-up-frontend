@@ -37,15 +37,15 @@ export const DASHBOARD_NAVIGATION: Record<
     },
     {
       label: "My orders",
-      href: "/dashboard/customer/orders",
+      href: "/dashboard/orders",
       icon: ClipboardList,
     },
     {
       label: "Payments",
-      href: "/dashboard/customer/payments",
+      href: "/dashboard/payments",
       icon: CreditCard,
     },
-    { label: "Browse gear", href: "/gear", icon: PackageSearch },
+    { label: "Browse gear", href: "/dashboard/gear", icon: PackageSearch },
   ],
   PROVIDER: [
     {
@@ -56,17 +56,17 @@ export const DASHBOARD_NAVIGATION: Record<
     },
     {
       label: "Inventory",
-      href: "/dashboard/provider/gear",
+      href: "/dashboard/gear",
       icon: Boxes,
     },
     {
       label: "Rental orders",
-      href: "/dashboard/provider/orders",
+      href: "/dashboard/orders",
       icon: ClipboardList,
     },
     {
       label: "Payments",
-      href: "/dashboard/provider/payments",
+      href: "/dashboard/payments",
       icon: CreditCard,
     },
   ],
@@ -77,23 +77,23 @@ export const DASHBOARD_NAVIGATION: Record<
       icon: LayoutDashboard,
       exact: true,
     },
-    { label: "Users", href: "/dashboard/admin/users", icon: Users },
+    { label: "Users", href: "/dashboard/users", icon: Users },
     {
       label: "Categories",
-      href: "/dashboard/admin/categories",
+      href: "/dashboard/categories",
       icon: Tags,
     },
-    { label: "Gear", href: "/dashboard/admin/gear", icon: Boxes },
+    { label: "Gear", href: "/dashboard/gear", icon: Boxes },
     {
       label: "Orders",
-      href: "/dashboard/admin/orders",
+      href: "/dashboard/orders",
       icon: ClipboardList,
     },
     {
       label: "Payments",
-      href: "/dashboard/admin/payments",
+      href: "/dashboard/payments",
       icon: CreditCard,
     },
-    { label: "Reviews", href: "/dashboard/admin/reviews", icon: Star },
+    { label: "Reviews", href: "/dashboard/reviews", icon: Star },
   ],
 };

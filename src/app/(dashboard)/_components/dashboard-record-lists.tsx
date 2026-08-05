@@ -194,7 +194,7 @@ export function GearList({
               {adminActions && (
                 <div className="mt-4 flex flex-wrap gap-2 lg:justify-end">
                   <Button asChild variant="outline" size="compact">
-                    <Link href={`/dashboard/admin/gear/${item.id}/edit`}>
+                    <Link href={`/dashboard/gear/${item.id}/edit`}>
                       <Pencil aria-hidden="true" />
                       Edit
                     </Link>

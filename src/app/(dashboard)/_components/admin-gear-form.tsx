@@ -39,7 +39,7 @@ export function AdminGearForm({ categories, providers = [], gear }: AdminGearFor
 
   useEffect(() => {
     if (state.status === "success") {
-      router.push("/dashboard/admin/gear");
+      router.push("/dashboard/gear");
       router.refresh();
     }
   }, [router, state.status]);

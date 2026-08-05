@@ -71,7 +71,7 @@ export async function updateUserStatusAction(
   _previousState: AdminMutationState,
   formData: FormData,
 ): Promise<AdminMutationState> {
-  const admin = await requireDashboardRole("ADMIN", "/dashboard/admin/users");
+  const admin = await requireDashboardRole("ADMIN", "/dashboard/users");
   const invalidId = validateId(userId, "User ID");
   if (invalidId) return errorState(invalidId);
 
@@ -90,7 +90,7 @@ export async function updateUserStatusAction(
   const result = await updateUserStatus(userId, status);
   if (!result.ok) return apiState(result);
 
-  invalidateAdmin(["/dashboard/admin", "/dashboard/admin/users"]);
+  invalidateAdmin(["/dashboard/admin", "/dashboard/users"]);
   return successState(result.message);
 }
 
@@ -98,7 +98,7 @@ export async function createAdminAction(
   _previousState: AdminMutationState,
   formData: FormData,
 ): Promise<AdminMutationState> {
-  await requireDashboardRole("ADMIN", "/dashboard/admin/admins/new");
+  await requireDashboardRole("ADMIN", "/dashboard/admins/new");
 
   const name = readTrimmed(formData, "name");
   const email = readTrimmed(formData, "email").toLowerCase();
@@ -130,7 +130,7 @@ export async function createAdminAction(
     return errorState(result.error.message, result.error.fieldErrors, values);
   }
 
-  invalidateAdmin(["/dashboard/admin", "/dashboard/admin/users"]);
+  invalidateAdmin(["/dashboard/admin", "/dashboard/users"]);
   return successState(result.message);
 }
 
@@ -145,7 +145,7 @@ export async function createCategoryAction(
   formData: FormData,
 ): Promise<AdminMutationState> {
   void _previousState;
-  await requireDashboardRole("ADMIN", "/dashboard/admin/categories");
+  await requireDashboardRole("ADMIN", "/dashboard/categories");
   const name = readTrimmed(formData, "name");
   const validationMessage = validateCategoryName(name);
   if (validationMessage) {
@@ -157,7 +157,7 @@ export async function createCategoryAction(
   const result = await createCategory(name);
   if (!result.ok) return errorState(result.error.message, result.error.fieldErrors, { name });
 
-  invalidateAdmin(["/dashboard/admin/categories"], ["categories"]);
+  invalidateAdmin(["/dashboard/categories"], ["categories"]);
   return successState(result.message);
 }
 
@@ -166,7 +166,7 @@ export async function updateCategoryAction(
   _previousState: AdminMutationState,
   formData: FormData,
 ): Promise<AdminMutationState> {
-  await requireDashboardRole("ADMIN", "/dashboard/admin/categories");
+  await requireDashboardRole("ADMIN", "/dashboard/categories");
   const invalidId = validateId(categoryId, "Category ID");
   if (invalidId) return errorState(invalidId);
 
@@ -181,7 +181,7 @@ export async function updateCategoryAction(
   const result = await updateCategory(categoryId, name);
   if (!result.ok) return errorState(result.error.message, result.error.fieldErrors, { name });
 
-  invalidateAdmin(["/dashboard/admin/categories", "/dashboard/admin/gear"], [
+  invalidateAdmin(["/dashboard/categories", "/dashboard/gear"], [
     "categories",
     "gear",
   ]);
@@ -195,14 +195,14 @@ export async function deleteCategoryAction(
 ): Promise<AdminMutationState> {
   void _previousState;
   void _formData;
-  await requireDashboardRole("ADMIN", "/dashboard/admin/categories");
+  await requireDashboardRole("ADMIN", "/dashboard/categories");
   const invalidId = validateId(categoryId, "Category ID");
   if (invalidId) return errorState(invalidId);
 
   const result = await deleteCategory(categoryId);
   if (!result.ok) return apiState(result);
 
-  invalidateAdmin(["/dashboard/admin/categories"], ["categories"]);
+  invalidateAdmin(["/dashboard/categories"], ["categories"]);
   return successState(result.message);
 }
 
@@ -211,7 +211,7 @@ export async function updateOrderStatusAction(
   _previousState: AdminMutationState,
   formData: FormData,
 ): Promise<AdminMutationState> {
-  await requireDashboardRole("ADMIN", "/dashboard/admin/orders");
+  await requireDashboardRole("ADMIN", "/dashboard/orders");
   const invalidId = validateId(orderId, "Order ID");
   if (invalidId) return errorState(invalidId);
 
@@ -226,7 +226,7 @@ export async function updateOrderStatusAction(
   );
   if (!result.ok) return apiState(result);
 
-  invalidateAdmin(["/dashboard/admin", "/dashboard/admin/orders"]);
+  invalidateAdmin(["/dashboard/admin", "/dashboard/orders"]);
   return successState(result.message);
 }
 
@@ -237,14 +237,14 @@ export async function deleteReviewAction(
 ): Promise<AdminMutationState> {
   void _previousState;
   void _formData;
-  await requireDashboardRole("ADMIN", "/dashboard/admin/reviews");
+  await requireDashboardRole("ADMIN", "/dashboard/reviews");
   const invalidId = validateId(reviewId, "Review ID");
   if (invalidId) return errorState(invalidId);
 
   const result = await deleteReview(reviewId);
   if (!result.ok) return apiState(result);
 
-  invalidateAdmin(["/dashboard/admin/reviews"], ["reviews"]);
+  invalidateAdmin(["/dashboard/reviews"], ["reviews"]);
   return successState(result.message);
 }
 
@@ -327,7 +327,7 @@ export async function createGearAction(
   _previousState: AdminMutationState,
   formData: FormData,
 ): Promise<AdminMutationState> {
-  await requireDashboardRole("ADMIN", "/dashboard/admin/gear/new");
+  await requireDashboardRole("ADMIN", "/dashboard/gear/new");
   const parsed = parseGearForm(formData, true);
   if (Object.keys(parsed.fieldErrors).length > 0) {
     return errorState(
@@ -342,7 +342,7 @@ export async function createGearAction(
     return errorState(result.error.message, result.error.fieldErrors, parsed.values);
   }
 
-  invalidateAdmin(["/dashboard/admin", "/dashboard/admin/gear"], ["gear"]);
+  invalidateAdmin(["/dashboard/admin", "/dashboard/gear"], ["gear"]);
   return successState(result.message);
 }
 
@@ -351,7 +351,7 @@ export async function updateGearAction(
   _previousState: AdminMutationState,
   formData: FormData,
 ): Promise<AdminMutationState> {
-  await requireDashboardRole("ADMIN", `/dashboard/admin/gear/${gearId}/edit`);
+  await requireDashboardRole("ADMIN", `/dashboard/gear/${gearId}/edit`);
   const invalidId = validateId(gearId, "Gear ID");
   if (invalidId) return errorState(invalidId);
 
@@ -379,7 +379,7 @@ export async function updateGearAction(
     return errorState(result.error.message, result.error.fieldErrors, parsed.values);
   }
 
-  invalidateAdmin(["/dashboard/admin", "/dashboard/admin/gear"], [
+  invalidateAdmin(["/dashboard/admin", "/dashboard/gear"], [
     "gear",
     `gear:${gearId}`,
   ]);
@@ -393,14 +393,14 @@ export async function deleteGearAction(
 ): Promise<AdminMutationState> {
   void _previousState;
   void _formData;
-  await requireDashboardRole("ADMIN", "/dashboard/admin/gear");
+  await requireDashboardRole("ADMIN", "/dashboard/gear");
   const invalidId = validateId(gearId, "Gear ID");
   if (invalidId) return errorState(invalidId);
 
   const result = await deleteGearItem(gearId);
   if (!result.ok) return apiState(result);
 
-  invalidateAdmin(["/dashboard/admin", "/dashboard/admin/gear"], [
+  invalidateAdmin(["/dashboard/admin", "/dashboard/gear"], [
     "gear",
     `gear:${gearId}`,
   ]);
