@@ -10,6 +10,7 @@ import {
   Users,
 } from "lucide-react";
 import type { Role } from "@/lib/types";
+import { ROLE_HOME } from "@/lib/auth/dashboard-routes";
 
 export type DashboardNavigationItem = {
   label: string;
@@ -18,11 +19,9 @@ export type DashboardNavigationItem = {
   exact?: boolean;
 };
 
-export const ROLE_DASHBOARD_PATH: Record<Role, string> = {
-  CUSTOMER: "/dashboard/customer",
-  PROVIDER: "/dashboard/provider",
-  ADMIN: "/dashboard/admin",
-};
+// Single source of truth lives in the Edge-safe auth module so Proxy and server
+// guards agree on where each role lands.
+export const ROLE_DASHBOARD_PATH: Record<Role, string> = ROLE_HOME;
 
 export const DASHBOARD_NAVIGATION: Record<
   Role,

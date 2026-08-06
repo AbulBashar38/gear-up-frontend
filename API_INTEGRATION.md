@@ -213,10 +213,17 @@ Only endpoints currently called by the application are listed here.
 - `returnTo` is accepted only as a single-slash internal path; anything else
   falls back to `/dashboard`. Successful login/registration enters the role
   resolver at `/dashboard`.
-- `src/proxy.ts` performs only an optimistic cookie-presence redirect for
-  `/dashboard/:path*`; it never calls the API, refreshes a token, or pretends to
-  verify a backend JWT. The dashboard layout validates the session through
-  `/auth/me` near protected data.
+- `src/proxy.ts` performs only optimistic, cookie-based redirects for
+  `/dashboard/:path*`, `/login`, and `/register`: guests are sent to
+  `/login?returnTo=…`, signed-in users are bounced off the auth pages to their
+  role home, and an obviously wrong-role visitor is redirected to their own
+  dashboard. It decodes the JWT payload (`{ id, name, email, role }`) with an
+  Edge-safe, secret-free decoder (`src/lib/auth/session-token.ts`) purely to
+  route — it never calls the API, refreshes a token, or verifies the signature.
+  Role→path rules live in `src/lib/auth/dashboard-routes.ts` (`ROLE_HOME`,
+  `requiredRoleForPath`). Authorization is enforced authoritatively near the
+  data by `requireDashboardRole`/`requireDashboardRoles` and `/auth/me`; the
+  proxy redirects are never the security boundary.
 - Dashboard logout deletes both frontend-domain HttpOnly cookies and redirects
   to `/login`. Access-token refresh rotation is not yet implemented; an expired
   access token currently requires signing in again.
