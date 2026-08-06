@@ -32,3 +32,13 @@ export async function requireDashboardRole(role: Role, returnTo: string) {
 
   return user;
 }
+
+export async function requireDashboardRoles(roles: Role[], returnTo: string) {
+  const user = await requireDashboardUser(returnTo);
+
+  if (!roles.includes(user.role)) {
+    redirect(ROLE_DASHBOARD_PATH[user.role]);
+  }
+
+  return user;
+}

@@ -4,16 +4,19 @@ import { getGearItem } from "@/services/gear";
 import { DashboardApiFeedback } from "../../../../_components/dashboard-feedback";
 import { AdminGearForm } from "../../../../_components/admin-gear-form";
 import { DashboardPageHeader } from "../../../../_components/dashboard-page-header";
-import { requireDashboardRole } from "../../../../_utils/dashboard-access";
+import { requireDashboardRoles } from "../../../../_utils/dashboard-access";
 import { collectApiProblems } from "../../../../_utils/dashboard-results";
 
-export default async function EditAdminGearPage({
+export default async function EditGearPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  await requireDashboardRole("ADMIN", `/dashboard/gear/${id}/edit`);
+  const user = await requireDashboardRoles(
+    ["ADMIN", "PROVIDER"],
+    `/dashboard/gear/${id}/edit`,
+  );
   const [gear, categories] = await Promise.all([
     getGearItem(id),
     listCategories(),
@@ -35,7 +38,11 @@ export default async function EditAdminGearPage({
         ) : (
           gear.ok &&
           categories.ok && (
-            <AdminGearForm gear={gear.data} categories={categories.data} />
+            <AdminGearForm
+              gear={gear.data}
+              categories={categories.data}
+              canAssignProvider={user.role === "ADMIN"}
+            />
           )
         )}
       </div>

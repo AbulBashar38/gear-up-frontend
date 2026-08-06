@@ -30,9 +30,17 @@ type AdminGearFormProps = {
   categories: Category[];
   providers?: AdminUser[];
   gear?: GearItem;
+  // Admins assign the listing to an active provider. Providers own their gear
+  // implicitly, so the field is hidden and no providerId is sent for them.
+  canAssignProvider?: boolean;
 };
 
-export function AdminGearForm({ categories, providers = [], gear }: AdminGearFormProps) {
+export function AdminGearForm({
+  categories,
+  providers = [],
+  gear,
+  canAssignProvider = true,
+}: AdminGearFormProps) {
   const router = useRouter();
   const actionFunction = gear
     ? updateGearAction.bind(null, gear.id)
@@ -59,7 +67,7 @@ export function AdminGearForm({ categories, providers = [], gear }: AdminGearFor
   return (
     <form action={action} noValidate className="border border-ink/15 bg-card p-6 sm:p-8">
       <div className="grid gap-6 lg:grid-cols-2">
-        {!gear && (
+        {!gear && canAssignProvider && (
           <div>
             <Label htmlFor="gear-provider" className="font-bold">Provider</Label>
             <NativeSelect name="providerId" defaultValue={values.providerId} disabled={pending} className="mt-2 w-full" aria-invalid={Boolean(fields.providerId)} aria-describedby={fields.providerId ? "gear-provider-error" : undefined}>
@@ -83,7 +91,7 @@ export function AdminGearForm({ categories, providers = [], gear }: AdminGearFor
           <AdminFieldError id="gear-category-error" messages={fields.categoryId} />
         </div>
 
-        {gear && (
+        {gear && canAssignProvider && (
           <div>
             <Label className="font-bold">Provider</Label>
             <div className="mt-2 min-h-11 border border-ink/15 bg-mist/45 px-3 py-2 text-sm">
@@ -148,7 +156,7 @@ export function AdminGearForm({ categories, providers = [], gear }: AdminGearFor
 
       <AdminActionMessage state={state} className="mt-6" />
       <div className="mt-7 flex flex-wrap gap-3 border-t border-ink/12 pt-6">
-        <Button type="submit" size="lg" disabled={pending || categories.length === 0 || (!gear && providers.length === 0)}>
+        <Button type="submit" size="lg" disabled={pending || categories.length === 0 || (!gear && canAssignProvider && providers.length === 0)}>
           {gear ? <Save aria-hidden="true" /> : <PackagePlus aria-hidden="true" />}
           {pending ? "Uploading & saving…" : gear ? "Save listing" : "Create listing"}
         </Button>

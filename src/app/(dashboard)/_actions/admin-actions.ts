@@ -29,7 +29,10 @@ import {
 import { updateOrderStatus } from "@/services/orders";
 import { deleteReview } from "@/services/reviews";
 import { createAdmin, updateUserStatus } from "@/services/users";
-import { requireDashboardRole } from "../_utils/dashboard-access";
+import {
+  requireDashboardRole,
+  requireDashboardRoles,
+} from "../_utils/dashboard-access";
 
 function readTrimmed(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -279,9 +282,17 @@ export async function createGearAction(
   _previousState: AdminMutationState,
   formData: FormData,
 ): Promise<AdminMutationState> {
-  await requireDashboardRole("ADMIN", "/dashboard/gear/new");
+  const actor = await requireDashboardRoles(
+    ["ADMIN", "PROVIDER"],
+    "/dashboard/gear/new",
+  );
   const form = readGearForm(formData);
-  const parsed = createGearFormSchema.safeParse(form.input);
+  // Admins must assign an active provider; providers own the listing implicitly,
+  // so the provider field/UUID is neither shown nor required for them.
+  const parsed =
+    actor.role === "ADMIN"
+      ? createGearFormSchema.safeParse(form.input)
+      : updateGearFormSchema.safeParse(form.input);
   if (!parsed.success) {
     return errorState(
       "Check the highlighted gear fields and try again.",
@@ -318,7 +329,10 @@ export async function updateGearAction(
   _previousState: AdminMutationState,
   formData: FormData,
 ): Promise<AdminMutationState> {
-  await requireDashboardRole("ADMIN", `/dashboard/gear/${gearId}/edit`);
+  await requireDashboardRoles(
+    ["ADMIN", "PROVIDER"],
+    `/dashboard/gear/${gearId}/edit`,
+  );
   const invalidId = validateId(gearId, "Gear ID");
   if (invalidId) return errorState(invalidId);
 
@@ -365,7 +379,7 @@ export async function deleteGearAction(
 ): Promise<AdminMutationState> {
   void _previousState;
   void _formData;
-  await requireDashboardRole("ADMIN", "/dashboard/gear");
+  await requireDashboardRoles(["ADMIN", "PROVIDER"], "/dashboard/gear");
   const invalidId = validateId(gearId, "Gear ID");
   if (invalidId) return errorState(invalidId);
 

@@ -299,7 +299,7 @@ export type CreateAdminInput = {
 
 export type CreateGearInput = {
   categoryId: string;
-  providerId: string;
+  providerId?: string;
   name: string;
   description: string;
   stock: number;

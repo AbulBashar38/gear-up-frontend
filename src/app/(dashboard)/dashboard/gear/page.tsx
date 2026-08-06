@@ -45,6 +45,7 @@ export default async function DashboardGearPage({
     limit: 8,
   });
   const copy = GEAR_COPY[user.role];
+  const canManageGear = user.role === "ADMIN" || user.role === "PROVIDER";
 
   return (
     <DashboardRegisterPage
@@ -57,7 +58,7 @@ export default async function DashboardGearPage({
       pathname="/dashboard/gear"
       actions={
         <>
-          {user.role === "ADMIN" && (
+          {canManageGear && (
             <Button asChild size="lg">
               <Link href="/dashboard/gear/new">
                 <PackagePlus aria-hidden="true" />
@@ -72,7 +73,7 @@ export default async function DashboardGearPage({
       }
     >
       {result.ok && (
-        <GearList gear={result.data} adminActions={user.role === "ADMIN"} />
+        <GearList gear={result.data} adminActions={canManageGear} />
       )}
     </DashboardRegisterPage>
   );
