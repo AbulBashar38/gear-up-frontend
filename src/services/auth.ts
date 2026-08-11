@@ -47,6 +47,20 @@ export function getCurrentUserWithAccessToken(accessToken: string) {
   });
 }
 
+/** Self-service profile edit for the signed-in user; name and phone only. */
+export function updateCurrentUser(input: {
+  name?: string;
+  phone?: string;
+}) {
+  return gearUpFetch<CurrentUser>("/auth/me", {
+    method: "PATCH",
+    auth: true,
+    cache: "no-store",
+    json: input,
+    fallbackMessage: "Your profile couldn't be updated. Try again shortly.",
+  });
+}
+
 export const getCurrentUser = cache(function getCurrentUserRequest() {
   return gearUpFetch<CurrentUser>("/auth/me", {
     auth: true,

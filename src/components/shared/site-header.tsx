@@ -38,6 +38,15 @@ export function SiteHeader() {
   });
 
   const hasSolidBackground = pathname !== "/" || scrolled || menuOpen;
+  // Before the solid bar fades in, the header sits directly on the hero. The
+  // hero's scrim is dark on the left and at the top on small screens, but it
+  // fades to nearly the bare photo on the right from `lg` up — exactly where
+  // these controls sit — so the default cream loses all contrast there. Those
+  // controls switch to ink until the bar appears; everything else stays cream
+  // because it is still over the dark part of the scrim.
+  const overLightHero = !hasSolidBackground;
+  const onLightHeroControl =
+    "lg:border-ink/35 lg:text-ink lg:hover:border-primary lg:hover:text-primary-foreground";
   const accountHref =
     session.status === "authenticated" ? "/dashboard" : "/login";
   const accountLabel =
@@ -76,13 +85,32 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-4 lg:flex">
-          <ThemeToggle />
+          <ThemeToggle
+            className={cn(
+              "transition-colors",
+              overLightHero && onLightHeroControl,
+            )}
+          />
           {firstName ? (
-            <span className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-paper/65">
+            <span
+              className={cn(
+                "text-[0.65rem] font-bold uppercase tracking-[0.18em] transition-colors",
+                overLightHero ? "lg:text-ink" : "text-paper/65",
+              )}
+            >
               Signed in as {firstName}
             </span>
           ) : (
-            <Button asChild variant="outline-accent" size="compact">
+            <Button
+              asChild
+              variant="outline-accent"
+              size="compact"
+              className={cn(
+                "transition-colors",
+                overLightHero &&
+                  "lg:border-ink/35 lg:text-ink lg:hover:border-accent lg:hover:text-accent-foreground",
+              )}
+            >
               <Link href="/register">Create account</Link>
             </Button>
           )}

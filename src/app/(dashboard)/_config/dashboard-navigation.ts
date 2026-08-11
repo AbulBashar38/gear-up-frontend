@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Star,
   Tags,
+  UserRound,
   Users,
 } from "lucide-react";
 import type { Role } from "@/lib/types";
@@ -21,6 +22,14 @@ export type DashboardNavigationItem = {
 // Single source of truth lives in the Edge-safe auth module so Proxy and server
 // guards agree on where each role lands.
 export const ROLE_DASHBOARD_PATH: Record<Role, string> = ROLE_HOME;
+
+// Every signed-in role resolves the same `/auth/me` record, so the profile
+// entry is shared rather than repeated per role.
+const PROFILE_ITEM: DashboardNavigationItem = {
+  label: "Profile",
+  href: "/dashboard/profile",
+  icon: UserRound,
+};
 
 export const DASHBOARD_NAVIGATION: Record<
   Role,
@@ -46,6 +55,7 @@ export const DASHBOARD_NAVIGATION: Record<
     // No gear entry: customers discover gear through the public `/gear`
     // catalog, which the customer overview links to. `/dashboard/gear` is the
     // provider/admin inventory register.
+    PROFILE_ITEM,
   ],
   PROVIDER: [
     {
@@ -83,6 +93,7 @@ export const DASHBOARD_NAVIGATION: Record<
       href: "/dashboard/reviews",
       icon: Star,
     },
+    PROFILE_ITEM,
   ],
   ADMIN: [
     {
@@ -109,5 +120,6 @@ export const DASHBOARD_NAVIGATION: Record<
       icon: CreditCard,
     },
     { label: "Reviews", href: "/dashboard/reviews", icon: Star },
+    PROFILE_ITEM,
   ],
 };

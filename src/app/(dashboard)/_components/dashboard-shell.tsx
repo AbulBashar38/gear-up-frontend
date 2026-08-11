@@ -84,7 +84,10 @@ function UserSummary({ user }: { user: CurrentUser }) {
     .toUpperCase();
 
   return (
-    <div className="flex min-w-0 items-center gap-3">
+    <Link
+      href="/dashboard/profile"
+      className="flex min-w-0 items-center gap-3 rounded-sm transition-opacity hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+    >
       <span
         aria-hidden="true"
         className="surface-accent grid size-10 shrink-0 place-items-center bg-orange font-mono text-xs font-bold text-ink"
@@ -94,10 +97,10 @@ function UserSummary({ user }: { user: CurrentUser }) {
       <div className="min-w-0">
         <p className="truncate text-sm font-extrabold text-paper">{user.name}</p>
         <p className="truncate text-[0.62rem] font-bold uppercase tracking-[0.16em] text-paper/55">
-          {user.role.toLowerCase()} account
+          View profile
         </p>
       </div>
-    </div>
+    </Link>
   );
 }
 
