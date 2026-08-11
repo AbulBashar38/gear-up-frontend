@@ -60,7 +60,7 @@ export function GearDetail({ gear }: { gear: GearDetailType }) {
           <Button asChild variant="outline" size="compact">
             <Link href="/gear">
               <ArrowLeft aria-hidden="true" />
-              Back to gear locker
+              Back to all gear
             </Link>
           </Button>
 
@@ -78,7 +78,7 @@ export function GearDetail({ gear }: { gear: GearDetailType }) {
                     variant="outline"
                     className="absolute bottom-5 left-5 h-auto rounded-none border-current/35 bg-paper/90 px-3 py-2 font-mono text-[0.62rem] font-bold uppercase tracking-[0.18em] text-ink"
                   >
-                    Catalog field visual
+                    Gear image unavailable
                   </Badge>
                 </div>
               )}
@@ -139,7 +139,7 @@ export function GearDetail({ gear }: { gear: GearDetailType }) {
         <div className="mx-auto grid w-full max-w-[90rem] gap-10 px-5 sm:px-8 lg:grid-cols-12 lg:px-12">
           <div className="lg:col-span-7">
             <Reveal>
-              <p className="section-kicker">Field notes // listing brief</p>
+              <p className="section-kicker">Item details</p>
               <h2 className="mt-4 font-display text-[clamp(3.5rem,7vw,6.5rem)] font-black uppercase leading-[0.82] tracking-[-0.05em]">
                 Know the kit
                 <br />
@@ -201,7 +201,7 @@ export function GearDetail({ gear }: { gear: GearDetailType }) {
         <div className="mx-auto w-full max-w-[90rem] px-5 sm:px-8 lg:px-12">
           <Reveal>
             <p className="text-[0.65rem] font-extrabold uppercase tracking-[0.24em] text-lime">
-              Rental protocol // three checkpoints
+              What happens next
             </p>
             <h2 id="rental-flow-title" className="mt-4 font-display text-[clamp(3.5rem,7vw,6.5rem)] font-black uppercase leading-[0.82] tracking-[-0.05em]">
               Request. Confirm. Go.
@@ -209,9 +209,24 @@ export function GearDetail({ gear }: { gear: GearDetailType }) {
           </Reveal>
           <div className="mt-10 grid border-l border-t border-paper/15 md:grid-cols-3">
             {[
-              { code: "01", title: "Send dates", copy: "Choose your rental dates and quantity. The request begins in PLACED status.", icon: Clock3 },
-              { code: "02", title: "Provider checks", copy: "The provider verifies date-aware stock, then confirms or cancels the request.", icon: PackageCheck },
-              { code: "03", title: "Pay securely", copy: "After confirmation, Stripe Checkout handles payment before pickup.", icon: ShieldCheck },
+              {
+                code: "01",
+                title: "Send dates",
+                copy: "Choose your rental dates and quantity. Sending a request does not reserve stock yet.",
+                icon: Clock3,
+              },
+              {
+                code: "02",
+                title: "Provider checks",
+                copy: "The provider verifies stock for your dates, then confirms or cancels the request.",
+                icon: PackageCheck,
+              },
+              {
+                code: "03",
+                title: "Pay securely",
+                copy: "After confirmation, Stripe Checkout handles payment before pickup.",
+                icon: ShieldCheck,
+              },
             ].map((step, index) => {
               const Icon = step.icon;
               return (
@@ -236,7 +251,7 @@ export function GearDetail({ gear }: { gear: GearDetailType }) {
           <Reveal>
             <div className="grid gap-6 border-b border-ink/20 pb-7 lg:grid-cols-12 lg:items-end">
               <div className="lg:col-span-8">
-                <p className="section-kicker">Field reports // completed rentals</p>
+                <p className="section-kicker">Reviews from completed rentals</p>
                 <h2 id="gear-reviews-title" className="mt-4 font-display text-[clamp(3.5rem,7vw,6.5rem)] font-black uppercase leading-[0.82] tracking-[-0.05em]">
                   What renters report.
                 </h2>
@@ -270,11 +285,13 @@ export function GearDetail({ gear }: { gear: GearDetailType }) {
                             </div>
                             <Badge variant="outline" className="h-auto rounded-none border-success/30 px-2 py-1 text-[0.58rem] font-extrabold uppercase tracking-[0.12em] text-success">
                               <BadgeCheck aria-hidden="true" />
-                              Returned rental
+                              Completed rental
                             </Badge>
                           </div>
                           <blockquote className="mt-8 font-display text-3xl font-bold uppercase leading-[1.02] sm:text-4xl">
-                            {review.comment?.trim() ? `“${review.comment.trim()}”` : "Rating-only field report"}
+                            {review.comment?.trim()
+                              ? `“${review.comment.trim()}”`
+                              : "Rating submitted without a comment"}
                           </blockquote>
                           <footer className="mt-auto flex items-end justify-between gap-4 border-t border-ink/15 pt-6 text-xs">
                             <div>
@@ -297,9 +314,9 @@ export function GearDetail({ gear }: { gear: GearDetailType }) {
               <Card className="mt-8 grid min-h-72 place-items-center gap-0 rounded-none border border-dashed border-ink/25 bg-paper/60 p-8 py-8 text-center ring-0 shadow-none">
                 <div>
                   <Boxes aria-hidden="true" className="mx-auto size-10 text-signal" />
-                  <h3 className="mt-4 font-display text-4xl font-black uppercase">No field reports yet.</h3>
+                  <h3 className="mt-4 font-display text-4xl font-black uppercase">No reviews yet.</h3>
                   <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-ink/70">
-                    A customer can review this item after their rental reaches RETURNED.
+                    A customer can review this item after the rental is marked Returned.
                   </p>
                 </div>
               </Card>

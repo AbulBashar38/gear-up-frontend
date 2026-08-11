@@ -27,7 +27,7 @@ export default async function RegisterPage({
 
   return (
     <AuthShell
-      kicker="Field access // new crew"
+      kicker="Create your account"
       title="Join GearUp"
       subtitle="Pick how you'll use GearUp, then set up your account in one step."
       aside={{
@@ -35,7 +35,7 @@ export default async function RegisterPage({
         points: [
           "Customers request rentals and pay securely via Stripe.",
           "Providers list gear and manage every order in one place.",
-          "Your session stays in secure, HttpOnly cookies.",
+          "Your sign-in session stays secure on this device.",
         ],
       }}
       footer={

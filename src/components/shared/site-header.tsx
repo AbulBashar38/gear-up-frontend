@@ -21,9 +21,9 @@ import {
 import { cn } from "@/lib/utils";
 
 const navigation = [
-  { label: "Gear locker", href: "/gear" },
-  { label: "How it works", href: "/#rental-flow" },
-  { label: "For providers", href: "/#providers" },
+  { label: "Browse gear", href: "/gear" },
+  { label: "How renting works", href: "/#rental-flow" },
+  { label: "List your gear", href: "/#providers" },
 ];
 
 export function SiteHeader() {
@@ -41,7 +41,7 @@ export function SiteHeader() {
   const accountHref =
     session.status === "authenticated" ? "/dashboard" : "/login";
   const accountLabel =
-    session.status === "authenticated" ? "Open dashboard" : "Sign in";
+    session.status === "authenticated" ? "Dashboard" : "Sign in";
   const firstName =
     session.status === "authenticated"
       ? session.user.name.trim().split(/\s+/)[0]
@@ -77,9 +77,15 @@ export function SiteHeader() {
 
         <div className="hidden items-center gap-4 lg:flex">
           <ThemeToggle />
-          <span className="text-[0.65rem] font-bold uppercase tracking-[0.22em] text-paper/65">
-            {firstName ? `Field access // ${firstName}` : "Adventure, on request"}
-          </span>
+          {firstName ? (
+            <span className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-paper/65">
+              Signed in as {firstName}
+            </span>
+          ) : (
+            <Button asChild variant="outline-accent" size="compact">
+              <Link href="/register">Create account</Link>
+            </Button>
+          )}
           <Button
             asChild
             variant="primary"
@@ -112,11 +118,10 @@ export function SiteHeader() {
           >
             <SheetHeader className="border-b border-paper/10 px-6 pb-5 pt-6 text-left">
               <SheetTitle className="font-display text-3xl font-black uppercase tracking-tight text-paper">
-                Field navigation
+                Menu
               </SheetTitle>
               <SheetDescription className="text-paper/60">
-                Find equipment, understand the rental route, or list your own
-                gear.
+                Browse equipment, learn how renting works, or list your own gear.
               </SheetDescription>
             </SheetHeader>
 
@@ -136,18 +141,33 @@ export function SiteHeader() {
                 </SheetClose>
               ))}
 
-              <SheetClose asChild>
-                <Link
-                  href={accountHref}
-                  className={cn(
-                    buttonVariants({ variant: "primary", size: "xl" }),
-                    "mt-6",
-                  )}
-                >
-                  {accountLabel}
-                  <ArrowUpRight aria-hidden="true" className="size-4" />
-                </Link>
-              </SheetClose>
+              <div className="mt-6 grid gap-3">
+                {session.status !== "authenticated" && (
+                  <SheetClose asChild>
+                    <Link
+                      href="/register"
+                      className={buttonVariants({
+                        variant: "outline-accent",
+                        size: "xl",
+                      })}
+                    >
+                      Create account
+                    </Link>
+                  </SheetClose>
+                )}
+                <SheetClose asChild>
+                  <Link
+                    href={accountHref}
+                    className={buttonVariants({
+                      variant: "primary",
+                      size: "xl",
+                    })}
+                  >
+                    {accountLabel}
+                    <ArrowUpRight aria-hidden="true" className="size-4" />
+                  </Link>
+                </SheetClose>
+              </div>
             </nav>
           </SheetContent>
         </Sheet>

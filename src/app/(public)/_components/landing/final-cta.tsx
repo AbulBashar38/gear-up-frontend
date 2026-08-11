@@ -10,7 +10,7 @@ export function FinalCta() {
       <div className="relative mx-auto grid w-full max-w-[90rem] gap-10 px-5 sm:px-8 lg:grid-cols-12 lg:items-end lg:px-12">
         <Reveal className="lg:col-span-9">
           <p className="text-[0.65rem] font-extrabold uppercase tracking-[0.25em] text-lime">
-            Next field window // whenever you are ready
+            Ready for your next trip?
           </p>
           <h2 className="mt-5 font-display text-[clamp(4.4rem,10vw,10rem)] font-black uppercase leading-[0.77] tracking-[-0.06em]">
             Plan bigger.
@@ -30,7 +30,7 @@ export function FinalCta() {
             className="mt-6 w-full sm:w-auto lg:w-full"
           >
             <Link href="/gear">
-              Open the gear locker
+              Browse available gear
               <ArrowUpRight aria-hidden="true" className="size-4" />
             </Link>
           </Button>

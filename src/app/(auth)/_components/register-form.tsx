@@ -39,6 +39,7 @@ const ROLE_OPTIONS: {
 export function RegisterForm() {
   const searchParams = useSearchParams();
   const returnTo = searchParams.get("returnTo") ?? "";
+  const requestedRole = searchParams.get("role");
   const [state, action, pending] = useActionState(
     registerAction.bind(null, returnTo),
     INITIAL_STATE,
@@ -56,7 +57,9 @@ export function RegisterForm() {
   }, [state]);
 
   const fieldErrors = state.fieldErrors ?? {};
-  const defaultRole = (state.values?.role as RegistrableRole) ?? "CUSTOMER";
+  const defaultRole =
+    (state.values?.role as RegistrableRole) ??
+    (requestedRole === "PROVIDER" ? "PROVIDER" : "CUSTOMER");
 
   return (
     <form action={action} noValidate className="space-y-5">

@@ -22,11 +22,11 @@ export default function GearCatalogError({
       >
         <TriangleAlert aria-hidden="true" />
         <AlertTitle className="font-display text-3xl font-black uppercase">
-          The catalog hit an unexpected trail block.
+          The gear catalog could not be loaded.
         </AlertTitle>
         <AlertDescription className="mt-2">
-          The page could not finish rendering. Retry the route; if the problem
-          continues, return to the landing page and try again shortly.
+          Retry the page. If the problem continues, return home and try again
+          shortly.
         </AlertDescription>
         <Button
           type="button"

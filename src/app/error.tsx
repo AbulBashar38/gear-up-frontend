@@ -32,14 +32,14 @@ export default function ApplicationError({
           strokeWidth={1.5}
         />
         <p className="mt-6 font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-lime">
-          Dispatch fault // unexpected
+          Unexpected error
         </p>
         <h1 className="mt-4 font-display text-[clamp(3.5rem,9vw,7rem)] font-black uppercase leading-[0.82] tracking-[-0.05em]">
           We lost the trail.
         </h1>
         <p className="mt-6 max-w-xl text-sm leading-6 text-paper/65 sm:text-base sm:leading-7">
           The page hit an unexpected problem. Retry the request, or return to
-          the public gear locker while the route reconnects.
+          the gear catalog while the problem is resolved.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Button
@@ -49,14 +49,14 @@ export default function ApplicationError({
             size="lg"
           >
             <RotateCcw aria-hidden="true" />
-            Retry this route
+            Retry this page
           </Button>
           <Button
             asChild
             variant="outline"
             size="lg"
           >
-            <Link href="/gear">Open the gear locker</Link>
+            <Link href="/gear">Browse all gear</Link>
           </Button>
         </div>
       </section>

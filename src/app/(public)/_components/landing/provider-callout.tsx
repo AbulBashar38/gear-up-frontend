@@ -5,6 +5,7 @@ import {
   PackageCheck,
   SlidersHorizontal,
 } from "lucide-react";
+import Link from "next/link";
 import { Reveal } from "./motion-primitives";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,7 +23,8 @@ const providerTools = [
   },
   {
     title: "Confirm the right request",
-    copy: "The backend checks overlapping rental dates before confirmation.",
+    copy:
+      "GearUp checks overlapping rentals and available stock before confirmation.",
     icon: BadgeCheck,
   },
   {
@@ -44,7 +46,7 @@ export function ProviderCallout() {
           <div aria-hidden="true" className="route-grid absolute inset-0 opacity-20" />
           <Reveal className="relative">
             <p className="text-[0.65rem] font-extrabold uppercase tracking-[0.25em]">
-              Provider channel // keep good gear moving
+              For gear providers
             </p>
             <h2
               id="provider-title"
@@ -66,10 +68,10 @@ export function ProviderCallout() {
               size="xl"
               className="mt-8"
             >
-              <a href="#provider-workflow">
-                See the provider workflow
+              <Link href="/register?role=PROVIDER">
+                Create a provider account
                 <ArrowUpRight aria-hidden="true" className="size-4" />
-              </a>
+              </Link>
             </Button>
           </Reveal>
         </div>
@@ -81,10 +83,10 @@ export function ProviderCallout() {
           <Reveal>
             <div className="mb-8 flex items-center justify-between border-b border-paper/15 pb-4">
               <p className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.2em] text-lime">
-                Provider field kit
+                Provider tools
               </p>
               <span className="text-[0.58rem] font-bold uppercase tracking-[0.18em] text-paper/60">
-                Built into GearUp
+                Included with your account
               </span>
             </div>
           </Reveal>

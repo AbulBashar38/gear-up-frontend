@@ -22,14 +22,14 @@ export default function NotFound() {
           </span>
           <div>
             <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-signal">
-              Route not mapped
+              Page not found
             </p>
             <h1 className="mt-3 font-display text-4xl font-black uppercase leading-none sm:text-6xl">
               This trail ends here.
             </h1>
             <p className="mt-4 max-w-lg text-sm leading-6 text-ink/65">
-              The address may have moved or never existed. Return to field
-              access or continue browsing the live equipment catalog.
+              The address may have moved or never existed. Return home or
+              continue browsing all available gear.
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Button

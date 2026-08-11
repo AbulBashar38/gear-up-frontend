@@ -33,7 +33,7 @@ export function Hero() {
             <div className="mb-6 flex items-center gap-3">
               <span className="h-px w-10 bg-orange" />
               <p className="text-[0.65rem] font-extrabold uppercase tracking-[0.28em] text-lime">
-                GearUp field access // dispatch 01
+                Sports &amp; outdoor gear rentals
               </p>
             </div>
           </Reveal>
@@ -74,7 +74,7 @@ export function Hero() {
                 size="xl"
               >
                 <Link href="/gear">
-                  Explore the locker
+                  Browse available gear
                   <ArrowUpRight aria-hidden="true" className="size-4" />
                 </Link>
               </Button>
@@ -83,7 +83,7 @@ export function Hero() {
                 variant="outline-accent"
                 size="xl"
               >
-                <Link href="/#providers">Put your gear to work</Link>
+                <Link href="/#providers">List your gear</Link>
               </Button>
             </div>
           </Reveal>
@@ -92,15 +92,15 @@ export function Hero() {
             <ul className="mt-9 grid max-w-[45rem] gap-3 border-t border-paper/15 pt-5 text-xs font-semibold text-paper/65 sm:grid-cols-3">
               <li className="flex items-center gap-2">
                 <BadgeCheck aria-hidden="true" className="size-4 text-orange" />
-                Provider-confirmed dates
+                Choose dates before requesting
               </li>
               <li className="flex items-center gap-2">
                 <CreditCard aria-hidden="true" className="size-4 text-orange" />
-                Secure Stripe Checkout
+                Pay after provider confirmation
               </li>
               <li className="flex items-center gap-2">
                 <ShieldCheck aria-hidden="true" className="size-4 text-orange" />
-                Reviews after return
+                Reviews from returned rentals
               </li>
             </ul>
           </Reveal>
@@ -112,15 +112,15 @@ export function Hero() {
         >
           <aside className="gear-tag bg-orange p-5 text-ink shadow-[0_24px_70px_rgba(0,0,0,0.28)]">
             <div className="mb-4 flex items-center justify-between border-b border-ink/20 pb-3 font-mono text-[0.6rem] font-bold uppercase tracking-[0.18em]">
-              <span>Field note</span>
+              <span>How it works</span>
               <span>GU—001</span>
             </div>
             <p className="font-display text-3xl font-black uppercase leading-[0.9] tracking-[-0.03em]">
-              Request.
+              Send a request.
               <br />
-              Confirm.
+              Get confirmed.
               <br />
-              Go.
+              Pay securely.
             </p>
             <p className="mt-4 text-xs font-bold leading-5">
               Payment only follows provider confirmation.
@@ -132,7 +132,7 @@ export function Hero() {
           href="#gear-locker"
           className="absolute bottom-6 right-5 flex min-h-11 items-center gap-2 text-[0.62rem] font-extrabold uppercase tracking-[0.22em] text-paper/55 transition-colors hover:text-lime sm:right-8 lg:bottom-9 lg:right-auto lg:left-12"
         >
-          Scroll to dispatch
+          See available gear
           <ArrowDown aria-hidden="true" className="size-4 text-orange" />
         </Link>
       </div>

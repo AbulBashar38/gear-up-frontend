@@ -33,7 +33,7 @@ export function RentalRequestCard({
     <Card className="surface-accent gear-tag gap-0 rounded-none bg-lime py-0 text-ink ring-0 shadow-none">
       <CardContent className="p-7 sm:p-9">
         <p className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.2em] text-ink/70">
-          Rental dispatch // request first
+          Rental request
         </p>
         <h2 className="mt-7 font-display text-5xl font-black uppercase leading-[0.86] tracking-[-0.04em]">
           Dates are confirmed by the provider.
@@ -83,7 +83,7 @@ export function RentalRequestCard({
           </p>
           <p className="flex gap-3 text-xs font-bold leading-5 text-ink/70">
             <ShieldCheck aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-signal" />
-            The backend calculates the final total and confirms real stock.
+            GearUp calculates the final total and checks available stock.
           </p>
         </div>
       </CardContent>

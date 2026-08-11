@@ -39,7 +39,7 @@ export async function ReviewsSection() {
         <Reveal>
           <div className="grid gap-8 border-b border-ink/20 pb-8 lg:grid-cols-12 lg:items-end">
             <div className="lg:col-span-8">
-              <p className="section-kicker">Field reports // earned feedback</p>
+              <p className="section-kicker">Verified customer reviews</p>
               <h2
                 id="reviews-title"
                 className="mt-4 font-display text-[clamp(3.6rem,7vw,7.2rem)] font-black uppercase leading-[0.82] tracking-[-0.05em]"
@@ -50,8 +50,8 @@ export async function ReviewsSection() {
               </h2>
             </div>
             <p className="max-w-lg text-sm leading-6 text-ink/70 sm:text-base sm:leading-7 lg:col-span-4">
-              GearUp only accepts a review after the related rental has reached
-              RETURNED. Feedback belongs to a real completed order.
+              Customers can review gear only after the related order is marked
+              Returned, so every rating comes from a completed rental.
             </p>
           </div>
         </Reveal>
@@ -135,7 +135,7 @@ export async function ReviewsSection() {
                         ) : (
                           <div className="mt-14 max-w-2xl">
                             <p className="font-display text-[clamp(2.2rem,4.5vw,4.8rem)] font-bold uppercase leading-[0.94] tracking-[-0.035em]">
-                              Rating-only field report
+                              Rating submitted without a comment
                             </p>
                             <p className="mt-5 text-sm leading-6 text-paper/70">
                               This customer submitted a score without a written
@@ -157,7 +157,7 @@ export async function ReviewsSection() {
                             className="h-auto rounded-none border-lime/40 bg-transparent px-2 py-1 text-[0.62rem] font-extrabold uppercase tracking-[0.18em] text-lime"
                           >
                             <BadgeCheck aria-hidden="true" className="size-4" />
-                            Returned rental
+                            Completed rental
                           </Badge>
                         </footer>
                       </CardContent>
@@ -172,7 +172,7 @@ export async function ReviewsSection() {
                 <div>
                   <Quote aria-hidden="true" className="mx-auto size-10 text-signal" />
                   <h3 className="mt-4 font-display text-4xl font-black uppercase">
-                    The first field report is on its way.
+                    The first review is on its way.
                   </h3>
                   <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-ink/70">
                     Once a rental is returned, the customer can leave one
@@ -192,7 +192,7 @@ export async function ReviewsSection() {
                 <CardContent className="flex h-full flex-col justify-between p-7 sm:p-9">
                   <div>
                     <p className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.2em] text-ink/70">
-                      Review standard // GU—R1
+                      Why reviews are reliable
                     </p>
                     <h3 className="mt-8 font-display text-5xl font-black uppercase leading-[0.86] tracking-[-0.04em]">
                       One order.
@@ -203,8 +203,8 @@ export async function ReviewsSection() {
                     </h3>
                   </div>
                   <p className="mt-8 border-t border-ink/20 pt-5 text-xs font-bold leading-5 text-ink/70">
-                    Customers can update their own review. Admins can remove
-                    content when moderation is needed.
+                    Each returned order can be reviewed once, helping future
+                    renters choose gear with more confidence.
                   </p>
                 </CardContent>
               </aside>
@@ -219,7 +219,7 @@ export async function ReviewsSection() {
 export function ReviewsSkeleton() {
   return (
     <section
-      aria-label="Loading field reports"
+      aria-label="Loading customer reviews"
       className="bg-paper py-20 sm:py-28"
     >
       <div className="mx-auto w-full max-w-[90rem] px-5 sm:px-8 lg:px-12">

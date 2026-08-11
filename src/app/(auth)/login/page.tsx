@@ -33,7 +33,7 @@ export default async function LoginPage({
 
   return (
     <AuthShell
-      kicker="Field access // returning"
+      kicker="Account sign in"
       title="Welcome back"
       subtitle="Enter your credentials to pick up where you left off."
       aside={{

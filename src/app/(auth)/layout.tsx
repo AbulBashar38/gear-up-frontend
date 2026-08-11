@@ -17,7 +17,7 @@ export default function AuthLayout({
             href="/"
             className="hidden text-xs font-extrabold uppercase tracking-[0.18em] text-ink/70 hover:text-signal sm:inline"
           >
-            Back to field access
+            Back to home
           </Link>
         </div>
       </header>

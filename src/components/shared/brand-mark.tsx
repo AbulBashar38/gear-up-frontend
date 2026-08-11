@@ -32,9 +32,9 @@ export function BrandMark({
         <span
           className={`hidden border-l pl-2 text-[0.58rem] font-bold uppercase leading-[1.1] tracking-[0.2em] sm:block ${inverse ? "border-paper/25 text-paper/60" : "border-ink/20 text-ink/70"}`}
         >
-          Field
+          Gear
           <br />
-          access
+          rental
         </span>
       )}
     </Link>

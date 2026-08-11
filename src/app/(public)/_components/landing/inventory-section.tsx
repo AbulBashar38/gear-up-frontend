@@ -22,7 +22,7 @@ export async function InventorySection() {
         <Reveal>
           <div className="flex flex-col justify-between gap-6 border-b border-ink/20 pb-8 md:flex-row md:items-end">
             <div>
-              <p className="section-kicker">Dispatch board // recently listed</p>
+              <p className="section-kicker">Recently added gear</p>
               <h2 className="mt-4 max-w-4xl font-display text-[clamp(3.5rem,7vw,7.3rem)] font-black uppercase leading-[0.82] tracking-[-0.05em] text-ink">
                 Find your next
                 <br />
@@ -30,8 +30,8 @@ export async function InventorySection() {
               </h2>
             </div>
             <p className="max-w-md text-sm leading-6 text-ink/70 sm:text-base sm:leading-7">
-              GearUp makes good equipment useful more often. Browse the newest
-              listings, request your dates, and let the provider confirm the fit.
+              Browse the latest listings, open an item to review its details,
+              then choose dates and send the provider a rental request.
             </p>
           </div>
         </Reveal>
@@ -39,11 +39,12 @@ export async function InventorySection() {
         <div className="mt-6">
           <div className="mb-3 flex items-center justify-between">
             <p className="text-[0.62rem] font-extrabold uppercase tracking-[0.2em] text-ink/70">
-              Browse by field
+              Browse by category
             </p>
             {categories.ok && (
               <p className="font-mono text-[0.62rem] text-ink/70">
-                {String(categories.data.length).padStart(2, "0")} live categories
+                {categories.data.length}{" "}
+                {categories.data.length === 1 ? "category" : "categories"}
               </p>
             )}
           </div>
@@ -72,10 +73,10 @@ export async function InventorySection() {
           ) : (
             <Alert className="min-h-20 rounded-none border-dashed border-ink/25 bg-transparent px-5 text-ink">
               <Compass aria-hidden="true" className="size-5 text-signal" />
-              <AlertTitle>Category routes are being mapped.</AlertTitle>
+              <AlertTitle>Categories are not available yet.</AlertTitle>
               <AlertDescription className="text-ink/70">
                 {categories.ok
-                  ? "New categories will appear here when providers start listing gear."
+                  ? "Categories will appear here when providers start listing gear."
                   : categories.error.message}
               </AlertDescription>
             </Alert>
@@ -84,7 +85,7 @@ export async function InventorySection() {
 
         <div className="mt-10 flex flex-wrap items-end justify-between gap-4">
           <h3 className="font-display text-2xl font-black uppercase tracking-tight">
-            Fresh from the gear locker
+            Recently added gear
           </h3>
           <div className="flex items-center gap-4">
             {gear.ok && gear.meta && (
@@ -129,7 +130,9 @@ export async function InventorySection() {
                 className="mx-auto size-10 text-signal"
               />
               <h3 className="mt-4 font-display text-3xl font-black uppercase">
-                {gear.ok ? "The locker is being stocked." : "Signal interrupted."}
+                {gear.ok
+                  ? "No gear has been listed yet."
+                  : "Gear could not be loaded."}
               </h3>
               <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-ink/70">
                 {gear.ok

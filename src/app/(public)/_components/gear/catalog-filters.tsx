@@ -158,12 +158,12 @@ export function CatalogFilters({
               <Filter aria-hidden="true" className="size-4" />
             </span>
             <div>
-              <p className="section-kicker">Catalog controls // live API</p>
+              <p className="section-kicker">Search and filters</p>
               <h2
                 id="catalog-filters-title"
                 className="font-display text-3xl font-black uppercase tracking-tight"
               >
-                Filter the full locker
+                Find the right gear
               </h2>
             </div>
           </div>
@@ -318,12 +318,12 @@ export function CatalogFilters({
         >
           <Info aria-hidden="true" className="size-4 text-signal" />
           <AlertTitle className="font-display text-xl font-black uppercase">
-            Search scope
+            How filters work
           </AlertTitle>
           <AlertDescription className="mt-2 text-xs leading-5 text-ink/70">
             Keyword search updates as you type. Category, brand, price, and date
-            choices wait for Apply filters. Date results exclude stock reserved
-            by confirmed, paid, or picked-up orders.
+            choices wait for Apply filters. Date results show items with enough
+            stock across your selected rental window.
           </AlertDescription>
         </Alert>
       </div>

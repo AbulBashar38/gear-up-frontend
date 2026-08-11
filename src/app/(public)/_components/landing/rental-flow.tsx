@@ -11,26 +11,29 @@ import { m, useReducedMotion } from "motion/react";
 const steps = [
   {
     number: "01",
-    title: "Find gear",
-    copy: "Explore newly listed equipment by category, brand, and daily price.",
+    title: "Browse gear",
+    copy: "Search by keyword, category, brand, daily price, and rental dates.",
     icon: Search,
   },
   {
     number: "02",
-    title: "Request dates",
-    copy: "Choose your rental window and quantity. Your request starts as PLACED.",
+    title: "Choose dates",
+    copy:
+      "Select your rental window and quantity, then send a request. Stock is not reserved yet.",
     icon: CalendarDays,
   },
   {
     number: "03",
-    title: "Get confirmed",
-    copy: "The provider checks date-aware stock and confirms what is ready.",
+    title: "Wait for confirmation",
+    copy:
+      "The provider checks stock for your dates and confirms when the order is ready to pay.",
     icon: BadgeCheck,
   },
   {
     number: "04",
-    title: "Pay securely",
-    copy: "Once confirmed, continue to Stripe Checkout and get going.",
+    title: "Pay and pick up",
+    copy:
+      "After confirmation, pay through Stripe Checkout and follow the order status through return.",
     icon: CreditCard,
   },
 ];
@@ -47,19 +50,19 @@ export function RentalFlow() {
       <div className="mx-auto w-full max-w-[90rem] px-5 sm:px-8 lg:px-12">
         <div className="grid gap-8 border-b border-ink/20 pb-8 lg:grid-cols-12 lg:items-end">
           <div className="lg:col-span-8">
-            <p className="section-kicker">Rental route // four clear moves</p>
+            <p className="section-kicker">How renting works</p>
             <h2
               id="flow-title"
               className="mt-4 font-display text-[clamp(3.5rem,7vw,7.2rem)] font-black uppercase leading-[0.82] tracking-[-0.05em]"
             >
-              From maybe
+              From browsing
               <br />
-              to moving.
+              to pickup.
             </h2>
           </div>
           <p className="max-w-lg text-sm leading-6 text-ink/70 sm:text-base sm:leading-7 lg:col-span-4">
-            No mystery reservation state. A provider confirms your request before
-            payment, so every next step is visible.
+            Browse without an account. Sign in when you are ready to request,
+            then pay only after the provider confirms your dates and quantity.
           </p>
         </div>
 

@@ -29,7 +29,7 @@ export function AuthShell({
         className="surface-inverse hidden flex-col justify-between overflow-hidden rounded-2xl bg-ink p-10 text-paper lg:flex"
       >
         <div>
-          <p className="section-kicker text-lime">GearUp // field desk</p>
+          <p className="section-kicker text-lime">Why use GearUp</p>
           <p className="mt-6 font-display text-5xl font-black uppercase leading-[0.95] tracking-tight">
             {aside.heading}
           </p>

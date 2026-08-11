@@ -4,9 +4,9 @@ import { BrandMark } from "@/components/shared/brand-mark";
 import { Button } from "@/components/ui/button";
 
 const footerLinks = [
-  { label: "Gear locker", href: "/gear" },
-  { label: "Rental route", href: "/#rental-flow" },
-  { label: "Providers", href: "/#providers" },
+  { label: "Browse gear", href: "/gear" },
+  { label: "How renting works", href: "/#rental-flow" },
+  { label: "List your gear", href: "/#providers" },
 ];
 
 export function SiteFooter() {
@@ -38,7 +38,7 @@ export function SiteFooter() {
 
         <div className="flex items-end justify-between gap-4 md:justify-end">
           <p className="text-[0.6rem] font-bold uppercase tracking-[0.18em] text-paper/60">
-            GearUp // Built for the next outing
+            GearUp // Rent what you need
           </p>
           <Button
             asChild

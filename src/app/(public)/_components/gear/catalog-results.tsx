@@ -40,7 +40,7 @@ export function CatalogResults({
       <div className="mx-auto w-full max-w-[90rem] px-5 sm:px-8 lg:px-12">
         <div className="flex flex-col justify-between gap-5 border-b border-ink/20 pb-6 sm:flex-row sm:items-end">
           <div>
-            <p className="section-kicker">Dispatch results // newest first</p>
+            <p className="section-kicker">Available listings // newest first</p>
             <h2
               id="catalog-results-title"
               className="mt-3 font-display text-4xl font-black uppercase tracking-[-0.035em] sm:text-5xl"
