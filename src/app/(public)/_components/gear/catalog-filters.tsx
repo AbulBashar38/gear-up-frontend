@@ -26,6 +26,10 @@ import {
   PriceRangeSlider,
   type PriceRangeValue,
 } from "./price-range-slider";
+import {
+  DateRangePicker,
+  type DateRangeValue,
+} from "@/components/ui/date-range-picker";
 
 type CatalogFiltersProps = {
   categories: Category[];
@@ -55,7 +59,10 @@ export function CatalogFilters({
   const formRef = useRef<HTMLFormElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [draftStartDate, setDraftStartDate] = useState(values.startDate);
+  const [draftDateRange, setDraftDateRange] = useState<DateRangeValue>({
+    from: values.startDate,
+    to: values.endDate,
+  });
   const [draftPrice, setDraftPrice] = useState<PriceRangeValue>(() => {
     if (!priceBounds) return { min: 0, max: 0 };
     const requestedMin = values.minPrice ? Number(values.minPrice) : Number.NaN;
@@ -122,18 +129,6 @@ export function CatalogFilters({
       return;
     }
 
-    if (target.name === "startDate") {
-      setDraftStartDate(target.value);
-      const endDate = formRef.current?.elements.namedItem("endDate");
-      if (
-        endDate instanceof HTMLInputElement &&
-        endDate.value &&
-        target.value &&
-        endDate.value < target.value
-      ) {
-        endDate.value = "";
-      }
-    }
   }
 
   function clearFilters() {
@@ -149,7 +144,7 @@ export function CatalogFilters({
         }
       }
     }
-    setDraftStartDate("");
+    setDraftDateRange({ from: "", to: "" });
     if (priceBounds) setDraftPrice(priceBounds);
     startTransition(() => router.replace(pathname, { scroll: false }));
   }
@@ -274,37 +269,20 @@ export function CatalogFilters({
               </div>
             )}
 
-            <div className="space-y-2">
+            <div className="space-y-2 sm:col-span-2 xl:col-span-2">
               <Label
-                htmlFor="startDate"
+                htmlFor="availabilityDates"
                 className="text-[0.68rem] font-extrabold uppercase tracking-[0.16em] text-ink/70"
               >
-                Available from
+                Availability dates
               </Label>
-              <Input
-                id="startDate"
-                name="startDate"
-                type="date"
-                min={minimumDate}
-                defaultValue={values.startDate}
-                className="h-10 rounded-lg bg-paper"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label
-                htmlFor="endDate"
-                className="text-[0.68rem] font-extrabold uppercase tracking-[0.16em] text-ink/70"
-              >
-                Available through
-              </Label>
-              <Input
-                id="endDate"
-                name="endDate"
-                type="date"
-                min={draftStartDate || minimumDate}
-                defaultValue={values.endDate}
-                className="h-10 rounded-lg bg-paper"
+              <DateRangePicker
+                id="availabilityDates"
+                startName="startDate"
+                endName="endDate"
+                value={draftDateRange}
+                minimumDate={minimumDate}
+                onValueChange={setDraftDateRange}
               />
             </div>
 
