@@ -17,12 +17,24 @@ import {
 type FilterShellProps = {
   action: string;
   hasFilters: boolean;
+  /**
+   * Serialized active filter values. Uncontrolled inputs keep their DOM value
+   * across client-side navigation, so remount the form whenever the URL-derived
+   * values change to keep "Clear filters" from leaving stale text behind.
+   */
+  resetKey: string;
   children: React.ReactNode;
 };
 
-function FilterShell({ action, hasFilters, children }: FilterShellProps) {
+function FilterShell({
+  action,
+  hasFilters,
+  resetKey,
+  children,
+}: FilterShellProps) {
   return (
     <form
+      key={resetKey}
       action={action}
       method="get"
       className="mt-6 border border-ink/15 bg-card/55 p-5"
@@ -72,6 +84,12 @@ function SearchField({
   );
 }
 
+function filterResetKey(values: Record<string, string>) {
+  return Object.entries(values)
+    .map(([field, value]) => `${field}=${value}`)
+    .join("&");
+}
+
 const ORDER_STATUSES: RentalOrderStatus[] = [
   "PLACED",
   "CONFIRMED",
@@ -114,6 +132,7 @@ export function OrderRegisterFilters({
     <FilterShell
       action="/dashboard/orders"
       hasFilters={Boolean(values.search || values.status || values.paymentStatus)}
+      resetKey={filterResetKey(values)}
     >
       <SearchField id="order-search" value={values.search} placeholder={subjects} />
       <div className="space-y-2">
@@ -172,6 +191,7 @@ export function GearRegisterFilters({
       hasFilters={Boolean(
         values.search || values.category || values.availability || values.stock,
       )}
+      resetKey={filterResetKey(values)}
     >
       <SearchField
         id="gear-search"
@@ -239,6 +259,7 @@ export function PaymentRegisterFilters({
     <FilterShell
       action="/dashboard/payments"
       hasFilters={Boolean(values.search || values.status || values.orderStatus)}
+      resetKey={filterResetKey(values)}
     >
       <SearchField
         id="payment-search"
@@ -295,6 +316,7 @@ export function ReviewRegisterFilters({
     <FilterShell
       action="/dashboard/reviews"
       hasFilters={Boolean(values.search || values.rating)}
+      resetKey={filterResetKey(values)}
     >
       <SearchField
         id="review-search"
@@ -321,7 +343,11 @@ export function ReviewRegisterFilters({
 
 export function CategoryRegisterFilters({ search }: { search: string }) {
   return (
-    <FilterShell action="/dashboard/categories" hasFilters={Boolean(search)}>
+    <FilterShell
+      action="/dashboard/categories"
+      hasFilters={Boolean(search)}
+      resetKey={filterResetKey({ search })}
+    >
       <SearchField
         id="category-search"
         value={search}

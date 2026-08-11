@@ -24,6 +24,10 @@ export function AdminUserFilters({
 
   return (
     <form
+      // Uncontrolled inputs keep their DOM value across client-side navigation,
+      // so remount the form whenever the URL-derived values change to keep
+      // "Clear" from leaving stale text in the search field.
+      key={`${values.search}|${values.role}|${values.status}`}
       action="/dashboard/users"
       method="get"
       className="mt-6 grid gap-4 border border-ink/15 bg-card/55 p-5 md:grid-cols-[minmax(14rem,1fr)_minmax(10rem,0.35fr)_minmax(10rem,0.35fr)_auto] md:items-end"
