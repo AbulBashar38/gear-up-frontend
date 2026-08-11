@@ -11,6 +11,7 @@ import type {
 export function listReviews(query: ReviewListQuery = {}) {
   return gearUpFetch<Review[]>("/reviews", {
     query: {
+      search: query.search,
       gearItemId: query.gearItemId,
       rating: query.rating,
       page: query.page ?? 1,

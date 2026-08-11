@@ -8,7 +8,9 @@ export function listPayments(query: PaymentListQuery = {}) {
     auth: true,
     cache: "no-store",
     query: {
+      search: query.search,
       status: query.status,
+      orderStatus: query.orderStatus,
       page: query.page ?? 1,
       limit: query.limit ?? 10,
     },

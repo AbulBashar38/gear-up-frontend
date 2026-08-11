@@ -47,7 +47,7 @@ export default async function AdminUsersPage({
   const { page: rawPage } = params;
   const page = parseDashboardPage(rawPage);
   const values: AdminUserFilterValues = {
-    search: first(params.search).trim().slice(0, 255),
+    search: first(params.search).trim().slice(0, 100),
     role: parseRole(params.role),
     status: parseStatus(params.status),
   };

@@ -1,11 +1,21 @@
-import type { Role } from "@/lib/types";
+import type {
+  PaymentStatus,
+  RentalOrderStatus,
+  Role,
+} from "@/lib/types";
 import { listOrders } from "@/services/orders";
 import { DashboardRegisterPage } from "../../_components/dashboard-register-page";
 import { OrderList } from "../../_components/dashboard-record-lists";
+import {
+  OrderRegisterFilters,
+  type OrderFilterValues,
+} from "../../_components/dashboard-register-filters";
 import { requireDashboardUser } from "../../_utils/dashboard-access";
 import {
   type DashboardListPageProps,
+  parseDashboardChoice,
   parseDashboardPage,
+  parseDashboardText,
 } from "../../_utils/dashboard-query";
 import { getResultTotal } from "../../_utils/dashboard-results";
 
@@ -30,12 +40,40 @@ const ORDER_COPY: Record<Role, { eyebrow: string; title: string; description: st
   },
 };
 
+const ORDER_STATUSES: readonly RentalOrderStatus[] = [
+  "PLACED",
+  "CONFIRMED",
+  "PAID",
+  "PICKED_UP",
+  "RETURNED",
+  "CANCELLED",
+];
+const PAYMENT_STATUSES: readonly PaymentStatus[] = [
+  "PENDING",
+  "COMPLETED",
+  "FAILED",
+];
+
 export default async function OrdersPage({ searchParams }: DashboardListPageProps) {
-  const { page: rawPage } = await searchParams;
-  const page = parseDashboardPage(rawPage);
+  const params = await searchParams;
+  const page = parseDashboardPage(params.page);
+  const values: OrderFilterValues = {
+    search: parseDashboardText(params.search),
+    status: parseDashboardChoice(params.status, ORDER_STATUSES),
+    paymentStatus: parseDashboardChoice(
+      params.paymentStatus,
+      PAYMENT_STATUSES,
+    ),
+  };
   const [user, result] = await Promise.all([
     requireDashboardUser("/dashboard/orders"),
-    listOrders({ page, limit: 8 }),
+    listOrders({
+      search: values.search || undefined,
+      status: values.status || undefined,
+      paymentStatus: values.paymentStatus || undefined,
+      page,
+      limit: 8,
+    }),
   ]);
   const copy = ORDER_COPY[user.role];
 
@@ -48,6 +86,12 @@ export default async function OrdersPage({ searchParams }: DashboardListPageProp
       problem={result.ok ? undefined : result.error}
       meta={result.ok ? result.meta : undefined}
       pathname="/dashboard/orders"
+      paginationQuery={{
+        search: values.search || undefined,
+        status: values.status || undefined,
+        paymentStatus: values.paymentStatus || undefined,
+      }}
+      filters={<OrderRegisterFilters values={values} role={user.role} />}
     >
       {result.ok && (
         <OrderList

@@ -139,14 +139,24 @@ function CategoryRow({ category, index }: { category: Category; index: number })
   );
 }
 
-export function AdminCategoryManager({ categories }: { categories: Category[] }) {
+export function AdminCategoryManager({
+  categories,
+  isFiltered = false,
+}: {
+  categories: Category[];
+  isFiltered?: boolean;
+}) {
   return (
     <div className="space-y-6">
       <CreateCategoryForm />
       {categories.length === 0 ? (
         <DashboardEmptyState
-          title="No categories"
-          description="Create the first category so providers can publish gear."
+          title={isFiltered ? "No matching categories" : "No categories"}
+          description={
+            isFiltered
+              ? "Try another category name or clear the current search."
+              : "Create the first category so providers can publish gear."
+          }
         />
       ) : (
         <div className="grid gap-px border border-ink/15 bg-ink/15 sm:grid-cols-2 xl:grid-cols-3">

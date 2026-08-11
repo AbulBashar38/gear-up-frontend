@@ -15,6 +15,7 @@ export function listOrders(query: OrderListQuery = {}) {
     auth: true,
     cache: "no-store",
     query: {
+      search: query.search,
       status: query.status,
       paymentStatus: query.paymentStatus,
       page: query.page ?? 1,

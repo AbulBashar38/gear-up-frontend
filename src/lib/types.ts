@@ -167,6 +167,7 @@ export type GearPriceRange = {
 };
 
 export type ReviewListQuery = {
+  search?: string;
   gearItemId?: string;
   rating?: number;
   page?: number;
@@ -299,6 +300,7 @@ export type AdminUser = CurrentUser & {
 };
 
 export type OrderListQuery = {
+  search?: string;
   status?: RentalOrderStatus;
   paymentStatus?: PaymentStatus;
   page?: number;
@@ -306,7 +308,9 @@ export type OrderListQuery = {
 };
 
 export type PaymentListQuery = {
+  search?: string;
   status?: PaymentStatus;
+  orderStatus?: RentalOrderStatus;
   page?: number;
   limit?: number;
 };

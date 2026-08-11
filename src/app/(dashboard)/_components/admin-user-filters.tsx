@@ -36,7 +36,7 @@ export function AdminUserFilters({
           type="search"
           defaultValue={values.search}
           placeholder="Name, email, or phone"
-          maxLength={255}
+          maxLength={100}
         />
       </div>
       <div className="space-y-2">

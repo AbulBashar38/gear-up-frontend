@@ -2,13 +2,21 @@ import Link from "next/link";
 import { PackagePlus } from "lucide-react";
 import type { Role } from "@/lib/types";
 import { listGear } from "@/services/gear";
+import { listCategories } from "@/services/categories";
 import { Button } from "@/components/ui/button";
 import { DashboardRegisterPage } from "../../_components/dashboard-register-page";
 import { GearList } from "../../_components/dashboard-record-lists";
+import {
+  GearRegisterFilters,
+  type GearFilterValues,
+} from "../../_components/dashboard-register-filters";
+import { DashboardApiFeedback } from "../../_components/dashboard-feedback";
 import { requireDashboardUser } from "../../_utils/dashboard-access";
 import {
   type DashboardListPageProps,
+  parseDashboardChoice,
   parseDashboardPage,
+  parseDashboardText,
 } from "../../_utils/dashboard-query";
 import { getResultTotal } from "../../_utils/dashboard-results";
 
@@ -36,11 +44,26 @@ const GEAR_COPY: Record<Role, { eyebrow: string; title: string; description: str
 export default async function DashboardGearPage({
   searchParams,
 }: DashboardListPageProps) {
-  const { page: rawPage } = await searchParams;
-  const page = parseDashboardPage(rawPage);
-  const user = await requireDashboardUser("/dashboard/gear");
+  const params = await searchParams;
+  const page = parseDashboardPage(params.page);
+  const values: GearFilterValues = {
+    search: parseDashboardText(params.search, 255),
+    category: parseDashboardText(params.category, 255),
+    availability: parseDashboardChoice(params.availability, ["true", "false"]),
+    stock: parseDashboardChoice(params.stock, ["true", "false"]),
+  };
+  const [user, categoriesResult] = await Promise.all([
+    requireDashboardUser("/dashboard/gear"),
+    listCategories(),
+  ]);
   const result = await listGear({
     providerId: user.role === "PROVIDER" ? user.id : undefined,
+    search: values.search || undefined,
+    category: values.category || undefined,
+    isAvailable: values.availability
+      ? values.availability === "true"
+      : undefined,
+    inStock: values.stock ? values.stock === "true" : undefined,
     page,
     limit: 8,
   });
@@ -56,6 +79,25 @@ export default async function DashboardGearPage({
       problem={result.ok ? undefined : result.error}
       meta={result.ok ? result.meta : undefined}
       pathname="/dashboard/gear"
+      paginationQuery={{
+        search: values.search || undefined,
+        category: values.category || undefined,
+        availability: values.availability || undefined,
+        stock: values.stock || undefined,
+      }}
+      filters={
+        <>
+          <GearRegisterFilters
+            values={values}
+            categories={categoriesResult.ok ? categoriesResult.data : []}
+          />
+          {!categoriesResult.ok && (
+            <div className="mt-4">
+              <DashboardApiFeedback problems={[categoriesResult.error]} />
+            </div>
+          )}
+        </>
+      }
       actions={
         <>
           {canManageGear && (

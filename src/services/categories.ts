@@ -3,8 +3,9 @@ import "server-only";
 import { gearUpFetch } from "./server-client";
 import type { Category } from "@/lib/types";
 
-export function listCategories() {
+export function listCategories(query: { search?: string } = {}) {
   return gearUpFetch<Category[]>("/categories", {
+    query: { search: query.search },
     next: {
       revalidate: 60,
       tags: ["categories"],
