@@ -1,9 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
-import { ShieldCheck } from "lucide-react";
-import type { AdminUser } from "@/lib/types";
-import { Button } from "@/components/ui/button";
+import { useActionState, useRef, useState } from "react";
+import { LoaderCircle, ShieldCheck } from "lucide-react";
+import type { AdminUser, UserStatus } from "@/lib/types";
 import {
   NativeSelect,
   NativeSelectOption,
@@ -27,7 +26,17 @@ export function AdminUserStatusForm({
     INITIAL_ADMIN_MUTATION_STATE,
   );
   useAdminMutationToast(state);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [choice, setChoice] = useState<UserStatus | null>(null);
   const isCurrentAdmin = user.id === currentAdminId;
+
+  // A rejected change (backend `409` on self-suspension, a stale record, or a
+  // network failure) must not leave the control showing a status the backend
+  // never accepted, so a settled error falls back to the canonical record. The
+  // chosen value stays visible while the request is in flight and after it
+  // succeeds, where the refreshed record then remounts this form.
+  const status =
+    !pending && state.status === "error" ? user.status : choice ?? user.status;
 
   if (isCurrentAdmin) {
     return (
@@ -39,23 +48,35 @@ export function AdminUserStatusForm({
   }
 
   return (
-    <form action={action} className="min-w-44 space-y-2">
-      <div className="flex gap-2">
-        <NativeSelect
-          name="status"
-          defaultValue={user.status}
-          disabled={pending}
-          className="w-full"
-          aria-label={`Status for ${user.name}`}
-        >
-          <NativeSelectOption value="ACTIVE">Active</NativeSelectOption>
-          <NativeSelectOption value="INACTIVE">Inactive</NativeSelectOption>
-          <NativeSelectOption value="SUSPENDED">Suspended</NativeSelectOption>
-        </NativeSelect>
-        <Button type="submit" variant="outline" size="compact" disabled={pending}>
-          {pending ? "Saving…" : "Update"}
-        </Button>
-      </div>
+    <form ref={formRef} action={action} className="min-w-44 space-y-2">
+      <NativeSelect
+        name="status"
+        value={status}
+        disabled={pending}
+        className="w-full"
+        aria-label={`Status for ${user.name}`}
+        onChange={(event) => {
+          setChoice(event.target.value as UserStatus);
+          // Submitting from the change handler replaces the removed Update
+          // button; the action still revalidates the admin role server-side.
+          formRef.current?.requestSubmit();
+        }}
+      >
+        <NativeSelectOption value="ACTIVE">Active</NativeSelectOption>
+        <NativeSelectOption value="INACTIVE">Inactive</NativeSelectOption>
+        <NativeSelectOption value="SUSPENDED">Suspended</NativeSelectOption>
+      </NativeSelect>
+      <p
+        aria-live="polite"
+        className="flex items-center gap-1.5 text-xs text-ink/60"
+      >
+        {pending && (
+          <>
+            <LoaderCircle aria-hidden="true" className="size-3 animate-spin" />
+            Saving status…
+          </>
+        )}
+      </p>
       <AdminActionMessage state={state} />
     </form>
   );

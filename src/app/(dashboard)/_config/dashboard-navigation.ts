@@ -58,6 +58,13 @@ export const DASHBOARD_NAVIGATION: Record<
       href: "/dashboard/gear",
       icon: Boxes,
     },
+    // Read-only for providers: the register renders the taxonomy without the
+    // admin create/rename/delete controls.
+    {
+      label: "Categories",
+      href: "/dashboard/categories",
+      icon: Tags,
+    },
     {
       label: "Rental orders",
       href: "/dashboard/orders",
@@ -67,6 +74,13 @@ export const DASHBOARD_NAVIGATION: Record<
       label: "Payments",
       href: "/dashboard/payments",
       icon: CreditCard,
+    },
+    // Read-only for providers: feedback on their own listings, scoped per gear
+    // item because the reviews API has no provider filter.
+    {
+      label: "Reviews",
+      href: "/dashboard/reviews",
+      icon: Star,
     },
   ],
   ADMIN: [

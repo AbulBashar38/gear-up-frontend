@@ -291,6 +291,13 @@ export type OrderMutationState = {
   data?: CreatedRentalOrder;
 };
 
+export type UpdateUserInput = {
+  name?: string;
+  email?: string;
+  phone?: string;
+  role?: Role;
+};
+
 export type AdminUser = CurrentUser & {
   _count: {
     gearItems: number;

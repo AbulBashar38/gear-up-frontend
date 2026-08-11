@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { ArrowLeft, CalendarRange, Package, Store, User } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CalendarRange,
+  Package,
+  Store,
+  User,
+} from "lucide-react";
 import type { RentalOrder, Review, Role } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { OrderReference } from "@/components/shared/order-reference";
@@ -42,6 +49,18 @@ function DetailCard({
       </h2>
       <div className="mt-4 space-y-2 text-sm text-ink/80">{children}</div>
     </section>
+  );
+}
+
+/** Cross-link into the role-scoped `/dashboard/payments/[id]` register entry. */
+function PaymentRecordLink({ paymentId }: { paymentId: string }) {
+  return (
+    <Button asChild variant="outline" size="compact" className="mt-4">
+      <Link href={`/dashboard/payments/${paymentId}`}>
+        View payment record
+        <ArrowRight aria-hidden="true" />
+      </Link>
+    </Button>
   );
 }
 
@@ -162,20 +181,23 @@ export function OrderDetail({
         ) : (
           <DetailCard title="Payment" icon={Package}>
             {order.payment ? (
-              <dl className="space-y-2">
-                <Row
-                  label="Status"
-                  value={<PaymentStatusBadge status={order.payment.status} />}
-                />
-                <Row
-                  label="Amount"
-                  value={formatDashboardMoney(order.payment.amount)}
-                />
-                <Row
-                  label="Updated"
-                  value={formatDashboardDate(order.payment.updatedAt)}
-                />
-              </dl>
+              <>
+                <dl className="space-y-2">
+                  <Row
+                    label="Status"
+                    value={<PaymentStatusBadge status={order.payment.status} />}
+                  />
+                  <Row
+                    label="Amount"
+                    value={formatDashboardMoney(order.payment.amount)}
+                  />
+                  <Row
+                    label="Updated"
+                    value={formatDashboardDate(order.payment.updatedAt)}
+                  />
+                </dl>
+                <PaymentRecordLink paymentId={order.payment.id} />
+              </>
             ) : (
               <p className="text-xs text-ink/60">
                 No payment record yet. Payment opens once the provider confirms
@@ -189,20 +211,23 @@ export function OrderDetail({
       {showParties && (
         <DetailCard title="Payment" icon={Package}>
           {order.payment ? (
-            <dl className="grid gap-2 sm:grid-cols-3">
-              <Row
-                label="Status"
-                value={<PaymentStatusBadge status={order.payment.status} />}
-              />
-              <Row
-                label="Amount"
-                value={formatDashboardMoney(order.payment.amount)}
-              />
-              <Row
-                label="Updated"
-                value={formatDashboardDate(order.payment.updatedAt)}
-              />
-            </dl>
+            <>
+              <dl className="grid gap-2 sm:grid-cols-3">
+                <Row
+                  label="Status"
+                  value={<PaymentStatusBadge status={order.payment.status} />}
+                />
+                <Row
+                  label="Amount"
+                  value={formatDashboardMoney(order.payment.amount)}
+                />
+                <Row
+                  label="Updated"
+                  value={formatDashboardDate(order.payment.updatedAt)}
+                />
+              </dl>
+              <PaymentRecordLink paymentId={order.payment.id} />
+            </>
           ) : (
             <p className="text-xs text-ink/60">
               No payment has been initiated for this order yet.

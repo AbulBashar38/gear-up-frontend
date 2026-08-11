@@ -3,6 +3,7 @@ import "server-only";
 import type {
   AdminUser,
   CreateAdminInput,
+  UpdateUserInput,
   UserListQuery,
   UserStatus,
 } from "@/lib/types";
@@ -23,6 +24,14 @@ export function listUsers(query: UserListQuery = {}) {
   });
 }
 
+export function getUser(id: string) {
+  return gearUpFetch<AdminUser>(`/users/${id}`, {
+    auth: true,
+    cache: "no-store",
+    fallbackMessage: "This account couldn't be loaded. Try again shortly.",
+  });
+}
+
 export function createAdmin(input: CreateAdminInput) {
   return gearUpFetch<AdminUser>("/users/admins", {
     method: "POST",
@@ -30,6 +39,16 @@ export function createAdmin(input: CreateAdminInput) {
     cache: "no-store",
     json: input,
     fallbackMessage: "The admin account couldn't be created. Try again shortly.",
+  });
+}
+
+export function updateUser(id: string, input: UpdateUserInput) {
+  return gearUpFetch<AdminUser>(`/users/${id}`, {
+    method: "PATCH",
+    auth: true,
+    cache: "no-store",
+    json: input,
+    fallbackMessage: "The account couldn't be updated. Try again shortly.",
   });
 }
 

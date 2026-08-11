@@ -8,9 +8,12 @@ import { cn } from "@/lib/utils";
 
 export function OrderReference({
   orderId,
+  label = "Order ID",
   className,
 }: {
   orderId: string;
+  /** Overridden for payment and Stripe references, which reuse this control. */
+  label?: string;
   className?: string;
 }) {
   const [copied, setCopied] = useState(false);
@@ -28,9 +31,11 @@ export function OrderReference({
       }
       await navigator.clipboard.writeText(orderId);
       setCopied(true);
-      toast.success("Order ID copied");
+      toast.success(`${label} copied`);
     } catch {
-      toast.error("The order ID could not be copied. Select it manually.");
+      toast.error(
+        `The ${label.toLowerCase()} could not be copied. Select it manually.`,
+      );
     }
   }
 
@@ -43,7 +48,7 @@ export function OrderReference({
     >
       <div className="min-w-0 flex-1">
         <p className="font-mono text-[0.55rem] font-bold uppercase tracking-[0.14em] text-ink/50">
-          Order ID
+          {label}
         </p>
         <code className="mt-1 block select-all break-all font-mono text-[0.68rem] font-semibold lowercase leading-5 tracking-normal text-ink">
           {orderId}
@@ -54,7 +59,7 @@ export function OrderReference({
         variant="outline"
         size="compact"
         className="shrink-0"
-        aria-label={`${copied ? "Copied" : "Copy"} order ID ${orderId}`}
+        aria-label={`${copied ? "Copied" : "Copy"} ${label.toLowerCase()} ${orderId}`}
         onClick={copyOrderId}
       >
         {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}

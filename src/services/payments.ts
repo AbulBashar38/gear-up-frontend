@@ -18,3 +18,15 @@ export function listPayments(query: PaymentListQuery = {}) {
       "Payment activity couldn't be loaded. Try again shortly.",
   });
 }
+
+/**
+ * The backend scopes this by role and returns `404` when the payment exists but
+ * the caller may not see it, so the page treats 403/404 the same way.
+ */
+export function getPayment(id: string) {
+  return gearUpFetch<Payment>(`/payments/${id}`, {
+    auth: true,
+    cache: "no-store",
+    fallbackMessage: "This payment couldn't be loaded. Try again shortly.",
+  });
+}

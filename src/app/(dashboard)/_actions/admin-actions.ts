@@ -9,6 +9,7 @@ import {
   createGearFormSchema,
   idSchema,
   updateGearFormSchema,
+  updateUserFormSchema,
   userStatusFormSchema,
 } from "../validation/admin.schema";
 import { getZodFieldErrors } from "@/lib/validations/zod-errors";
@@ -30,7 +31,7 @@ import {
 } from "@/services/gear";
 import { updateOrderStatus } from "@/services/orders";
 import { deleteReview } from "@/services/reviews";
-import { createAdmin, updateUserStatus } from "@/services/users";
+import { createAdmin, updateUser, updateUserStatus } from "@/services/users";
 import {
   requireDashboardRole,
   requireDashboardRoles,
@@ -101,6 +102,51 @@ export async function updateUserStatusAction(
   if (!result.ok) return apiState(result);
 
   invalidateAdmin(["/dashboard/admin", "/dashboard/users"]);
+  return successState(result.message);
+}
+
+export async function updateUserAction(
+  userId: string,
+  _previousState: AdminMutationState,
+  formData: FormData,
+): Promise<AdminMutationState> {
+  const admin = await requireDashboardRole("ADMIN", `/dashboard/users/${userId}`);
+  const invalidId = validateId(userId, "User ID");
+  if (invalidId) return errorState(invalidId);
+
+  const input = {
+    name: readTrimmed(formData, "name"),
+    email: readTrimmed(formData, "email").toLowerCase(),
+    phone: readTrimmed(formData, "phone"),
+    role: readTrimmed(formData, "role"),
+  };
+  const parsed = updateUserFormSchema.safeParse(input);
+
+  if (!parsed.success) {
+    return errorState(
+      "Check the highlighted fields and try again.",
+      getZodFieldErrors(parsed.error),
+      input,
+    );
+  }
+
+  if (admin.id === userId && parsed.data.role !== "ADMIN") {
+    return errorState("You cannot change your own admin role.", undefined, input);
+  }
+
+  // The backend rejects an empty body, reports a duplicate email or phone as a
+  // `409`, and refuses a role change that would strand owned gear or in-flight
+  // rentals. Each reaches the form as a field or page-level message.
+  const result = await updateUser(userId, parsed.data);
+  if (!result.ok) {
+    return errorState(result.error.message, result.error.fieldErrors, input);
+  }
+
+  invalidateAdmin([
+    "/dashboard/admin",
+    "/dashboard/users",
+    `/dashboard/users/${userId}`,
+  ]);
   return successState(result.message);
 }
 

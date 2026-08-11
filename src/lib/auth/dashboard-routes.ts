@@ -8,24 +8,30 @@ export const ROLE_HOME: Record<Role, string> = {
   ADMIN: "/dashboard/admin",
 };
 
-// Dashboard path prefixes that only one role may view. Shared registers such as
-// /dashboard/orders, /dashboard/payments, and /dashboard/gear are intentionally
-// absent: their pages resolve the role and scope the data themselves.
-const ROLE_RESTRICTED_PREFIXES: ReadonlyArray<{ prefix: string; role: Role }> = [
-  { prefix: "/dashboard/customer", role: "CUSTOMER" },
-  { prefix: "/dashboard/provider", role: "PROVIDER" },
-  { prefix: "/dashboard/admin", role: "ADMIN" },
-  { prefix: "/dashboard/users", role: "ADMIN" },
-  { prefix: "/dashboard/categories", role: "ADMIN" },
-  { prefix: "/dashboard/admins", role: "ADMIN" },
+// Dashboard path prefixes that only some roles may view. Shared registers such
+// as /dashboard/orders, /dashboard/payments, and /dashboard/gear are
+// intentionally absent: their pages resolve the role and scope the data
+// themselves. /dashboard/categories is readable by providers because gear forms
+// depend on the taxonomy, but every category mutation stays admin-only in the
+// Server Actions and in the backend.
+const ROLE_RESTRICTED_PREFIXES: ReadonlyArray<{
+  prefix: string;
+  roles: readonly Role[];
+}> = [
+  { prefix: "/dashboard/customer", roles: ["CUSTOMER"] },
+  { prefix: "/dashboard/provider", roles: ["PROVIDER"] },
+  { prefix: "/dashboard/admin", roles: ["ADMIN"] },
+  { prefix: "/dashboard/users", roles: ["ADMIN"] },
+  { prefix: "/dashboard/categories", roles: ["ADMIN", "PROVIDER"] },
+  { prefix: "/dashboard/admins", roles: ["ADMIN"] },
 ];
 
-// The single role permitted on a dashboard path, or null when any signed-in
-// role may view it. Used for optimistic Proxy redirects; page-level
-// requireDashboardRole remains the authoritative check.
-export function requiredRoleForPath(pathname: string): Role | null {
+// The roles permitted on a dashboard path, or null when any signed-in role may
+// view it. Used for optimistic Proxy redirects; the page-level
+// requireDashboardRole(s) guard remains the authoritative check.
+export function allowedRolesForPath(pathname: string): readonly Role[] | null {
   const match = ROLE_RESTRICTED_PREFIXES.find(
     ({ prefix }) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
-  return match?.role ?? null;
+  return match?.roles ?? null;
 }

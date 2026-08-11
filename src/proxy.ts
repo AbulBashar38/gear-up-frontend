@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { ROLE_HOME, requiredRoleForPath } from "@/lib/auth/dashboard-routes";
+import { ROLE_HOME, allowedRolesForPath } from "@/lib/auth/dashboard-routes";
 import {
   decodeSessionToken,
   hasUnexpiredSessionToken,
@@ -69,8 +69,8 @@ export function proxy(request: NextRequest) {
 
     // Optimistically bounce an obviously wrong-role visitor to their own
     // dashboard. When the role can't be decoded we defer to the page guard.
-    const requiredRole = requiredRoleForPath(pathname);
-    if (requiredRole && role && role !== requiredRole) {
+    const allowedRoles = allowedRolesForPath(pathname);
+    if (allowedRoles && role && !allowedRoles.includes(role)) {
       return NextResponse.redirect(new URL(home, request.url));
     }
   }

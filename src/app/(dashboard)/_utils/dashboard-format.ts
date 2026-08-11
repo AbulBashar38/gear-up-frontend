@@ -29,6 +29,25 @@ export function formatDashboardDate(value: string) {
   }).format(date);
 }
 
+/**
+ * Payments move through Stripe and its webhook, so their records are read at a
+ * finer resolution than the date-only rental fields.
+ */
+export function formatDashboardDateTime(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Date unavailable";
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "UTC",
+    timeZoneName: "short",
+  }).format(date);
+}
+
 export function formatDashboardRating(value: DecimalValue) {
   const rating = typeof value === "number" ? value : Number(value);
   return Number.isFinite(rating) ? rating.toFixed(1) : "—";

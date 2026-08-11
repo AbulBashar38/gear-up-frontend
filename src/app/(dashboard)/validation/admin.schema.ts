@@ -26,6 +26,23 @@ export const createAdminFormSchema = z.object({
     .min(6, "Password must be at least 6 characters."),
 });
 
+/** Mirrors the backend `updateUserValidationSchema` identity fields. */
+export const updateUserFormSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, "Name must be at least 2 characters.")
+    .max(255, "Name cannot exceed 255 characters."),
+  email: z.email("Enter a valid email address.").trim().toLowerCase(),
+  phone: z
+    .string()
+    .trim()
+    .regex(PHONE_PATTERN, "Enter a valid phone number (7–20 digits)."),
+  role: z.enum(["CUSTOMER", "PROVIDER", "ADMIN"], {
+    error: "Choose customer, provider, or admin.",
+  }),
+});
+
 export const userStatusFormSchema = z.object({
   status: z.enum(["ACTIVE", "INACTIVE", "SUSPENDED"], {
     error: "Choose active, inactive, or suspended.",

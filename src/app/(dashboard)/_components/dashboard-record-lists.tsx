@@ -153,7 +153,12 @@ export function PaymentList({ payments }: { payments: Payment[] }) {
             <div className="min-w-0">
               <PaymentStatusBadge status={payment.status} />
               <h3 className="mt-4 truncate font-display text-2xl font-black uppercase">
-                {payment.rentalOrder.gearItem.name}
+                <Link
+                  href={`/dashboard/payments/${payment.id}`}
+                  className="underline-offset-4 hover:underline"
+                >
+                  {payment.rentalOrder.gearItem.name}
+                </Link>
               </h3>
               <p className="mt-1 text-xs text-ink/60">
                 Created {formatDashboardDate(payment.createdAt)}
@@ -164,9 +169,19 @@ export function PaymentList({ payments }: { payments: Payment[] }) {
               />
             </div>
             <OrderStatusBadge status={payment.rentalOrder.status} />
-            <p className="font-display text-2xl font-black lg:text-right">
-              {formatDashboardMoney(payment.amount)}
-            </p>
+            <div className="lg:text-right">
+              <p className="font-display text-2xl font-black">
+                {formatDashboardMoney(payment.amount)}
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2 lg:justify-end">
+                <Button asChild variant="ghost" size="compact">
+                  <Link href={`/dashboard/payments/${payment.id}`}>
+                    View payment
+                    <ArrowRight aria-hidden="true" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
           </li>
         ))}
       </ol>
@@ -284,7 +299,12 @@ export function UserList({
                 <UserStatusBadge status={user.status} />
               </div>
               <h3 className="mt-4 truncate font-display text-2xl font-black uppercase">
-                {user.name}
+                <Link
+                  href={`/dashboard/users/${user.id}`}
+                  className="underline-offset-4 hover:underline"
+                >
+                  {user.name}
+                </Link>
               </h3>
               <p className="mt-1 truncate text-xs text-ink/60">
                 {user.email} · {user.phone}
@@ -293,11 +313,20 @@ export function UserList({
             <div className="text-xs leading-5 text-ink/65">
               <p>{user._count.gearItems} gear listings</p>
               <p>{user._count.rentalOrders} rental orders</p>
+              <p>{user._count.reviews} reviews</p>
             </div>
             <div className="space-y-3 lg:text-right">
               <p className="font-mono text-[0.6rem] uppercase tracking-[0.12em] text-ink/55">
                 Joined {formatDashboardDate(user.createdAt)}
               </p>
+              <div className="flex flex-wrap gap-2 lg:justify-end">
+                <Button asChild variant="ghost" size="compact">
+                  <Link href={`/dashboard/users/${user.id}`}>
+                    View details
+                    <ArrowRight aria-hidden="true" />
+                  </Link>
+                </Button>
+              </div>
               {currentAdminId && (
                 <AdminUserStatusForm
                   key={`${user.id}:${user.status}`}
@@ -381,12 +410,20 @@ export function ReviewList({
             <span>
               {review.customer.name} · {review.gearItem.name}
             </span>
-            {adminActions && (
-              <AdminDeleteReviewButton
-                reviewId={review.id}
-                label={review.customer.name}
-              />
-            )}
+            <div className="flex flex-wrap items-center gap-2">
+              <Button asChild variant="ghost" size="compact">
+                <Link href={`/dashboard/orders/${review.rentalOrderId}`}>
+                  View order
+                  <ArrowRight aria-hidden="true" />
+                </Link>
+              </Button>
+              {adminActions && (
+                <AdminDeleteReviewButton
+                  reviewId={review.id}
+                  label={review.customer.name}
+                />
+              )}
+            </div>
           </footer>
         </article>
       ))}

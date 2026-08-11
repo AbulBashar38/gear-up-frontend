@@ -46,9 +46,9 @@ sharing one server-only client; domain and envelope types live in
 | `src/services/cloudinary.ts` | Server-only signed Cloudinary stream upload, secure URL validation, and best-effort orphan cleanup |
 | `src/services/gear.ts` | Reusable gear reads, filters, pagination, and protected create/update/delete operations |
 | `src/services/orders.ts` | Authenticated, role-scoped order reads, dashboard counts, and protected status transitions |
-| `src/services/payments.ts` | Authenticated, role-scoped payment lists and dashboard counts |
+| `src/services/payments.ts` | Authenticated, role-scoped payment lists, single-payment detail reads, and dashboard counts |
 | `src/services/reviews.ts` | Public review reads, exact returned-order review lookup, protected customer creation, and admin moderation deletion |
-| `src/services/users.ts` | Admin-only user reads, account-status updates, and admin-account creation |
+| `src/services/users.ts` | Admin-only user list and detail reads, account-status updates, and admin-account creation |
 
 Expected API failures are returned as a discriminated result:
 
@@ -138,13 +138,17 @@ Only endpoints currently called by the application are listed here.
 | Implemented | `/payment/success` `PaymentSuccessPoller` via `refreshCheckoutStatusAction` | `getOrder(id)` | `GET /orders/:id` | Customer; order id read from the pending-checkout cookie (never from `session_id`) | Order status and linked payment status | `no-store`; polls up to ~25s while the webhook moves payment `PENDING→COMPLETED` / order `CONFIRMED→PAID`; renders paid only after API verification and non-committal processing on timeout; if the cookie is missing it explicitly says verification is unavailable instead of claiming payment; detected failure clears context and routes to `/payment/failed?order_id=` |
 | Implemented | `/payment/failed` outcome screen | `getOrder(id)` | `GET /orders/:id` | Customer; order id from the URL (refresh-safe) | Gear name for context | `no-store`; best-effort read only for copy; terminal screen (order is `CANCELLED`) so it offers view-order and browse-gear, not retry |
 | Implemented | Role overviews and shared `/dashboard/payments` register | `listPayments(query)` | `GET /payments?search?&status?&orderStatus?&page=&limit=` | Authenticated; backend automatically scopes records by role; URL-owned search covers gear/customer/provider, Stripe references, or exact full payment/order UUID | Payment amount/status, linked order and gear, timestamps, and pagination metadata | `no-store`; each payment displays its complete copyable order UUID; payment and linked-order status filters combine with database search and persist across page links; completed/pending totals come from metadata; Stripe/webhook status is backend truth |
+| Implemented | `/dashboard/payments/[id]` payment detail | `getPayment(id)` | `GET /payments/:id` | Authenticated; UUID from the URL is Zod-checked before the request; the backend scopes the record by role and returns `404` for payments outside that scope | Payment status/amount/timestamps, Stripe session and payment-intent references, and the linked rental order's dates, quantity, total, gear, category, provider, and customer | `no-store`; `loading.tsx` skeleton; invalid UUID and `403`/`404` both render `notFound()`; other failures show a persistent retry/back alert; customers see the provider card while providers and admins see the customer card; cross-links to the rental order and back to the register |
 | Implemented | Admin overview and `/dashboard/users` search/filter register | `listUsers(query)` | `GET /users?search?&role?&status?&page=&limit=` | Admin only; URL-owned name/email/phone search, role, status, and page | User identity, role, account status, timestamps, resource counts, and pagination metadata | `no-store`; filters are preserved across pagination; the page explicitly requires `ADMIN` and backend authorization remains authoritative; failures never render as an empty user list |
 | Implemented | Shared `/dashboard/gear` plus provider/admin overviews | `listGear({ providerId?, search?, category?, isAvailable?, inStock?, page, limit })` | `GET /gear?providerId?&search?&category?&isAvailable?&inStock?&page=&limit=` | Authenticated dashboard page over a public read; provider always passes the canonical current-user id; search/category/availability/stock are URL-owned | Listing, stock, availability, category, provider, price, and metadata | One shared role-aware page exposes database-wide inventory filters and preserves them through pagination; category-loading failure remains visible without hiding gear; admin/provider mutations remain backend-authorized |
-| Implemented | Admin category manager | `listCategories({ search? })` | `GET /categories?search?` | Public case-insensitive name search inside an admin-guarded dashboard route | Filtered category identity, name, and timestamps | 60-second `categories` revalidation; Apply/Clear URL search keeps create controls available and distinguishes no matches from a globally empty category list |
-| Implemented | Admin review moderation register | `listReviews({ search?, rating?, page, limit })` | `GET /reviews?search?&rating?&page=&limit=` | Public read inside an admin-guarded dashboard route; search covers gear/customer/comment or exact UUID and rating accepts 1–5 in 0.1 steps | Review, rating, customer, gear, returned order, timestamps, and metadata | 60-second `reviews` revalidation; every moderation card displays the complete copyable rental-order UUID; search/exact decimal rating persist through backend pagination and protected moderation controls remain available |
+| Implemented | Shared `/dashboard/categories` register: admin category manager or provider read-only list | `listCategories({ search? })` | `GET /categories?search?` | Public case-insensitive name search inside a dashboard route guarded to `ADMIN` and `PROVIDER` | Filtered category identity, name, and timestamps | 60-second `categories` revalidation; Apply/Clear URL search distinguishes no matches from a globally empty category list; admins keep the create/rename/delete controls while providers see the same records without any mutation control |
+| Implemented | Admin review moderation register | `listReviews({ search?, rating?, page, limit })` | `GET /reviews?search?&rating?&page=&limit=` | Public read inside an admin-guarded dashboard route; search covers gear/customer/comment or exact UUID and rating accepts 1–5 in 0.1 steps | Review, rating, customer, gear, returned order, timestamps, and metadata | 60-second `reviews` revalidation; every moderation card displays the complete copyable rental-order UUID and a link to the linked rental order; search/exact decimal rating persist through backend pagination and protected moderation controls remain available |
+| Implemented | Provider read-only review register on `/dashboard/reviews` | `listReviews({ gearItemId, search?, rating?, page, limit })` plus `listGear({ providerId, limit: 100 })` and `getGearItem(id)` | `GET /reviews?gearItemId=&search?&rating?&page=&limit=`, `GET /gear?providerId=&limit=100`, `GET /gear/:id` | Provider; the gear selector lists owned listings and the chosen `gearItemId` is verified against the canonical gear record's `providerId` before any review request | Review, rating, customer, gear, returned order, timestamps, and metadata | 60-second `reviews` revalidation; the register is scoped to one owned listing at a time because `GET /reviews` has no provider filter; unselected and non-owned selections render distinct empty states rather than a misleading list; no create/edit/delete control is rendered and the delete action still requires `ADMIN` |
 | Implemented | Returned customer order detail `OrderReviewCard` | `findReviewForOrder(gearItemId, orderId)` via `listReviews()` | `GET /reviews?gearItemId=&page=&limit=100` | Public read only after a backend-scoped customer order resolves as `RETURNED`; the frontend scans backend pages because there is no direct order-id review filter | Existing review identity, rating, comment, customer, gear, returned order, and timestamps | 60-second `reviews` revalidation; an existing review replaces the form with its backend record; lookup failure stays visible while submission remains available and backend duplicate protection remains authoritative |
 | Implemented | Returned customer order detail `OrderReviewCard` via `createReviewAction` | `createReview(input)` | `POST /reviews` | Customer only; `{ orderId, rating, comment? }`; the action rechecks the canonical role and the backend verifies order ownership, `RETURNED` state, and one-review-per-order | Created review, linked gear/order/customer, rating/comment, and backend success message | `no-store`; Zod and backend field errors render inline plus toast; backend `409` explains non-returned or already-reviewed orders; success immediately updates `reviews`, `gear`, and `gear:<id>` tags plus order/customer paths |
 | Implemented | Admin user register `AdminUserStatusForm` via `updateUserStatusAction` | `updateUserStatus()` | `PATCH /users/:id/status` | Admin; `{ status: "ACTIVE" | "INACTIVE" | "SUSPENDED" }` | Updated user and backend message | The action revalidates the admin role, blocks self-deactivation in the UI and action, preserves backend `409` feedback, refreshes the register, and shows pending, inline, and toast feedback |
+| Implemented | `/dashboard/users/[id]` account detail | `getUser(id)` plus `listGear({ providerId, limit: 5 })` for provider accounts | `GET /users/:id`, `GET /gear?providerId=&limit=5` | Admin only; UUID from the URL is Zod-checked before the request | Identity, role, status, phone/email, created/updated timestamps, and all three `_count` values; a provider's newest listings with stock, availability, category, and daily price | `no-store` for the account, `loading.tsx` skeleton; invalid UUID and `403`/`404` render `notFound()`; other failures show a persistent retry/back alert; a gear-read failure renders inline feedback without hiding the account; the status control reuses `AdminUserStatusForm` and disables itself for the signed-in admin |
+| Implemented | `/dashboard/users/[id]` `AdminUserEditForm` via `updateUserAction` | `updateUser()` | `PATCH /users/:id` | Admin; any non-empty subset of `{ name, email, phone, role }` | Updated user record and backend message | Authorized backend extension; the action revalidates the admin role and mirrors the backend field rules in Zod; duplicate email/phone and blocked role-change `409` messages stay inline plus toast; the role control is disabled for the signed-in admin and its value still submits through a hidden field; the editor collapses only after the backend confirms, refreshes the user register and detail path, and preserves submitted values on failure |
 | Implemented | `/dashboard/admins/new` `AdminCreateAdminForm` via `createAdminAction` | `createAdmin()` | `POST /users/admins` | Admin; `{ name, email, phone, password }` | Created admin identity and backend message | Server validation mirrors the backend; duplicate email/phone details map to fields/toasts; successful creation invalidates user data and returns to `/dashboard/users` |
 | Implemented | Admin category manager via category Server Actions | `createCategory()`, `updateCategory()`, `deleteCategory()` | `POST /categories`, `PATCH /categories/:id`, `DELETE /categories/:id` | Admin; create/update `{ name }`, delete UUID path | Created/updated category or deletion confirmation | Inline create/rename/delete controls use pending states, confirmation before deletion, field errors, and toasts; used-category `409` responses remain visible; `categories` and `gear` tags are invalidated after applicable writes |
 | Implemented | `/dashboard/gear/new`, `/dashboard/gear/[id]/edit`, and admin/provider controls on `/dashboard/gear` | `getGearItemForMutation()` plus `uploadGearImages()` then `createGearItem()`/`updateGearItem()`; `deleteGearItem()` | Public uncached `GET /gear/:id` verification on edit, up to four signed Cloudinary `image/upload` calls, then `POST /gear`, `PATCH /gear/:id`, or `DELETE /gear/:id` | Admin or Provider; gallery is optional and each file is limited to approved image types/5 MB; admin create requires an active `providerId`, provider create omits it; edit submits retained saved URLs separately from new files and the backend ownership check remains authoritative; backend receives only the final HTTPS `imageUrl`/`imageUrls` | Latest gallery plus ordered Cloudinary HTTPS URLs and created/updated gear, or deletion confirmation | Users can add in batches and remove individual saved/new previews without an immediate request; submit uploads only new files, rolls them back if the write fails, and deletes deselected configured-folder assets only after `PATCH` succeeds; stale saved URLs, upload/backend failures, and validation errors render inline plus toast; affected gear paths/tags refresh |
@@ -199,9 +203,33 @@ Only endpoints currently called by the application are listed here.
   Guests arrive through login with this internal return path preserved; the
   page and Server Action both require the CUSTOMER role before reading or
   creating an order.
-- `/dashboard/users`, `/dashboard/categories`, `/dashboard/reviews`, and
-  `/dashboard/admins/new` use role-neutral URLs but explicitly require `ADMIN`
-  inside their pages and actions.
+- `/dashboard/payments/[id]` is a shared role-aware detail route reached from
+  the payments register and from the payment card on `/dashboard/orders/[id]`.
+  It requires a signed-in user and relies on the backend's automatic role
+  scoping rather than a frontend role branch; only the customer-versus-party
+  card selection differs by role.
+- `/dashboard/users`, `/dashboard/users/[id]`, and `/dashboard/admins/new` use
+  role-neutral URLs but explicitly require `ADMIN` inside their pages and
+  actions.
+- The user detail page links into the orders, payments, and reviews registers by
+  handing them a backend search term, and only where the backend can resolve it.
+  `GET /orders` and `GET /reviews` match `customerId` on an exact UUID, so a
+  customer's UUID is used there; `GET /payments` matches no user UUID, so the
+  customer's email is used instead; a provider links only to orders via the
+  owning-provider email match. Combinations the backend cannot answer render no
+  link rather than a dead one.
+- `/dashboard/reviews` is guarded to `ADMIN` and `PROVIDER` through
+  `requireDashboardRoles`. Admins get the platform-wide moderation register with
+  the protected delete control; providers get a per-listing, read-only view of
+  feedback on gear they own. `deleteReviewAction` still calls
+  `requireDashboardRole("ADMIN", ...)`, and the backend restricts review writes
+  to the owning customer or an admin regardless of what the UI renders.
+- `/dashboard/categories` is readable by `ADMIN` and `PROVIDER` through
+  `requireDashboardRoles`. Admins get the full create/rename/delete manager;
+  providers get the same searchable register rendered read-only, because gear
+  forms depend on the taxonomy. Every category Server Action still calls
+  `requireDashboardRole("ADMIN", ...)`, and the backend restricts the mutation
+  endpoints regardless of what the UI renders.
 - Dashboard overview totals are derived from `meta.total` with small parallel
   requests. Orders, payments, users, gear, and reviews registers use URL-owned
   `?page=` pagination, persistent error feedback, successful empty states, and
@@ -290,9 +318,36 @@ Only endpoints currently called by the application are listed here.
   edits are deferred until submit: the action uploads only new files, updates
   the backend's final ordered URLs, then removes deselected assets from the
   configured Cloudinary folder.
+- `GET /reviews` filters by `gearItemId`, `rating`, and `search`, but has no
+  `providerId` or `customerId` filter. The provider review register therefore
+  scopes to one owned listing at a time instead of implying a provider-wide
+  feed, and it verifies the selected `gearItemId` against `GET /gear/:id` rather
+  than trusting the query string. Reviews themselves are a public read, so this
+  check governs how the register is labelled, not who may read the data.
+- `PATCH /users/:id` is an authorized backend extension. The stock backend
+  exposed only `PATCH /users/:id/status`, leaving a user's name, email, phone,
+  and role immutable after registration; the admin user-detail edit form needed
+  a real endpoint rather than invented client-side CRUD. It is admin-only,
+  accepts a non-empty subset of `{ name, email, phone, role }`, reuses the
+  registration field rules, and reports a duplicate email or phone as `409` on
+  the offending field.
+- Role changes through that endpoint are guarded, because a role decides which
+  records an account can still reach. An admin cannot change their own role; a
+  provider that still owns gear cannot change role, since gear mutations require
+  `PROVIDER`/`ADMIN`; and a customer with orders outside `RETURNED`/`CANCELLED`
+  cannot change role, since checkout and customer-side transitions are
+  `CUSTOMER`-only and an in-flight rental would become unpayable. Each case is a
+  `409` naming the blocking record count. Reviews are not blocking: they stay
+  attached to the account, but a demoted customer can no longer edit them.
+- Password and account status remain out of scope for that endpoint: status
+  keeps its own endpoint with the self-suspension guard, and there is still no
+  password-reset or self-service profile endpoint.
 - Admin gear, category, user, order, and review mutations now consume their real
   protected endpoints. Payments intentionally remain read-only, and no admin
   control can author `PAID`; Stripe's signed webhook remains authoritative.
+  Providers get read-only visibility into categories, payments, and reviews on
+  their gear; review create/update stays with the owning customer and delete
+  stays with the customer or an admin.
 - Customer order creation and the real Stripe Checkout return flow now use the
   backend mutations end to end. No dashboard presents placeholder CRUD, invented
   paid states, COD/Pay-Later, or fake success data; `PAID` only ever arrives from

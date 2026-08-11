@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Search, X } from "lucide-react";
 import type {
   Category,
+  GearItem,
   PaymentStatus,
   RentalOrderStatus,
   Role,
@@ -322,6 +323,71 @@ export function ReviewRegisterFilters({
         id="review-search"
         value={values.search}
         placeholder="Gear, customer, comment, or full review/order ID"
+      />
+      <div className="space-y-2">
+        <Label htmlFor="review-rating-filter">Exact rating</Label>
+        <Input
+          id="review-rating-filter"
+          name="rating"
+          type="number"
+          inputMode="decimal"
+          min="1"
+          max="5"
+          step="0.1"
+          defaultValue={values.rating}
+          placeholder="1.0–5.0"
+        />
+      </div>
+    </FilterShell>
+  );
+}
+
+export type ProviderReviewFilterValues = {
+  gearItemId: string;
+  search: string;
+  rating: string;
+};
+
+/**
+ * `GET /reviews` accepts `gearItemId` but has no provider filter, so a provider
+ * reads their feedback one owned listing at a time instead of the frontend
+ * pretending the public review list is provider-scoped.
+ */
+export function ProviderReviewFilters({
+  values,
+  gear,
+}: {
+  values: ProviderReviewFilterValues;
+  gear: GearItem[];
+}) {
+  return (
+    <FilterShell
+      action="/dashboard/reviews"
+      hasFilters={Boolean(values.gearItemId || values.search || values.rating)}
+      resetKey={filterResetKey(values)}
+    >
+      <div className="space-y-2 md:col-span-2">
+        <Label htmlFor="review-gear-filter">Your gear listing</Label>
+        <NativeSelect
+          id="review-gear-filter"
+          name="gearItemId"
+          defaultValue={values.gearItemId}
+          className="w-full"
+        >
+          <NativeSelectOption value="">
+            Select one of your listings
+          </NativeSelectOption>
+          {gear.map((item) => (
+            <NativeSelectOption key={item.id} value={item.id}>
+              {item.name}
+            </NativeSelectOption>
+          ))}
+        </NativeSelect>
+      </div>
+      <SearchField
+        id="review-search"
+        value={values.search}
+        placeholder="Customer, comment, or full review/order ID"
       />
       <div className="space-y-2">
         <Label htmlFor="review-rating-filter">Exact rating</Label>
