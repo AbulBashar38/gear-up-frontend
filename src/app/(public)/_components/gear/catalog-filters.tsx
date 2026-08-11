@@ -154,7 +154,7 @@ export function CatalogFilters({
       <div className="mx-auto grid w-full max-w-[90rem] gap-6 px-5 py-8 sm:px-8 lg:grid-cols-12 lg:px-12 lg:py-10">
         <div className="lg:col-span-9">
           <div className="mb-5 flex items-center gap-3">
-            <span className="grid size-10 place-items-center bg-ink text-lime">
+            <span className="grid size-10 place-items-center bg-pine text-lime">
               <Filter aria-hidden="true" className="size-4" />
             </span>
             <div>

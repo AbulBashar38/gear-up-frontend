@@ -42,7 +42,7 @@ export default async function ServiceUnavailablePage({
     >
       <div aria-hidden="true" className="route-grid absolute inset-0 opacity-20" />
       <section className="relative mx-auto w-full max-w-3xl border border-ink/15 bg-card p-7 sm:p-12">
-        <span className="grid size-14 place-items-center bg-ink text-lime">
+        <span className="grid size-14 place-items-center bg-pine text-lime">
           <WifiOff aria-hidden="true" className="size-6" />
         </span>
         <p className="mt-8 font-mono text-[0.62rem] font-bold uppercase tracking-[0.2em] text-signal">

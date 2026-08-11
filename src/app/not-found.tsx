@@ -17,7 +17,7 @@ export default function NotFound() {
           404
         </p>
         <div className="mt-10 grid gap-6 border-t border-ink/15 pt-8 sm:grid-cols-[auto_1fr] sm:items-start">
-          <span className="grid size-12 place-items-center bg-ink text-lime">
+          <span className="grid size-12 place-items-center bg-pine text-lime">
             <Compass aria-hidden="true" className="size-5" />
           </span>
           <div>

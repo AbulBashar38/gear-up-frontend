@@ -64,7 +64,10 @@ export async function InventorySection() {
                     <span className="font-display text-xl font-black uppercase">
                       {category.name}
                     </span>
-                    <Badge className="size-8 rounded-none bg-ink p-0 font-mono text-[0.62rem] text-lime hover:bg-ink">
+                    {/* `pine` rather than `ink`: ink inverts to near-white in
+                        dark mode, which leaves lime unreadable. Pine stays dark
+                        in both themes, so the chip keeps its contrast. */}
+                    <Badge className="size-8 rounded-none bg-pine p-0 font-mono text-[0.62rem] text-lime hover:bg-pine">
                       0{index + 1}
                     </Badge>
                   </Link>
