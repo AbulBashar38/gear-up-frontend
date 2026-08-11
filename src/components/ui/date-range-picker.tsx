@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
 import type { DateRange } from "react-day-picker"
@@ -30,6 +31,22 @@ type DatePickerWithRangeProps = {
   className?: string
 }
 
+const TWO_MONTHS_QUERY = "(min-width: 640px)"
+
+function subscribeToTwoMonths(callback: () => void) {
+  const mediaQuery = window.matchMedia(TWO_MONTHS_QUERY)
+  mediaQuery.addEventListener("change", callback)
+  return () => mediaQuery.removeEventListener("change", callback)
+}
+
+function getTwoMonthsSnapshot() {
+  return window.matchMedia(TWO_MONTHS_QUERY).matches
+}
+
+function getServerTwoMonthsSnapshot() {
+  return false
+}
+
 function parseDateValue(value?: string): Date | undefined {
   if (!value) return undefined
   const [year, month, day] = value.split("-").map(Number)
@@ -56,6 +73,11 @@ export function DatePickerWithRange({
   disabled,
   className,
 }: DatePickerWithRangeProps) {
+  const showTwoMonths = React.useSyncExternalStore(
+    subscribeToTwoMonths,
+    getTwoMonthsSnapshot,
+    getServerTwoMonthsSnapshot
+  )
   const selected: DateRange | undefined = value.from
     ? { from: parseDateValue(value.from), to: parseDateValue(value.to) }
     : undefined
@@ -103,7 +125,7 @@ export function DatePickerWithRange({
           defaultMonth={selected?.from ?? minimum}
           selected={selected}
           onSelect={commit}
-          numberOfMonths={2}
+          numberOfMonths={showTwoMonths ? 2 : 1}
           disabled={minimum ? { before: minimum } : undefined}
         />
       </PopoverContent>
