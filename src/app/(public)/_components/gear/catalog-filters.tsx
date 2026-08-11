@@ -27,7 +27,7 @@ import {
   type PriceRangeValue,
 } from "./price-range-slider";
 import {
-  DateRangePicker,
+  DatePickerWithRange,
   type DateRangeValue,
 } from "@/components/ui/date-range-picker";
 
@@ -276,7 +276,7 @@ export function CatalogFilters({
               >
                 Availability dates
               </Label>
-              <DateRangePicker
+              <DatePickerWithRange
                 id="availabilityDates"
                 startName="startDate"
                 endName="endDate"

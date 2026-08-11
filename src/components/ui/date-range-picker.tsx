@@ -1,7 +1,7 @@
 "use client"
 
-import * as React from "react"
-import { CalendarDays, X } from "lucide-react"
+import { format } from "date-fns"
+import { CalendarIcon } from "lucide-react"
 import type { DateRange } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
@@ -18,7 +18,7 @@ export type DateRangeValue = {
   to: string
 }
 
-type DateRangePickerProps = {
+type DatePickerWithRangeProps = {
   id?: string
   startName: string
   endName: string
@@ -45,13 +45,7 @@ function formatDateValue(date?: Date): string {
   return `${year}-${month}-${day}`
 }
 
-const displayFormatter = new Intl.DateTimeFormat(undefined, {
-  year: "numeric",
-  month: "short",
-  day: "numeric",
-})
-
-export function DateRangePicker({
+export function DatePickerWithRange({
   id,
   startName,
   endName,
@@ -61,16 +55,15 @@ export function DateRangePicker({
   placeholder = "Select availability dates",
   disabled,
   className,
-}: DateRangePickerProps) {
-  const [open, setOpen] = React.useState(false)
+}: DatePickerWithRangeProps) {
   const selected: DateRange | undefined = value.from
     ? { from: parseDateValue(value.from), to: parseDateValue(value.to) }
     : undefined
   const minimum = parseDateValue(minimumDate)
   const label = selected?.from
     ? selected.to
-      ? `${displayFormatter.format(selected.from)} — ${displayFormatter.format(selected.to)}`
-      : `${displayFormatter.format(selected.from)} — Select end date`
+      ? `${format(selected.from, "LLL dd, y")} - ${format(selected.to, "LLL dd, y")}`
+      : format(selected.from, "LLL dd, y")
     : placeholder
 
   function commit(range?: DateRange) {
@@ -79,11 +72,10 @@ export function DateRangePicker({
       to: formatDateValue(range?.to),
     }
     onValueChange(next)
-    if (next.from && next.to) setOpen(false)
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover>
       <PopoverTrigger asChild>
         <Button
           id={id}
@@ -93,37 +85,27 @@ export function DateRangePicker({
           data-empty={!selected?.from}
           aria-label={`Availability date range: ${label}`}
           className={cn(
-            "h-10 w-full justify-start gap-2 overflow-hidden px-3 font-medium",
+            "h-10 w-full justify-start gap-2 overflow-hidden px-2.5 font-normal",
             "data-[empty=true]:text-ink/55 data-[empty=true]:hover:text-primary-foreground data-[empty=true]:aria-expanded:text-primary-foreground",
             className
           )}
         >
-          <CalendarDays aria-hidden="true" className="size-4 shrink-0" />
+          <CalendarIcon aria-hidden="true" className="size-4 shrink-0" />
           <span className="truncate">{label}</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-auto p-4">
+      <PopoverContent
+        align="start"
+        className="w-auto max-w-[calc(100vw-2rem)] overflow-x-auto p-0"
+      >
         <Calendar
           mode="range"
-          autoFocus
-          selected={selected}
           defaultMonth={selected?.from ?? minimum}
-          disabled={minimum ? { before: minimum } : undefined}
+          selected={selected}
           onSelect={commit}
+          numberOfMonths={2}
+          disabled={minimum ? { before: minimum } : undefined}
         />
-        {(value.from || value.to) && (
-          <div className="mt-3 border-t border-ink/12 pt-3">
-            <Button
-              type="button"
-              variant="ghost"
-              size="compact"
-              onClick={() => commit(undefined)}
-            >
-              <X aria-hidden="true" />
-              Clear dates
-            </Button>
-          </div>
-        )}
       </PopoverContent>
       <input readOnly type="hidden" name={startName} value={value.from} />
       <input readOnly type="hidden" name={endName} value={value.to} />
