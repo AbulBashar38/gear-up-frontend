@@ -56,8 +56,11 @@ export default function RootLayout({
       <body className="min-h-full" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          // Light is the designed default. The toggle only ever sets an
+          // explicit light or dark preference, so following the OS is disabled
+          // rather than silently dark-mode-ing a first-time visitor.
+          defaultTheme="light"
+          enableSystem={false}
           disableTransitionOnChange
           storageKey="gearup-theme"
         >

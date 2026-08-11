@@ -5,7 +5,9 @@ import { Toaster as Sonner, type ToasterProps } from "sonner"
 import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
+  // Falls back to light to match the app's default theme; "system" here would
+  // briefly render toasts dark for an OS-dark visitor before hydration.
+  const { theme = "light" } = useTheme()
 
   return (
     <Sonner
