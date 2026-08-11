@@ -50,7 +50,7 @@ export function AdminOrderAction({ order }: { order: RentalOrder }) {
           name="status"
           defaultValue={transitions[0]}
           disabled={pending}
-          aria-label={`Next status for order ${order.id.slice(0, 8)}`}
+          aria-label={`Next status for order ${order.id}`}
         >
           {transitions.map((status) => (
             <NativeSelectOption key={status} value={status}>

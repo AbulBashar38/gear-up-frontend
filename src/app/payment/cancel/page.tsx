@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { OrderReference } from "@/components/shared/order-reference";
 import { getOrder } from "@/services/orders";
 import { idSchema } from "../../(dashboard)/validation/order.schema";
 import { CancelActions } from "./_components/cancel-actions";
@@ -40,7 +41,10 @@ export default async function PaymentCancelPage({
 
         <div className="mt-6">
           {parsedId.success ? (
-            <CancelPageActions orderId={parsedId.data} />
+            <>
+              <OrderReference orderId={parsedId.data} className="mb-5" />
+              <CancelPageActions orderId={parsedId.data} />
+            </>
           ) : (
             <Button asChild size="lg">
               <Link href="/dashboard/orders">Back to my orders</Link>

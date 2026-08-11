@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { OrderReference } from "@/components/shared/order-reference";
 import { getOrder } from "@/services/orders";
 import { idSchema } from "../../(dashboard)/validation/order.schema";
 
@@ -52,6 +53,12 @@ export default async function PaymentFailedPage({
           You haven&apos;t been charged. You can place the rental request again
           whenever you&apos;re ready.
         </p>
+        {parsedId.success && (
+          <OrderReference
+            orderId={parsedId.data}
+            className="mx-auto mt-6 max-w-md"
+          />
+        )}
         <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
           {parsedId.success && (
             <Button asChild size="lg" variant="outline">

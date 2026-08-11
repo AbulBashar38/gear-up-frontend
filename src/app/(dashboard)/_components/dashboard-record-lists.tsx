@@ -1,7 +1,6 @@
-import Link from "next/link";
-import { ArrowRight, Pencil, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { OrderReference } from "@/components/shared/order-reference";
 import type {
   AdminUser,
   Category,
@@ -10,24 +9,26 @@ import type {
   RentalOrder,
   Review,
 } from "@/lib/types";
+import { ArrowRight, Pencil, Star } from "lucide-react";
+import Link from "next/link";
 import {
   formatDashboardDate,
   formatDashboardMoney,
   formatDashboardRating,
 } from "../_utils/dashboard-format";
 import {
+  AdminDeleteGearButton,
+  AdminDeleteReviewButton,
+} from "./admin-delete-controls";
+import { AdminOrderAction } from "./admin-order-action";
+import { AdminUserStatusForm } from "./admin-user-status-form";
+import { DashboardEmptyState } from "./dashboard-feedback";
+import {
   OrderStatusBadge,
   PaymentStatusBadge,
   UserStatusBadge,
 } from "./dashboard-status-badge";
-import { DashboardEmptyState } from "./dashboard-feedback";
-import { AdminUserStatusForm } from "./admin-user-status-form";
-import { AdminOrderAction } from "./admin-order-action";
 import { OrderStatusActions } from "./order-status-actions";
-import {
-  AdminDeleteGearButton,
-  AdminDeleteReviewButton,
-} from "./admin-delete-controls";
 
 function ListFrame({ children }: { children: React.ReactNode }) {
   return (
@@ -63,7 +64,7 @@ export function OrderList({
         {orders.map((order) => (
           <li
             key={order.id}
-            className="grid gap-5 p-5 sm:p-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(11rem,0.7fr)_auto] lg:items-center"
+            className="grid gap-5 p-5 sm:p-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(10rem,0.6fr)_minmax(17rem,0.9fr)] lg:items-center"
           >
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-3">
@@ -81,7 +82,8 @@ export function OrderList({
                 </Link>
               </h3>
               <p className="mt-1 truncate text-xs text-ink/60">
-                Customer: {order.customer.name} · Provider: {order.gearItem.provider.name}
+                Customer: {order.customer.name} · Provider:{" "}
+                {order.gearItem.provider.name}
               </p>
             </div>
             <div className="text-xs leading-5 text-ink/68">
@@ -95,9 +97,7 @@ export function OrderList({
               <p className="font-display text-2xl font-black">
                 {formatDashboardMoney(order.totalPrice)}
               </p>
-              <p className="mt-1 font-mono text-[0.58rem] uppercase tracking-[0.13em] text-ink/55">
-                #{order.id.slice(0, 8)}
-              </p>
+              <OrderReference orderId={order.id} className="mt-3 lg:ml-auto" />
               <div className="mt-2 flex flex-wrap gap-2 lg:justify-end">
                 <Button asChild variant="ghost" size="compact">
                   <Link href={`/dashboard/orders/${order.id}`}>
@@ -156,9 +156,12 @@ export function PaymentList({ payments }: { payments: Payment[] }) {
                 {payment.rentalOrder.gearItem.name}
               </h3>
               <p className="mt-1 text-xs text-ink/60">
-                Order #{payment.rentalOrderId.slice(0, 8)} ·{" "}
-                {formatDashboardDate(payment.createdAt)}
+                Created {formatDashboardDate(payment.createdAt)}
               </p>
+              <OrderReference
+                orderId={payment.rentalOrderId}
+                className="mt-3 max-w-xl"
+              />
             </div>
             <OrderStatusBadge status={payment.rentalOrder.status} />
             <p className="font-display text-2xl font-black lg:text-right">
@@ -201,10 +204,16 @@ export function GearList({
                   {item.category.name}
                 </Badge>
                 <Badge
-                  variant={item.isAvailable && item.stock > 0 ? "success" : "destructive"}
+                  variant={
+                    item.isAvailable && item.stock > 0
+                      ? "success"
+                      : "destructive"
+                  }
                   className="rounded-none uppercase"
                 >
-                  {item.isAvailable && item.stock > 0 ? "Available" : "Unavailable"}
+                  {item.isAvailable && item.stock > 0
+                    ? "Available"
+                    : "Unavailable"}
                 </Badge>
               </div>
               <h3 className="mt-4 truncate font-display text-2xl font-black uppercase">
@@ -220,7 +229,9 @@ export function GearList({
             <div className="lg:text-right">
               <p className="font-display text-2xl font-black">
                 {formatDashboardMoney(item.pricePerDay)}
-                <span className="ml-1 text-xs font-bold uppercase text-ink/55">/ day</span>
+                <span className="ml-1 text-xs font-bold uppercase text-ink/55">
+                  / day
+                </span>
               </p>
               {adminActions && (
                 <div className="mt-4 flex flex-wrap gap-2 lg:justify-end">
@@ -362,8 +373,14 @@ export function ReviewList({
           <blockquote className="mt-7 line-clamp-5 font-display text-2xl font-bold uppercase leading-tight">
             “{review.comment || "Rating submitted without a written comment."}”
           </blockquote>
+          <OrderReference
+            orderId={review.rentalOrderId}
+            className="mt-5"
+          />
           <footer className="mt-7 flex flex-wrap items-center justify-between gap-4 border-t border-ink/12 pt-4 text-xs text-ink/65">
-            <span>{review.customer.name} · {review.gearItem.name}</span>
+            <span>
+              {review.customer.name} · {review.gearItem.name}
+            </span>
             {adminActions && (
               <AdminDeleteReviewButton
                 reviewId={review.id}

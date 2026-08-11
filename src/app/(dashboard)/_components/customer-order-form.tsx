@@ -57,7 +57,11 @@ export function CustomerOrderForm({
           ? `${state.data.rentalDays} rental day${state.data.rentalDays === 1 ? "" : "s"} · authoritative total saved to your order`
           : undefined,
       });
-      router.push("/dashboard/orders");
+      router.push(
+        state.data?.orderId
+          ? `/dashboard/orders/${state.data.orderId}`
+          : "/dashboard/orders",
+      );
       router.refresh();
     }
   }, [router, state]);

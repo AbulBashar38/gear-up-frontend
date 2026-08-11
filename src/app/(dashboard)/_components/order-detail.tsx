@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, CalendarRange, Package, Store, User } from "lucide-react";
 import type { RentalOrder, Review, Role } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { OrderReference } from "@/components/shared/order-reference";
 import {
   formatDashboardDate,
   formatDashboardMoney,
@@ -87,10 +88,8 @@ export function OrderDetail({
         <div className="flex flex-wrap items-center gap-3">
           <OrderStatusBadge status={order.status} />
           {order.payment && <PaymentStatusBadge status={order.payment.status} />}
-          <span className="font-mono text-[0.6rem] uppercase tracking-[0.13em] text-ink/55">
-            #{order.id.slice(0, 8)}
-          </span>
         </div>
+        <OrderReference orderId={order.id} className="mt-4 max-w-2xl" />
         <h1 className="mt-4 font-display text-3xl font-black uppercase leading-tight sm:text-4xl">
           <Link
             href={`/gear/${order.gearItemId}`}

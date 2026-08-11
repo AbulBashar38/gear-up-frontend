@@ -7,6 +7,7 @@ import { Check, Clock, Loader2 } from "lucide-react";
 import type { PaymentStatus, RentalOrderStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { OrderReference } from "@/components/shared/order-reference";
 import {
   finalizeCheckoutAction,
   refreshCheckoutStatusAction,
@@ -102,6 +103,7 @@ export function PaymentSuccessPoller({
       <Panel
         icon={Check}
         tone="success"
+        orderId={orderId}
         title="Payment successful"
         description="Your rental is paid and confirmed. The provider will prepare it for pickup — you can track everything from your order."
       >
@@ -120,6 +122,7 @@ export function PaymentSuccessPoller({
       <Panel
         icon={Clock}
         tone="muted"
+        orderId={orderId}
         title="Payment confirmation is processing"
         description="Stripe is still confirming your payment. This can take a moment — check your order shortly and the status will update automatically."
       >
@@ -137,6 +140,7 @@ export function PaymentSuccessPoller({
     <Panel
       icon={Loader2}
       tone="muted"
+      orderId={orderId}
       spin
       title="Confirming your payment"
       description="Please wait while we verify the payment with Stripe. Don't close this tab."
@@ -147,6 +151,7 @@ export function PaymentSuccessPoller({
 function Panel({
   icon: Icon,
   tone,
+  orderId,
   spin = false,
   title,
   description,
@@ -154,6 +159,7 @@ function Panel({
 }: {
   icon: typeof Check;
   tone: "success" | "danger" | "muted";
+  orderId: string;
   spin?: boolean;
   title: string;
   description: string;
@@ -196,8 +202,12 @@ function Panel({
         {title}
       </h1>
       <p className="mx-auto mt-3 max-w-md text-sm text-ink/70">{description}</p>
+      <OrderReference
+        orderId={orderId}
+        className="mx-auto mt-6 max-w-xl"
+      />
       {children && (
-        <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
           {children}
         </div>
       )}
