@@ -99,7 +99,7 @@ export function DatePickerField({
           {selected ? displayFormatter.format(selected) : placeholder}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-auto">
+      <PopoverContent align="start" className="w-auto p-0">
         <Calendar
           mode="single"
           autoFocus
