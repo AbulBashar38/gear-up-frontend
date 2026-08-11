@@ -19,7 +19,7 @@ export default async function AdminDashboardPage() {
   const user = await requireDashboardRole("ADMIN", "/dashboard/admin");
   const [users, gear, orders, payments] = await Promise.all([
     listUsers({ page: 1, limit: 1 }),
-    listGear({ page: 1, limit: 1 }),
+    listGear({ isAvailable: true, inStock: true, page: 1, limit: 1 }),
     listOrders({ page: 1, limit: 5 }),
     listPayments({ page: 1, limit: 1 }),
   ]);
@@ -46,7 +46,7 @@ export default async function AdminDashboardPage() {
 
       <section aria-label="Admin dashboard totals" className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <DashboardMetricCard code="ADM—01" label="Users" value={getResultTotal(users)} detail="Customer, provider, and admin accounts." href="/dashboard/users" icon={Users} />
-        <DashboardMetricCard code="ADM—02" label="Gear" value={getResultTotal(gear)} detail="All inventory published across providers." href="/dashboard/gear" icon={Boxes} tone="orange" />
+        <DashboardMetricCard code="ADM—02" label="Active gear" value={getResultTotal(gear)} detail="Available listings with at least one item in stock." href="/dashboard/gear" icon={Boxes} tone="orange" />
         <DashboardMetricCard code="ADM—03" label="Orders" value={getResultTotal(orders)} detail="All rental requests across the platform." href="/dashboard/orders" icon={ClipboardList} tone="lime" />
         <DashboardMetricCard code="ADM—04" label="Payments" value={getResultTotal(payments)} detail="Stripe-backed payment records at every status." href="/dashboard/payments" icon={CreditCard} tone="ink" />
       </section>

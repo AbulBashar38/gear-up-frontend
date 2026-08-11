@@ -72,7 +72,7 @@ export default async function ProviderDashboardPage() {
           </div>
           <Button asChild variant="outline" size="compact"><Link href="/dashboard/orders">View all orders</Link></Button>
         </div>
-        {requests.ok && <OrderList orders={requests.data} />}
+        {requests.ok && <OrderList orders={requests.data} providerActions />}
       </section>
     </div>
   );

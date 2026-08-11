@@ -69,6 +69,7 @@ export type GearItem = {
   isAvailable: boolean;
   pricePerDay: DecimalValue;
   imageUrl: string | null;
+  imageUrls: string[];
   brand: string | null;
   createdAt: string;
   updatedAt: string;
@@ -146,11 +147,16 @@ export type ReviewMutationState = {
 
 export type GearCatalogQuery = {
   providerId?: string;
+  search?: string;
   category?: string;
   brand?: string;
   price?: number;
   minPrice?: number;
   maxPrice?: number;
+  isAvailable?: boolean;
+  inStock?: boolean;
+  startDate?: string;
+  endDate?: string;
   page?: number;
   limit?: number;
 };
@@ -324,6 +330,7 @@ export type CreateGearInput = {
   isAvailable: boolean;
   pricePerDay: number;
   imageUrl?: string | null;
+  imageUrls?: string[];
   brand?: string | null;
 };
 

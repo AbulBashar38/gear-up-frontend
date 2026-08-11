@@ -3,19 +3,28 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import type { ApiMeta } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 
-function pageHref(pathname: string, page: number) {
+function pageHref(
+  pathname: string,
+  page: number,
+  query?: Record<string, string | undefined>,
+) {
   const params = new URLSearchParams();
+  Object.entries(query ?? {}).forEach(([key, value]) => {
+    if (value) params.set(key, value);
+  });
   if (page > 1) params.set("page", String(page));
-  const query = params.toString();
-  return query ? `${pathname}?${query}` : pathname;
+  const queryString = params.toString();
+  return queryString ? `${pathname}?${queryString}` : pathname;
 }
 
 export function DashboardPagination({
   pathname,
   meta,
+  query,
 }: {
   pathname: string;
   meta: ApiMeta;
+  query?: Record<string, string | undefined>;
 }) {
   const totalPages = Math.max(1, Math.ceil(meta.total / meta.limit));
   if (totalPages <= 1) return null;
@@ -31,7 +40,7 @@ export function DashboardPagination({
       <div className="flex gap-2">
         {meta.page > 1 ? (
           <Button asChild variant="outline" size="compact">
-            <Link href={pageHref(pathname, meta.page - 1)}>
+            <Link href={pageHref(pathname, meta.page - 1, query)}>
               <ArrowLeft aria-hidden="true" />
               Previous
             </Link>
@@ -44,7 +53,7 @@ export function DashboardPagination({
         )}
         {meta.page < totalPages ? (
           <Button asChild variant="outline" size="compact">
-            <Link href={pageHref(pathname, meta.page + 1)}>
+            <Link href={pageHref(pathname, meta.page + 1, query)}>
               Next
               <ArrowRight aria-hidden="true" />
             </Link>

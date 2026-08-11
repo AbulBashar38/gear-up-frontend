@@ -14,7 +14,7 @@ import {
 import { getZodFieldErrors } from "@/lib/validations/zod-errors";
 import {
   removeUploadedGearImage,
-  uploadGearImage,
+  uploadGearImages,
 } from "@/services/cloudinary";
 import {
   createCategory,
@@ -249,7 +249,9 @@ export async function deleteReviewAction(
 }
 
 function readGearForm(formData: FormData) {
-  const imageValue = formData.get("image");
+  const images = formData
+    .getAll("images")
+    .filter((value): value is File => value instanceof File && value.size > 0);
   const input = {
     categoryId: readTrimmed(formData, "categoryId"),
     providerId: readTrimmed(formData, "providerId"),
@@ -258,10 +260,7 @@ function readGearForm(formData: FormData) {
     stock: readTrimmed(formData, "stock"),
     pricePerDay: readTrimmed(formData, "pricePerDay"),
     brand: readTrimmed(formData, "brand"),
-    image:
-      imageValue instanceof File && imageValue.size === 0
-        ? undefined
-        : (imageValue ?? undefined),
+    images,
     isAvailable: formData.get("isAvailable") === "on",
   };
   const values = {
@@ -301,22 +300,27 @@ export async function createGearAction(
     );
   }
 
-  const { image, ...gearData } = parsed.data;
-  const uploaded = image ? await uploadGearImage(image) : null;
+  const { images, ...gearData } = parsed.data;
+  const uploaded = images.length > 0 ? await uploadGearImages(images) : null;
   if (uploaded && !uploaded.ok) {
     return errorState(
       uploaded.message,
-      { image: [uploaded.message] },
+      { images: [uploaded.message] },
       form.values,
     );
   }
 
   const result = await createGearItem({
     ...gearData,
-    imageUrl: uploaded?.url ?? null,
+    imageUrl: uploaded?.images[0]?.url ?? null,
+    imageUrls: uploaded?.images.map((image) => image.url) ?? [],
   });
   if (!result.ok) {
-    if (uploaded) await removeUploadedGearImage(uploaded.publicId);
+    if (uploaded?.ok) {
+      await Promise.all(
+        uploaded.images.map((image) => removeUploadedGearImage(image.publicId)),
+      );
+    }
     return errorState(result.error.message, result.error.fieldErrors, form.values);
   }
 
@@ -346,22 +350,31 @@ export async function updateGearAction(
     );
   }
 
-  const { image, ...gearData } = parsed.data;
-  const uploaded = image ? await uploadGearImage(image) : null;
+  const { images, ...gearData } = parsed.data;
+  const uploaded = images.length > 0 ? await uploadGearImages(images) : null;
   if (uploaded && !uploaded.ok) {
     return errorState(
       uploaded.message,
-      { image: [uploaded.message] },
+      { images: [uploaded.message] },
       form.values,
     );
   }
 
   const result = await updateGearItem(gearId, {
     ...gearData,
-    ...(uploaded ? { imageUrl: uploaded.url } : {}),
+    ...(uploaded?.ok
+      ? {
+          imageUrl: uploaded.images[0]?.url ?? null,
+          imageUrls: uploaded.images.map((image) => image.url),
+        }
+      : {}),
   });
   if (!result.ok) {
-    if (uploaded) await removeUploadedGearImage(uploaded.publicId);
+    if (uploaded?.ok) {
+      await Promise.all(
+        uploaded.images.map((image) => removeUploadedGearImage(image.publicId)),
+      );
+    }
     return errorState(result.error.message, result.error.fieldErrors, form.values);
   }
 

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   GEAR_IMAGE_MAX_BYTES,
+  GEAR_IMAGE_MAX_FILES,
   GEAR_IMAGE_MIME_TYPES,
 } from "@/lib/image-upload";
 
@@ -67,27 +68,39 @@ const priceSchema = z
       .max(99999999.99, "Price per day is too large."),
   );
 
-const gearImageSchema = z
-  .unknown()
-  .superRefine((value, context) => {
-    if (typeof File === "undefined" || !(value instanceof File)) {
-      context.addIssue({ code: "custom", message: "Choose a valid image file." });
-      return;
-    }
-    if (!GEAR_IMAGE_MIME_TYPES.some((type) => type === value.type)) {
+const gearImagesSchema = z
+  .array(
+    z.custom<File>(
+      (value) => typeof File !== "undefined" && value instanceof File,
+    ),
+  )
+  .max(
+    GEAR_IMAGE_MAX_FILES,
+    `Choose no more than ${GEAR_IMAGE_MAX_FILES} images.`,
+  )
+  .superRefine((files, context) => {
+    if (
+      files.some(
+        (file) =>
+          !GEAR_IMAGE_MIME_TYPES.some((type) => type === file.type),
+      )
+    ) {
       context.addIssue({
         code: "custom",
-        message: "Use a JPEG, PNG, WebP, or AVIF image.",
+        message: "Use only JPEG, PNG, WebP, or AVIF images.",
       });
     }
-    if (value.size > GEAR_IMAGE_MAX_BYTES) {
+    if (
+      files.some(
+        (file) => file.size === 0 || file.size > GEAR_IMAGE_MAX_BYTES,
+      )
+    ) {
       context.addIssue({
         code: "custom",
-        message: "Image must be 5 MB or smaller.",
+        message: "Each image must be 5 MB or smaller.",
       });
     }
-  })
-  .transform((value) => value as File);
+  });
 
 const optionalBrandSchema = z
   .string()
@@ -109,7 +122,7 @@ const gearFields = {
   stock: stockSchema,
   pricePerDay: priceSchema,
   brand: optionalBrandSchema,
-  image: gearImageSchema.optional(),
+  images: gearImagesSchema,
   isAvailable: z.boolean(),
 };
 

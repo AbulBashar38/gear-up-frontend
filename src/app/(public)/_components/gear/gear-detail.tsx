@@ -8,7 +8,6 @@ import {
   Star,
   UserRound,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,6 +17,7 @@ import { getTrustedGearImageUrl } from "../../_utils/gear-image";
 import { Reveal } from "../landing/motion-primitives";
 import { formatGearPrice, GearIcon } from "./gear-card";
 import { RentalRequestCard } from "./rental-request-card";
+import { GearGallery } from "./gear-gallery";
 
 function formatReviewDate(value: string) {
   const date = new Date(value);
@@ -40,7 +40,11 @@ function getRating(value: string | number) {
 
 export function GearDetail({ gear }: { gear: GearDetailType }) {
   const canRequest = gear.isAvailable && gear.stock > 0;
-  const imageUrl = getTrustedGearImageUrl(gear.imageUrl);
+  const imageUrls = Array.from(
+    new Set([gear.imageUrl, ...(gear.imageUrls ?? [])]),
+  )
+    .map(getTrustedGearImageUrl)
+    .filter((url): url is string => Boolean(url));
   const ratings = gear.reviews
     .map((review) => getRating(review.rating))
     .filter((rating): rating is number => rating !== null);
@@ -62,29 +66,22 @@ export function GearDetail({ gear }: { gear: GearDetailType }) {
 
           <div className="mt-8 grid gap-8 lg:grid-cols-12 lg:items-stretch">
             <Reveal className="lg:col-span-7">
-              <div className="relative min-h-[25rem] overflow-hidden border border-paper/15 bg-orange text-ink sm:min-h-[34rem]">
-                <div aria-hidden="true" className="route-grid absolute inset-0 opacity-35" />
-                {imageUrl ? (
-                  <Image
-                    src={imageUrl}
-                    alt={gear.name}
-                    fill
-                    priority
-                    sizes="(min-width: 1024px) 58vw, 100vw"
-                    className="object-cover"
-                  />
-                ) : (
+              {imageUrls.length > 0 ? (
+                <GearGallery name={gear.name} images={imageUrls} />
+              ) : (
+                <div className="relative min-h-[25rem] overflow-hidden border border-paper/15 bg-orange text-ink sm:min-h-[34rem]">
+                  <div aria-hidden="true" className="route-grid absolute inset-0 opacity-35" />
                   <div className="absolute inset-0 grid place-items-center">
                     <GearIcon gear={gear} className="size-44 sm:size-64" />
                   </div>
-                )}
-                <Badge
-                  variant="outline"
-                  className="absolute bottom-5 left-5 h-auto rounded-none border-current/35 bg-paper/90 px-3 py-2 font-mono text-[0.62rem] font-bold uppercase tracking-[0.18em] text-ink"
-                >
-                  {imageUrl ? "Provider photo" : "Catalog field visual"}
-                </Badge>
-              </div>
+                  <Badge
+                    variant="outline"
+                    className="absolute bottom-5 left-5 h-auto rounded-none border-current/35 bg-paper/90 px-3 py-2 font-mono text-[0.62rem] font-bold uppercase tracking-[0.18em] text-ink"
+                  >
+                    Catalog field visual
+                  </Badge>
+                </div>
+              )}
             </Reveal>
 
             <Reveal delay={0.08} className="flex lg:col-span-5">

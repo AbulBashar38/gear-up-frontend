@@ -1,4 +1,8 @@
-import { Filter, Info, RotateCcw } from "lucide-react";
+"use client";
+
+import { useEffect, useRef, useTransition, type ChangeEvent } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { Filter, Info, LoaderCircle, RotateCcw, Search } from "lucide-react";
 import Link from "next/link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -15,16 +19,57 @@ type CatalogFiltersProps = {
   categories: Category[];
   categoriesError?: string;
   values: CatalogFilterValues;
+  minimumDate: string;
 };
 
 export function CatalogFilters({
   categories,
   categoriesError,
   values,
+  minimumDate,
 }: CatalogFiltersProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const formRef = useRef<HTMLFormElement>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isPending, startTransition] = useTransition();
   const hasKnownCategory = categories.some(
     (category) => category.id === values.category,
   );
+
+  useEffect(
+    () => () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    },
+    [],
+  );
+
+  function replaceFromForm() {
+    if (!formRef.current) return;
+    if (timerRef.current) clearTimeout(timerRef.current);
+
+    const params = new URLSearchParams();
+    const data = new FormData(formRef.current);
+    for (const [key, rawValue] of data.entries()) {
+      const value = String(rawValue).trim();
+      if (value) params.set(key, value);
+    }
+    const query = params.toString();
+    startTransition(() => router.replace(query ? `${pathname}?${query}` : pathname));
+  }
+
+  function scheduleReplace(target: HTMLInputElement | HTMLSelectElement) {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    const delay = target.tagName === "SELECT" || target.type === "date" ? 100 : 450;
+    timerRef.current = setTimeout(replaceFromForm, delay);
+  }
+
+  function handleFormChange(event: ChangeEvent<HTMLFormElement>) {
+    const target = event.target;
+    if (target instanceof HTMLInputElement || target instanceof HTMLSelectElement) {
+      scheduleReplace(target);
+    }
+  }
 
   return (
     <section aria-labelledby="catalog-filters-title" className="bg-mist">
@@ -46,10 +91,37 @@ export function CatalogFilters({
           </div>
 
           <form
+            ref={formRef}
+            key={JSON.stringify(values)}
             action="/gear"
             method="get"
-            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              replaceFromForm();
+            }}
+            onChange={handleFormChange}
+            className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
           >
+            <div className="space-y-2 sm:col-span-2 xl:col-span-4">
+              <Label
+                htmlFor="search"
+                className="text-[0.68rem] font-extrabold uppercase tracking-[0.16em] text-ink/70"
+              >
+                Keyword search
+              </Label>
+              <div className="relative">
+                <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink/45" />
+                <Input
+                  id="search"
+                  name="search"
+                  type="search"
+                  defaultValue={values.search}
+                  maxLength={255}
+                  placeholder="Search gear, descriptions, brands, categories, or providers"
+                  className="h-11 rounded-lg bg-paper pl-10"
+                />
+              </div>
+            </div>
             <div className="space-y-2">
               <Label
                 htmlFor="category"
@@ -140,13 +212,52 @@ export function CatalogFilters({
               />
             </div>
 
-            <div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row lg:col-span-4">
+            <div className="space-y-2">
+              <Label
+                htmlFor="startDate"
+                className="text-[0.68rem] font-extrabold uppercase tracking-[0.16em] text-ink/70"
+              >
+                Available from
+              </Label>
+              <Input
+                id="startDate"
+                name="startDate"
+                type="date"
+                min={minimumDate}
+                defaultValue={values.startDate}
+                className="h-10 rounded-lg bg-paper"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label
+                htmlFor="endDate"
+                className="text-[0.68rem] font-extrabold uppercase tracking-[0.16em] text-ink/70"
+              >
+                Available through
+              </Label>
+              <Input
+                id="endDate"
+                name="endDate"
+                type="date"
+                min={values.startDate || minimumDate}
+                defaultValue={values.endDate}
+                className="h-10 rounded-lg bg-paper"
+              />
+            </div>
+
+            <div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row xl:col-span-4">
               <Button
                 type="submit"
                 variant="primary"
+                disabled={isPending}
               >
-                Apply filters
-                <Filter aria-hidden="true" />
+                {isPending ? "Updating…" : "Apply filters"}
+                {isPending ? (
+                  <LoaderCircle aria-hidden="true" className="animate-spin" />
+                ) : (
+                  <Filter aria-hidden="true" />
+                )}
               </Button>
               <Button
                 asChild
@@ -170,9 +281,9 @@ export function CatalogFilters({
             Search scope
           </AlertTitle>
           <AlertDescription className="mt-2 text-xs leading-5 text-ink/70">
-            These filters query the complete backend catalog. Keyword and date
-            availability search are not exposed by the current API; brand
-            matching is exact.
+            Controls update the URL and query the complete backend catalog.
+            Date results exclude stock reserved by confirmed, paid, or picked-up
+            orders; brand matching remains exact.
           </AlertDescription>
         </Alert>
       </div>

@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   GEAR_IMAGE_ACCEPT,
   GEAR_IMAGE_MAX_BYTES,
+  GEAR_IMAGE_MAX_FILES,
   GEAR_IMAGE_MIME_TYPES,
 } from "@/lib/image-upload";
 import { createGearAction, updateGearAction } from "../_actions/admin-actions";
@@ -132,16 +133,19 @@ export function AdminGearForm({
 
         <PhotoUpload
           id="gear-image"
-          name="image"
-          label="Gear photo"
-          hint="Use a clear landscape photo showing the complete item. JPEG, PNG, WebP, or AVIF; maximum 5 MB."
+          name="images"
+          label="Gear image gallery"
+          hint="Choose up to four clear photos. JPEG, PNG, WebP, or AVIF; maximum 5 MB each."
           accept={GEAR_IMAGE_ACCEPT}
           acceptedTypes={GEAR_IMAGE_MIME_TYPES}
           maxBytes={GEAR_IMAGE_MAX_BYTES}
+          maxFiles={GEAR_IMAGE_MAX_FILES}
           disabled={pending}
           optional
-          defaultPreviewUrl={gear?.imageUrl}
-          errors={fields.image}
+          defaultPreviewUrls={Array.from(
+            new Set([gear?.imageUrl, ...(gear?.imageUrls ?? [])].filter((url): url is string => Boolean(url))),
+          )}
+          errors={fields.images}
           className="lg:col-span-2"
         />
 

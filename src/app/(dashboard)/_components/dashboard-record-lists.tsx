@@ -23,6 +23,7 @@ import {
 import { DashboardEmptyState } from "./dashboard-feedback";
 import { AdminUserStatusForm } from "./admin-user-status-form";
 import { AdminOrderAction } from "./admin-order-action";
+import { OrderStatusActions } from "./order-status-actions";
 import {
   AdminDeleteGearButton,
   AdminDeleteReviewButton,
@@ -39,10 +40,12 @@ function ListFrame({ children }: { children: React.ReactNode }) {
 export function OrderList({
   orders,
   adminActions = false,
+  providerActions = false,
   customerActions = false,
 }: {
   orders: RentalOrder[];
   adminActions?: boolean;
+  providerActions?: boolean;
   customerActions?: boolean;
 }) {
   if (orders.length === 0) {
@@ -114,6 +117,11 @@ export function OrderList({
               {adminActions && (
                 <div className="mt-4">
                   <AdminOrderAction order={order} />
+                </div>
+              )}
+              {providerActions && (
+                <div className="mt-4 lg:[&_form]:justify-end">
+                  <OrderStatusActions order={order} role="PROVIDER" />
                 </div>
               )}
             </div>

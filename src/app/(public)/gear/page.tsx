@@ -10,7 +10,7 @@ import type { GearPageSearchParams } from "../_utils/catalog-query";
 export const metadata: Metadata = {
   title: "Explore all gear",
   description:
-    "Filter the GearUp equipment catalog by category, exact brand, and daily price.",
+    "Search GearUp equipment by keyword, category, brand, price, and rental-date availability.",
 };
 
 export default function GearCatalogPage({

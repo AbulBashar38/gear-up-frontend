@@ -13,7 +13,9 @@ type DashboardRegisterPageProps = {
   problem?: ApiProblem;
   meta?: ApiMeta;
   pathname?: string;
+  paginationQuery?: Record<string, string | undefined>;
   actions?: ReactNode;
+  filters?: ReactNode;
   children?: ReactNode;
 };
 
@@ -25,7 +27,9 @@ export function DashboardRegisterPage({
   problem,
   meta,
   pathname,
+  paginationQuery,
   actions,
+  filters,
   children,
 }: DashboardRegisterPageProps) {
   return (
@@ -46,6 +50,8 @@ export function DashboardRegisterPage({
         </Badge>
       </div>
 
+      {filters}
+
       {problem ? (
         <div className="mt-6">
           <DashboardApiFeedback problems={[problem]} />
@@ -55,7 +61,11 @@ export function DashboardRegisterPage({
       )}
 
       {meta && pathname && (
-        <DashboardPagination pathname={pathname} meta={meta} />
+        <DashboardPagination
+          pathname={pathname}
+          meta={meta}
+          query={paginationQuery}
+        />
       )}
     </div>
   );

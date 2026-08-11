@@ -73,7 +73,7 @@ export function CatalogResults({
             className="mt-8 rounded-none p-5"
           >
             <TriangleAlert aria-hidden="true" />
-            <AlertTitle>Check the price filters</AlertTitle>
+            <AlertTitle>Check the catalog filters</AlertTitle>
             <AlertDescription>
               {validationErrors.map((error) => (
                 <p key={error}>{error}</p>

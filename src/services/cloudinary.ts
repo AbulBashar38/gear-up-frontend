@@ -13,6 +13,10 @@ export type CloudinaryUploadResult =
   | { ok: true; url: string; publicId: string }
   | { ok: false; message: string };
 
+export type CloudinaryGalleryUploadResult =
+  | { ok: true; images: Array<{ url: string; publicId: string }> }
+  | { ok: false; message: string };
+
 const DEFAULT_GEAR_FOLDER = "gearup/gear";
 
 function configureCloudinary() {
@@ -127,4 +131,23 @@ export async function removeUploadedGearImage(publicId: string) {
   } catch {
     // Best-effort cleanup must not hide the authoritative backend error.
   }
+}
+
+export async function uploadGearImages(
+  files: File[],
+): Promise<CloudinaryGalleryUploadResult> {
+  const images: Array<{ url: string; publicId: string }> = [];
+
+  for (const file of files) {
+    const result = await uploadGearImage(file);
+    if (!result.ok) {
+      await Promise.all(
+        images.map((image) => removeUploadedGearImage(image.publicId)),
+      );
+      return result;
+    }
+    images.push({ url: result.url, publicId: result.publicId });
+  }
+
+  return { ok: true, images };
 }

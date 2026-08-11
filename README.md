@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GearUp Frontend
 
-## Getting Started
+GearUp is a role-based sports and outdoor equipment rental marketplace. Customers search gear and request rentals, providers manage inventory and fulfillment, and admins operate users, categories, listings, orders, payments, and review moderation.
 
-First, run the development server:
+## Stack
+
+- Next.js 16.2 App Router, React 19, strict TypeScript
+- Tailwind CSS 4 and code-owned accessible UI components
+- Native server-side `fetch`, Server Actions, Zod, and HttpOnly JWT cookies
+- Cloudinary signed server uploads for gear galleries
+- Stripe hosted Checkout through the GearUp Express/Prisma backend
+
+## Implemented flows
+
+- Public landing page, paginated catalog, keyword/category/brand/price filters, and date-aware availability search
+- Gear details with up to four images, specifications, reviews, availability state, and rental CTA
+- Customer/provider registration, login, logout, access-token refresh, and role-aware route protection
+- Customer rental requests, order/payment history, Stripe success/cancel/failure handling, and returned-order reviews
+- Provider inventory CRUD, gallery upload, dashboard metrics, and inline order fulfillment actions
+- Admin platform totals, user search/role/status filters, status management, admin creation, categories, all gear/orders/payments, and review moderation
+
+The exact frontend-to-endpoint map and error/cache behavior are documented in [API_INTEGRATION.md](./API_INTEGRATION.md).
+
+## Local setup
+
+Requirements: Node.js 20+, npm, a running GearUp backend, PostgreSQL for the backend, Stripe test credentials/webhook forwarding, and Cloudinary credentials for image uploads.
 
 ```bash
+npm install
+cp .env.example .env
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The frontend runs at `http://localhost:3000`. The default `.env.example` points to `http://localhost:8080/api`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+For this workspace's backend reference:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+cd backend
+npm install
+npx prisma migrate deploy
+npm run dev
+```
 
-## Learn More
+The current frontend depends on the included backend extension for `GET /gear` keyword/date/active-stock filters and the `imageUrls` gallery field. Apply the migration before testing those flows.
 
-To learn more about Next.js, take a look at the following resources:
+## Environment variables
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `GEARUP_API_URL` | Yes | Server-only API base including `/api` |
+| `GEARUP_CURRENCY` | Yes | Display currency matching backend Stripe configuration |
+| `CLOUDINARY_CLOUD_NAME` | For uploads | Server-only Cloudinary cloud name |
+| `CLOUDINARY_API_KEY` | For uploads | Server-only Cloudinary API key |
+| `CLOUDINARY_API_SECRET` | For uploads | Server-only signing secret |
+| `CLOUDINARY_GEAR_FOLDER` | No | Optional upload folder |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Never prefix backend URLs, JWTs, Stripe secrets, or Cloudinary secrets with `NEXT_PUBLIC_`.
 
-## Deploy on Vercel
+## Verification
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run lint
+npm run build
+cd backend && npm run build
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The repository currently has no automated test suite; lint, strict TypeScript production builds, API smoke tests, and manual role/Stripe walkthroughs are the verification path.
+
+## Stripe return behavior
+
+The frontend never treats `session_id` as payment proof. It stores the backend order/payment references in a short-lived HttpOnly cookie before redirecting to Stripe, then polls the authenticated order while the signed webhook updates payment truth. If that context is missing, the success route asks the customer to inspect their API-backed order status and does not claim payment was received.
+
+## Deployment checklist
+
+- Deploy the backend and apply all Prisma migrations, including the gear gallery migration.
+- Set the backend `APP_URL` to the deployed frontend so Stripe return URLs are correct.
+- Configure the deployed Stripe webhook and verify a real test Checkout lifecycle.
+- Configure all server-only frontend environment variables.
+- Create a dedicated grading admin, verify it against the deployed stack, and provide that non-personal email/password with the submission.
+- Add the deployed frontend URL and record the required 7–10 minute walkthrough video.
+
+Do not commit real credentials. The deployed URL, grading account, and video link are submission artifacts and are intentionally not fabricated in this repository.

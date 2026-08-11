@@ -53,6 +53,7 @@ export default async function OrdersPage({ searchParams }: DashboardListPageProp
         <OrderList
           orders={result.data}
           adminActions={user.role === "ADMIN"}
+          providerActions={user.role === "PROVIDER"}
           customerActions={user.role === "CUSTOMER"}
         />
       )}

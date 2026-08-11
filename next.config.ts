@@ -14,9 +14,9 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     serverActions: {
-      // Gear images are capped at 5 MB; the extra room covers multipart
-      // boundaries and the remaining form fields.
-      bodySizeLimit: "6mb",
+      // A gallery accepts up to four 5 MB images; the extra room covers
+      // multipart boundaries and the remaining form fields.
+      bodySizeLimit: "22mb",
     },
   },
 };

@@ -45,6 +45,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
       className={`${manrope.variable} ${barlowCondensed.variable} ${spaceMono.variable} h-full`}
     >

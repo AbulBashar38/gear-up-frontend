@@ -13,11 +13,16 @@ export function listGear(query: GearCatalogQuery = {}) {
   return gearUpFetch<GearItem[]>("/gear", {
     query: {
       providerId: query.providerId,
+      search: query.search,
       category: query.category,
       brand: query.brand,
       price: query.price,
       minPrice: query.minPrice,
       maxPrice: query.maxPrice,
+      isAvailable: query.isAvailable,
+      inStock: query.inStock,
+      startDate: query.startDate,
+      endDate: query.endDate,
       page: query.page ?? 1,
       limit: query.limit ?? 12,
     },

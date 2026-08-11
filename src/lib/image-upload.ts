@@ -1,4 +1,5 @@
 export const GEAR_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+export const GEAR_IMAGE_MAX_FILES = 4;
 
 export const GEAR_IMAGE_MIME_TYPES = [
   "image/jpeg",

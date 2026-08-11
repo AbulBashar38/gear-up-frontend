@@ -38,11 +38,15 @@ export async function CatalogContent({ searchParams }: CatalogContentProps) {
     category: matchedCategory?.id ?? parsed.values.category,
   };
   const activeFilters = [
+    parsed.values.search && `Search: ${parsed.values.search}`,
     representedValues.category &&
       `Category: ${matchedCategory?.name ?? "Selected"}`,
     parsed.values.brand && `Brand: ${parsed.values.brand}`,
     parsed.values.minPrice && `From: ${parsed.values.minPrice}`,
     parsed.values.maxPrice && `Up to: ${parsed.values.maxPrice}`,
+    parsed.values.startDate &&
+      parsed.values.endDate &&
+      `Available: ${parsed.values.startDate} — ${parsed.values.endDate}`,
   ].filter((value): value is string => Boolean(value));
   const totalPages =
     catalog?.ok && catalog.meta && catalog.meta.limit > 0
@@ -65,6 +69,7 @@ export async function CatalogContent({ searchParams }: CatalogContentProps) {
           categories.ok ? undefined : categories.error.message
         }
         values={representedValues}
+        minimumDate={new Date().toISOString().slice(0, 10)}
       />
       <CatalogResults
         catalog={catalog}
