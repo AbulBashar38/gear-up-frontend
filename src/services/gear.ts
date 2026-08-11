@@ -6,8 +6,19 @@ import type {
   GearCatalogQuery,
   GearDetail,
   GearItem,
+  GearPriceRange,
   UpdateGearInput,
 } from "@/lib/types";
+
+export function getGearPriceRange() {
+  return gearUpFetch<GearPriceRange>("/gear/price-range", {
+    next: {
+      revalidate: 60,
+      tags: ["gear"],
+    },
+    fallbackMessage: "The catalog price range couldn't be loaded.",
+  });
+}
 
 export function listGear(query: GearCatalogQuery = {}) {
   return gearUpFetch<GearItem[]>("/gear", {

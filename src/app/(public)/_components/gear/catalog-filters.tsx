@@ -22,19 +22,33 @@ import {
   buildGearHref,
   type CatalogFilterValues,
 } from "../../_utils/catalog-query";
+import {
+  PriceRangeSlider,
+  type PriceRangeValue,
+} from "./price-range-slider";
 
 type CatalogFiltersProps = {
   categories: Category[];
   categoriesError?: string;
   values: CatalogFilterValues;
   minimumDate: string;
+  priceBounds?: PriceRangeValue;
+  priceRangeError?: string;
+  currency: string;
 };
+
+function clamp(value: number, minimum: number, maximum: number) {
+  return Math.min(Math.max(value, minimum), maximum);
+}
 
 export function CatalogFilters({
   categories,
   categoriesError,
   values,
   minimumDate,
+  priceBounds,
+  priceRangeError,
+  currency,
 }: CatalogFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -42,6 +56,18 @@ export function CatalogFilters({
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isPending, startTransition] = useTransition();
   const [draftStartDate, setDraftStartDate] = useState(values.startDate);
+  const [draftPrice, setDraftPrice] = useState<PriceRangeValue>(() => {
+    if (!priceBounds) return { min: 0, max: 0 };
+    const requestedMin = values.minPrice ? Number(values.minPrice) : Number.NaN;
+    const requestedMax = values.maxPrice ? Number(values.maxPrice) : Number.NaN;
+    const min = Number.isFinite(requestedMin)
+      ? clamp(requestedMin, priceBounds.min, priceBounds.max)
+      : priceBounds.min;
+    const max = Number.isFinite(requestedMax)
+      ? clamp(requestedMax, priceBounds.min, priceBounds.max)
+      : priceBounds.max;
+    return { min: Math.min(min, max), max: Math.max(min, max) };
+  });
   const hasKnownCategory = categories.some(
     (category) => category.id === values.category,
   );
@@ -61,6 +87,13 @@ export function CatalogFilters({
     const data = new FormData(formRef.current);
     for (const [key, rawValue] of data.entries()) {
       const value = String(rawValue).trim();
+      if (
+        priceBounds &&
+        ((key === "minPrice" && Number(value) === priceBounds.min) ||
+          (key === "maxPrice" && Number(value) === priceBounds.max))
+      ) {
+        continue;
+      }
       if (value) params.set(key, value);
     }
     const query = params.toString();
@@ -117,6 +150,7 @@ export function CatalogFilters({
       }
     }
     setDraftStartDate("");
+    if (priceBounds) setDraftPrice(priceBounds);
     startTransition(() => router.replace(pathname, { scroll: false }));
   }
 
@@ -220,45 +254,25 @@ export function CatalogFilters({
               />
             </div>
 
-            <div className="space-y-2">
-              <Label
-                htmlFor="minPrice"
-                className="text-[0.68rem] font-extrabold uppercase tracking-[0.16em] text-ink/70"
-              >
-                Minimum daily price
-              </Label>
-              <Input
-                id="minPrice"
-                name="minPrice"
-                type="number"
-                min="0"
-                step="0.01"
-                inputMode="decimal"
-                defaultValue={values.minPrice}
-                placeholder="0"
-                className="h-10 rounded-lg bg-paper"
+            {priceBounds ? (
+              <PriceRangeSlider
+                bounds={priceBounds}
+                value={draftPrice}
+                currency={currency}
+                onValueChange={setDraftPrice}
               />
-            </div>
-
-            <div className="space-y-2">
-              <Label
-                htmlFor="maxPrice"
-                className="text-[0.68rem] font-extrabold uppercase tracking-[0.16em] text-ink/70"
-              >
-                Maximum daily price
-              </Label>
-              <Input
-                id="maxPrice"
-                name="maxPrice"
-                type="number"
-                min="0"
-                step="0.01"
-                inputMode="decimal"
-                defaultValue={values.maxPrice}
-                placeholder="No maximum"
-                className="h-10 rounded-lg bg-paper"
-              />
-            </div>
+            ) : (
+              <div className="space-y-2 sm:col-span-2 xl:col-span-2">
+                <Label className="text-[0.68rem] font-extrabold uppercase tracking-[0.16em] text-ink/70">
+                  Daily price range
+                </Label>
+                <div className="grid min-h-20 place-items-center border border-dashed border-ink/25 bg-paper/55 px-4 text-center text-xs text-ink/60">
+                  {priceRangeError ?? "Add a gear item to enable price filtering."}
+                </div>
+                <input type="hidden" name="minPrice" value={values.minPrice} />
+                <input type="hidden" name="maxPrice" value={values.maxPrice} />
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label

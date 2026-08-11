@@ -161,6 +161,11 @@ export type GearCatalogQuery = {
   limit?: number;
 };
 
+export type GearPriceRange = {
+  minPrice: DecimalValue | null;
+  maxPrice: DecimalValue | null;
+};
+
 export type ReviewListQuery = {
   gearItemId?: string;
   rating?: number;
