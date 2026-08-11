@@ -9,11 +9,12 @@ export const ROLE_HOME: Record<Role, string> = {
 };
 
 // Dashboard path prefixes that only some roles may view. Shared registers such
-// as /dashboard/orders, /dashboard/payments, and /dashboard/gear are
-// intentionally absent: their pages resolve the role and scope the data
-// themselves. /dashboard/categories is readable by providers because gear forms
-// depend on the taxonomy, but every category mutation stays admin-only in the
-// Server Actions and in the backend.
+// as /dashboard/orders and /dashboard/payments are intentionally absent: their
+// pages resolve the role and scope the data themselves. /dashboard/categories
+// is readable by providers because gear forms depend on the taxonomy, but every
+// category mutation stays admin-only in the Server Actions and in the backend.
+// /dashboard/gear is provider inventory and admin oversight; customers discover
+// gear through the public /gear catalog instead.
 const ROLE_RESTRICTED_PREFIXES: ReadonlyArray<{
   prefix: string;
   roles: readonly Role[];
@@ -23,6 +24,7 @@ const ROLE_RESTRICTED_PREFIXES: ReadonlyArray<{
   { prefix: "/dashboard/admin", roles: ["ADMIN"] },
   { prefix: "/dashboard/users", roles: ["ADMIN"] },
   { prefix: "/dashboard/categories", roles: ["ADMIN", "PROVIDER"] },
+  { prefix: "/dashboard/gear", roles: ["ADMIN", "PROVIDER"] },
   { prefix: "/dashboard/admins", roles: ["ADMIN"] },
 ];
 

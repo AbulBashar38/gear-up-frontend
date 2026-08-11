@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowUpRight, LogOut, Menu } from "lucide-react";
+import { LogOut, Menu } from "lucide-react";
 import type { CurrentUser } from "@/lib/types";
 import { BrandMark } from "@/components/shared/brand-mark";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
@@ -61,9 +61,6 @@ function NavigationLinks({
               </span>
               <item.icon aria-hidden="true" className="size-4" />
               <span>{item.label}</span>
-              {item.href === "/dashboard/gear" && user.role === "CUSTOMER" && (
-                <ArrowUpRight aria-hidden="true" className="ml-auto size-3.5" />
-              )}
             </Link>
           );
 

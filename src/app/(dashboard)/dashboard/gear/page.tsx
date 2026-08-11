@@ -11,7 +11,7 @@ import {
   type GearFilterValues,
 } from "../../_components/dashboard-register-filters";
 import { DashboardApiFeedback } from "../../_components/dashboard-feedback";
-import { requireDashboardUser } from "../../_utils/dashboard-access";
+import { requireDashboardRoles } from "../../_utils/dashboard-access";
 import {
   type DashboardListPageProps,
   parseDashboardChoice,
@@ -20,13 +20,12 @@ import {
 } from "../../_utils/dashboard-query";
 import { getResultTotal } from "../../_utils/dashboard-results";
 
-const GEAR_COPY: Record<Role, { eyebrow: string; title: string; description: string }> = {
-  CUSTOMER: {
-    eyebrow: "Customer register // discovery",
-    title: "Available gear",
-    description:
-      "Browse the platform inventory before opening the public catalog to filter and request rental gear.",
-  },
+// Customers are not served here: gear discovery lives in the public `/gear`
+// catalog, so this register is provider inventory and admin oversight only.
+const GEAR_COPY: Record<
+  Exclude<Role, "CUSTOMER">,
+  { eyebrow: string; title: string; description: string }
+> = {
   PROVIDER: {
     eyebrow: "Provider register // inventory",
     title: "Owned gear",
@@ -53,7 +52,7 @@ export default async function DashboardGearPage({
     stock: parseDashboardChoice(params.stock, ["true", "false"]),
   };
   const [user, categoriesResult] = await Promise.all([
-    requireDashboardUser("/dashboard/gear"),
+    requireDashboardRoles(["PROVIDER", "ADMIN"], "/dashboard/gear"),
     listCategories(),
   ]);
   const result = await listGear({
@@ -67,8 +66,8 @@ export default async function DashboardGearPage({
     page,
     limit: 8,
   });
-  const copy = GEAR_COPY[user.role];
-  const canManageGear = user.role === "ADMIN" || user.role === "PROVIDER";
+  const copy =
+    user.role === "PROVIDER" ? GEAR_COPY.PROVIDER : GEAR_COPY.ADMIN;
 
   return (
     <DashboardRegisterPage
@@ -100,23 +99,19 @@ export default async function DashboardGearPage({
       }
       actions={
         <>
-          {canManageGear && (
-            <Button asChild size="lg">
-              <Link href="/dashboard/gear/new">
-                <PackagePlus aria-hidden="true" />
-                Add gear
-              </Link>
-            </Button>
-          )}
+          <Button asChild size="lg">
+            <Link href="/dashboard/gear/new">
+              <PackagePlus aria-hidden="true" />
+              Add gear
+            </Link>
+          </Button>
           <Button asChild variant="outline" size="lg">
             <Link href="/gear">View public catalog</Link>
           </Button>
         </>
       }
     >
-      {result.ok && (
-        <GearList gear={result.data} adminActions={canManageGear} />
-      )}
+      {result.ok && <GearList gear={result.data} adminActions />}
     </DashboardRegisterPage>
   );
 }

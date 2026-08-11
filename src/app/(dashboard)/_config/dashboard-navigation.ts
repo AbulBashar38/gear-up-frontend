@@ -4,7 +4,6 @@ import {
   ClipboardList,
   CreditCard,
   LayoutDashboard,
-  PackageSearch,
   Star,
   Tags,
   Users,
@@ -44,7 +43,9 @@ export const DASHBOARD_NAVIGATION: Record<
       href: "/dashboard/payments",
       icon: CreditCard,
     },
-    { label: "Browse gear", href: "/dashboard/gear", icon: PackageSearch },
+    // No gear entry: customers discover gear through the public `/gear`
+    // catalog, which the customer overview links to. `/dashboard/gear` is the
+    // provider/admin inventory register.
   ],
   PROVIDER: [
     {
