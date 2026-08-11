@@ -34,7 +34,8 @@ sharing one server-only client; domain and envelope types live in
 | `src/app/(dashboard)/validation/order.schema.ts` | Customer rental-request validation for UUID, real date-only values, non-past start, ordered dates, and positive integer quantity |
 | `src/app/(dashboard)/validation/review.schema.ts` | Returned-order review validation for UUID, 1–5 rating with one decimal place, and optional 3–2,000 character comment |
 | `src/components/shared/photo-upload.tsx` | Accessible multi-image picker with local object-URL previews, primary-image ordering, instant count/type/size feedback, replace, and cancel controls |
-| `src/app/(public)/_components/gear/price-range-slider.tsx` | Accessible dual-handle native range control whose draft minimum/maximum values submit only through the catalog Apply action |
+| `src/components/ui/slider.tsx` | Reusable Shadcn/Radix multi-thumb Slider primitive with theme styling and per-thumb accessible labels |
+| `src/app/(public)/_components/gear/price-range-slider.tsx` | Accessible dual-handle Shadcn price control whose hidden draft minimum/maximum values submit only through the catalog Apply action |
 | `src/lib/image-upload.ts` | Browser-safe accepted image MIME types, file-input accept value, four-file cap, and the 5 MB per-file limit |
 | `src/lib/validations/zod-errors.ts` | Cross-route adapter from flattened Zod failures to the shared `FieldErrors` action-state shape |
 | `src/services/errors.ts` | Safe JSON/object guards, validation-detail mapping, retryability, and sanitized user-facing problems |
