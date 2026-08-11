@@ -13,6 +13,12 @@ function refreshSession(returnTo: string): never {
   redirect(`/auth/refresh?returnTo=${encodeURIComponent(safeReturnTo(returnTo))}`);
 }
 
+function showServiceUnavailable(returnTo: string): never {
+  redirect(
+    `/service-unavailable?returnTo=${encodeURIComponent(safeReturnTo(returnTo))}`,
+  );
+}
+
 export async function requireDashboardUser(returnTo = "/dashboard") {
   const result = await getCurrentUser();
 
@@ -21,7 +27,11 @@ export async function requireDashboardUser(returnTo = "/dashboard") {
       refreshSession(returnTo);
     }
 
-    throw new Error(result.error.message);
+    // A missing/misconfigured API, network outage, invalid gateway response, or
+    // backend 5xx is an expected service interruption. Preserve the session
+    // cookies and move outside the protected layout so the failure cannot turn
+    // into a dashboard render loop or an uncaught layout exception.
+    showServiceUnavailable(returnTo);
   }
 
   return result.data;
