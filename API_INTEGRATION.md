@@ -101,7 +101,9 @@ does not accept multipart files. The protected gear form submits files to
 the Next.js Server Action. Zod accepts up to four JPEG, PNG, WebP, or AVIF files
 of 5 MB each; Next.js permits 22 MB action bodies for the bounded multipart
 gallery. The shared `PhotoUpload` component previews all selected browser files
-locally and supports repeated selection plus a per-photo close control. During
+locally and supports repeated selection plus a per-photo close control. When a
+selection exceeds the remaining gallery slots, it keeps the allowed files and
+shows how many extras were ignored instead of rejecting the full selection. During
 edits, saved URLs are submitted separately from new browser files, so removing a
 preview only stages that change and does not touch storage before submission.
 The Server Action reloads the current backend gallery, rejects stale or tampered

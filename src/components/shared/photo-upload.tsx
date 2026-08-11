@@ -112,34 +112,34 @@ export function PhotoUpload({
       return;
     }
 
-    const existingFiles = new Set(
+    const knownFiles = new Set(
       pendingImages.map((image) => fileIdentity(image.file)),
     );
-    const uniqueFiles = files.filter(
-      (file) => !existingFiles.has(fileIdentity(file)),
-    );
+    const uniqueFiles = files.filter((file) => {
+      const identity = fileIdentity(file);
+      if (knownFiles.has(identity)) return false;
+      knownFiles.add(identity);
+      return true;
+    });
     if (uniqueFiles.length === 0) {
       setLocalError("Those images are already selected.");
       syncFileInput(pendingImages);
       return;
     }
-    if (uniqueFiles.length > remainingSlots) {
-      setLocalError(
-        remainingSlots === 0
-          ? `Remove an image before adding another. The gallery limit is ${maxFiles}.`
-          : `You can add ${remainingSlots} more ${remainingSlots === 1 ? "image" : "images"}.`,
-      );
-      syncFileInput(pendingImages);
-      return;
-    }
 
-    const additions = uniqueFiles.map((file) => ({
+    const acceptedFiles = uniqueFiles.slice(0, remainingSlots);
+    const ignoredCount = uniqueFiles.length - acceptedFiles.length;
+    const additions = acceptedFiles.map((file) => ({
       id: crypto.randomUUID(),
       file,
       previewUrl: URL.createObjectURL(file),
     }));
     const nextImages = [...pendingImages, ...additions];
-    setLocalError(null);
+    setLocalError(
+      ignoredCount > 0
+        ? `The gallery allows ${maxFiles} images. Kept ${acceptedFiles.length} from this selection and ignored ${ignoredCount} extra ${ignoredCount === 1 ? "image" : "images"}.`
+        : null,
+    );
     setPendingImages(nextImages);
     syncFileInput(nextImages);
   }
