@@ -58,6 +58,51 @@ function isCloudinarySecureUrl(value: string) {
   }
 }
 
+function getStoredGearImagePublicId(value: string) {
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME?.trim();
+  if (!cloudName) return null;
+
+  try {
+    const url = new URL(value);
+    const segments = url.pathname
+      .split("/")
+      .filter(Boolean)
+      .map((segment) => decodeURIComponent(segment));
+    if (
+      url.protocol !== "https:" ||
+      url.hostname !== "res.cloudinary.com" ||
+      segments[0] !== cloudName ||
+      segments[1] !== "image" ||
+      segments[2] !== "upload"
+    ) {
+      return null;
+    }
+
+    const versionIndex = segments.findIndex(
+      (segment, index) => index >= 3 && /^v\d+$/.test(segment),
+    );
+    if (versionIndex < 0 || versionIndex === segments.length - 1) return null;
+
+    const assetSegments = segments.slice(versionIndex + 1);
+    const filename = assetSegments.at(-1);
+    if (!filename) return null;
+    assetSegments[assetSegments.length - 1] = filename.replace(
+      /\.(?:avif|jpe?g|png|webp)$/i,
+      "",
+    );
+
+    const publicId = assetSegments.join("/");
+    const gearFolder = getGearFolder();
+    if (publicId !== gearFolder && !publicId.startsWith(`${gearFolder}/`)) {
+      return null;
+    }
+
+    return publicId;
+  } catch {
+    return null;
+  }
+}
+
 export async function uploadGearImage(
   file: File,
 ): Promise<CloudinaryUploadResult> {
@@ -131,6 +176,12 @@ export async function removeUploadedGearImage(publicId: string) {
   } catch {
     // Best-effort cleanup must not hide the authoritative backend error.
   }
+}
+
+export async function removeStoredGearImage(url: string) {
+  const publicId = getStoredGearImagePublicId(url);
+  if (!publicId) return;
+  await removeUploadedGearImage(publicId);
 }
 
 export async function uploadGearImages(

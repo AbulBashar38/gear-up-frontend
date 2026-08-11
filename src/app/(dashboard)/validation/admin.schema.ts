@@ -102,6 +102,13 @@ const gearImagesSchema = z
     }
   });
 
+const retainedGearImagesSchema = z
+  .array(z.url("A saved gallery image is not valid."))
+  .max(
+    GEAR_IMAGE_MAX_FILES,
+    `Keep no more than ${GEAR_IMAGE_MAX_FILES} saved images.`,
+  );
+
 const optionalBrandSchema = z
   .string()
   .trim()
@@ -123,15 +130,42 @@ const gearFields = {
   pricePerDay: priceSchema,
   brand: optionalBrandSchema,
   images: gearImagesSchema,
+  retainedImageUrls: retainedGearImagesSchema,
   isAvailable: z.boolean(),
 };
 
-export const createGearFormSchema = z.object({
-  ...gearFields,
-  providerId: z.uuid("Choose an active provider."),
-});
+function validateGallerySize(
+  value: { images: File[]; retainedImageUrls: string[] },
+  context: z.RefinementCtx,
+) {
+  if (value.images.length + value.retainedImageUrls.length > GEAR_IMAGE_MAX_FILES) {
+    context.addIssue({
+      code: "custom",
+      path: ["images"],
+      message: `Keep or add no more than ${GEAR_IMAGE_MAX_FILES} images in total.`,
+    });
+  }
+}
 
-export const updateGearFormSchema = z.object(gearFields);
+export const createGearFormSchema = z
+  .object({
+    ...gearFields,
+    providerId: z.uuid("Choose an active provider."),
+  })
+  .superRefine((value, context) => {
+    validateGallerySize(value, context);
+    if (value.retainedImageUrls.length > 0) {
+      context.addIssue({
+        code: "custom",
+        path: ["images"],
+        message: "A new listing cannot retain saved gallery images.",
+      });
+    }
+  });
+
+export const updateGearFormSchema = z
+  .object(gearFields)
+  .superRefine(validateGallerySize);
 
 export function idSchema(label: string) {
   return z.uuid(`${label} is not valid.`);

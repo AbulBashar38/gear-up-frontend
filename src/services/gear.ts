@@ -55,6 +55,14 @@ export function getGearItem(id: string) {
   });
 }
 
+export function getGearItemForMutation(id: string) {
+  return gearUpFetch<GearDetail>(`/gear/${id}`, {
+    cache: "no-store",
+    fallbackMessage:
+      "The latest gallery could not be loaded. Refresh the page and try again.",
+  });
+}
+
 export function createGearItem(input: CreateGearInput) {
   return gearUpFetch<GearItem>("/gear", {
     method: "POST",

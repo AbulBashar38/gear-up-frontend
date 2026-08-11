@@ -101,12 +101,16 @@ does not accept multipart files. The protected gear form submits files to
 the Next.js Server Action. Zod accepts up to four JPEG, PNG, WebP, or AVIF files
 of 5 MB each; Next.js permits 22 MB action bodies for the bounded multipart
 gallery. The shared `PhotoUpload` component previews all selected browser files
-locally and lets the user replace or cancel the gallery before any network
-request. During edits, canceling a replacement restores the saved Cloudinary
-gallery. The server-only Cloudinary SDK streams signed uploads and returns HTTPS
-`secure_url` values. The first becomes backward-compatible `imageUrl`; the full
-ordered set is sent as `imageUrls`. If any upload or the backend mutation fails,
-all newly uploaded public IDs are destroyed as best-effort compensation. No
+locally and supports repeated selection plus a per-photo close control. During
+edits, saved URLs are submitted separately from new browser files, so removing a
+preview only stages that change and does not touch storage before submission.
+The Server Action reloads the current backend gallery, rejects stale or tampered
+saved URLs, uploads only the new files, and sends the retained-plus-new ordered
+set as `imageUrls`; its first URL remains the compatible `imageUrl` cover. Only
+after the backend accepts that final gallery does the server delete deselected
+assets from the configured Cloudinary gear folder. If any new upload or the
+backend mutation fails, all newly uploaded public IDs are destroyed as
+best-effort compensation while the saved gallery remains unchanged. No
 Cloudinary secret or raw image is forwarded to the GearUp API.
 
 ## Consumed endpoints
@@ -141,7 +145,7 @@ Only endpoints currently called by the application are listed here.
 | Implemented | Admin user register `AdminUserStatusForm` via `updateUserStatusAction` | `updateUserStatus()` | `PATCH /users/:id/status` | Admin; `{ status: "ACTIVE" | "INACTIVE" | "SUSPENDED" }` | Updated user and backend message | The action revalidates the admin role, blocks self-deactivation in the UI and action, preserves backend `409` feedback, refreshes the register, and shows pending, inline, and toast feedback |
 | Implemented | `/dashboard/admins/new` `AdminCreateAdminForm` via `createAdminAction` | `createAdmin()` | `POST /users/admins` | Admin; `{ name, email, phone, password }` | Created admin identity and backend message | Server validation mirrors the backend; duplicate email/phone details map to fields/toasts; successful creation invalidates user data and returns to `/dashboard/users` |
 | Implemented | Admin category manager via category Server Actions | `createCategory()`, `updateCategory()`, `deleteCategory()` | `POST /categories`, `PATCH /categories/:id`, `DELETE /categories/:id` | Admin; create/update `{ name }`, delete UUID path | Created/updated category or deletion confirmation | Inline create/rename/delete controls use pending states, confirmation before deletion, field errors, and toasts; used-category `409` responses remain visible; `categories` and `gear` tags are invalidated after applicable writes |
-| Implemented | `/dashboard/gear/new`, `/dashboard/gear/[id]/edit`, and admin/provider controls on `/dashboard/gear` | `uploadGearImages()` then `createGearItem()`/`updateGearItem()`; `deleteGearItem()` | Up to four signed Cloudinary `image/upload` calls, then `POST /gear`, `PATCH /gear/:id`, or `DELETE /gear/:id` | Admin or Provider; gallery is optional and each file is limited to approved image types/5 MB; admin create requires an active `providerId`, provider create omits it; backend ownership remains authoritative; backend receives only HTTPS `imageUrl`/`imageUrls` | Ordered Cloudinary HTTPS URLs plus created/updated gear, or deletion confirmation | Upload and backend errors share inline/toast feedback; submit stays pending through the sequence; all newly uploaded assets are destroyed if a later upload/backend write fails; affected gear paths/tags refresh |
+| Implemented | `/dashboard/gear/new`, `/dashboard/gear/[id]/edit`, and admin/provider controls on `/dashboard/gear` | `getGearItemForMutation()` plus `uploadGearImages()` then `createGearItem()`/`updateGearItem()`; `deleteGearItem()` | Public uncached `GET /gear/:id` verification on edit, up to four signed Cloudinary `image/upload` calls, then `POST /gear`, `PATCH /gear/:id`, or `DELETE /gear/:id` | Admin or Provider; gallery is optional and each file is limited to approved image types/5 MB; admin create requires an active `providerId`, provider create omits it; edit submits retained saved URLs separately from new files and the backend ownership check remains authoritative; backend receives only the final HTTPS `imageUrl`/`imageUrls` | Latest gallery plus ordered Cloudinary HTTPS URLs and created/updated gear, or deletion confirmation | Users can add in batches and remove individual saved/new previews without an immediate request; submit uploads only new files, rolls them back if the write fails, and deletes deselected configured-folder assets only after `PATCH` succeeds; stale saved URLs, upload/backend failures, and validation errors render inline plus toast; affected gear paths/tags refresh |
 | Implemented | Admin order registers and overview `AdminOrderAction` via `updateOrderStatusAction` | `updateOrderStatus()` | `PATCH /orders/:id/status` | Admin; exact lifecycle-controlled `{ status }` | Updated order and backend message | Controls expose only valid manual transitions, never `PAID`; stale-state/backend `409` errors show inline and as toasts; order/payment paths are revalidated after success |
 | Implemented | Order detail plus provider overview/register `OrderStatusActions` via `changeOrderStatusAction` | `updateOrderStatus()` | `PATCH /orders/:id/status` | Any authenticated user; buttons follow the role+transition map (customer cancels own `PLACED`/`CONFIRMED`; provider/admin confirm, cancel, pick up, return); `PAID`/`PLACED` are never requestable | Updated order and backend message | Provider fulfillment actions are available inline in order lists; cancel requires confirmation; the action re-verifies the session and lets the backend enforce ownership/state, mapping `403`/`409` to toasts; affected paths refresh after success |
 | Implemented | Admin review register `AdminReviewDeleteControl` via `deleteReviewAction` | `deleteReview()` | `DELETE /reviews/:id` | Admin; UUID path | Deletion confirmation | Requires explicit browser confirmation, disables while pending, surfaces the real backend error, and invalidates review pages/tags on success |
@@ -272,7 +276,10 @@ Only endpoints currently called by the application are listed here.
   therefore use the documented server-side Cloudinary adapter and persist only
   returned HTTPS URLs. The authorized backend extension adds an ordered
   `imageUrls` array while retaining `imageUrl` as the compatible catalog cover;
-  public fallback visuals remain available for records with no image.
+  public fallback visuals remain available for records with no image. Gallery
+  edits are deferred until submit: the action uploads only new files, updates
+  the backend's final ordered URLs, then removes deselected assets from the
+  configured Cloudinary folder.
 - Admin gear, category, user, order, and review mutations now consume their real
   protected endpoints. Payments intentionally remain read-only, and no admin
   control can author `PAID`; Stripe's signed webhook remains authoritative.

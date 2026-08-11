@@ -13,6 +13,7 @@ import {
 } from "../validation/admin.schema";
 import { getZodFieldErrors } from "@/lib/validations/zod-errors";
 import {
+  removeStoredGearImage,
   removeUploadedGearImage,
   uploadGearImages,
 } from "@/services/cloudinary";
@@ -24,6 +25,7 @@ import {
 import {
   createGearItem,
   deleteGearItem,
+  getGearItemForMutation,
   updateGearItem,
 } from "@/services/gear";
 import { updateOrderStatus } from "@/services/orders";
@@ -252,6 +254,15 @@ function readGearForm(formData: FormData) {
   const images = formData
     .getAll("images")
     .filter((value): value is File => value instanceof File && value.size > 0);
+  const retainedImageUrls = Array.from(
+    new Set(
+      formData
+        .getAll("retainedImageUrls")
+        .filter((value): value is string => typeof value === "string")
+        .map((value) => value.trim())
+        .filter(Boolean),
+    ),
+  );
   const input = {
     categoryId: readTrimmed(formData, "categoryId"),
     providerId: readTrimmed(formData, "providerId"),
@@ -261,6 +272,7 @@ function readGearForm(formData: FormData) {
     pricePerDay: readTrimmed(formData, "pricePerDay"),
     brand: readTrimmed(formData, "brand"),
     images,
+    retainedImageUrls,
     isAvailable: formData.get("isAvailable") === "on",
   };
   const values = {
@@ -300,7 +312,14 @@ export async function createGearAction(
     );
   }
 
-  const { images, ...gearData } = parsed.data;
+  const { images, retainedImageUrls, ...gearData } = parsed.data;
+  if (retainedImageUrls.length > 0) {
+    return errorState(
+      "A new listing cannot retain saved gallery images.",
+      { images: ["Choose new photos for this listing."] },
+      form.values,
+    );
+  }
   const uploaded = images.length > 0 ? await uploadGearImages(images) : null;
   if (uploaded && !uploaded.ok) {
     return errorState(
@@ -350,7 +369,27 @@ export async function updateGearAction(
     );
   }
 
-  const { images, ...gearData } = parsed.data;
+  const { images, retainedImageUrls, ...gearData } = parsed.data;
+  const current = await getGearItemForMutation(gearId);
+  if (!current.ok) {
+    return errorState(current.error.message, undefined, form.values);
+  }
+
+  const currentImageUrls = Array.from(
+    new Set(
+      [current.data.imageUrl, ...current.data.imageUrls].filter(
+        (url): url is string => Boolean(url),
+      ),
+    ),
+  );
+  if (retainedImageUrls.some((url) => !currentImageUrls.includes(url))) {
+    return errorState(
+      "The saved gallery changed while you were editing. Refresh the page and try again.",
+      { images: ["One or more saved gallery images are no longer current."] },
+      form.values,
+    );
+  }
+
   const uploaded = images.length > 0 ? await uploadGearImages(images) : null;
   if (uploaded && !uploaded.ok) {
     return errorState(
@@ -360,14 +399,14 @@ export async function updateGearAction(
     );
   }
 
+  const newImageUrls = uploaded?.ok
+    ? uploaded.images.map((image) => image.url)
+    : [];
+  const finalImageUrls = [...retainedImageUrls, ...newImageUrls];
   const result = await updateGearItem(gearId, {
     ...gearData,
-    ...(uploaded?.ok
-      ? {
-          imageUrl: uploaded.images[0]?.url ?? null,
-          imageUrls: uploaded.images.map((image) => image.url),
-        }
-      : {}),
+    imageUrl: finalImageUrls[0] ?? null,
+    imageUrls: finalImageUrls,
   });
   if (!result.ok) {
     if (uploaded?.ok) {
@@ -377,6 +416,11 @@ export async function updateGearAction(
     }
     return errorState(result.error.message, result.error.fieldErrors, form.values);
   }
+
+  const removedImageUrls = currentImageUrls.filter(
+    (url) => !retainedImageUrls.includes(url),
+  );
+  await Promise.all(removedImageUrls.map(removeStoredGearImage));
 
   invalidateAdmin(["/dashboard/admin", "/dashboard/gear"], [
     "gear",
