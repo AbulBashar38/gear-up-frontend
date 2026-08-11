@@ -67,6 +67,23 @@ Next.js documentation. If the example has no corresponding feature, state that
 in the working notes and use the established GearUp conventions. Never skip
 this inspection merely because a similar GearUp file already exists.
 
+**Mandatory Shadcn-first component workflow:** Before building or replacing
+any UI control, primitive, form element, overlay, navigation element, feedback
+element, or data-display pattern, check whether a suitable Shadcn component is
+already present under `src/components/ui/`. If it is not installed, check
+whether the official Shadcn registry provides a suitable component and whether
+it can be added or adapted safely for this project. Use the existing or
+official Shadcn component when it satisfies the required behavior, composing
+and styling it for the GearUp design instead of rebuilding the primitive from
+scratch. Prefer Shadcn/Radix accessibility and interaction behavior for
+controls such as forms, sliders, selects, dialogs, sheets, popovers, tabs,
+tables, pagination, skeletons, alerts, and toasts. Write a new custom primitive
+only when no appropriate Shadcn component exists or when the available
+component cannot meet a concrete product, accessibility, or technical
+requirement. In that case, state the reason in the working notes before writing
+the custom implementation. Domain-specific composed components may remain
+custom, but they should be assembled from Shadcn primitives wherever practical.
+
 - Use native `fetch` from async Server Components and server-only service functions.
 - Use Server Actions (`"use server"`) for form submissions and authenticated mutations.
 - Use React `useActionState` in small Client Components for pending state and action results.
@@ -78,7 +95,7 @@ this inspection merely because a similar GearUp file already exists.
 - Use cache tags and server-side invalidation after successful mutations when the data is actually cacheable.
 - Configure role-specific navigation from typed arrays instead of scattering role checks through JSX.
 - Use a root toast provider and action-result toasts; preserve inline form/page errors too.
-- Prefer code-owned UI primitives, a `cn` utility, variant-based buttons, Lucide icons, and accessible dialog/sidebar/dropdown components. Shadcn/Radix and Sonner are appropriate if added to this project.
+- Prefer installed or officially available Shadcn/Radix primitives first, then adapt them with the shared `cn` utility, variants, GearUp tokens, Lucide icons, and Sonner. Do not recreate an available Shadcn primitive from scratch.
 
 The example is instructional, not production-complete. Do **not** copy these shortcuts:
 
@@ -606,7 +623,7 @@ The browser validates for usability; the backend remains authoritative. Preserve
 ## UI/UX and accessibility bar
 
 - Replace all starter branding, metadata, copy, and imagery with an original GearUp identity.
-- Follow the instructor's component approach: code-owned Shadcn-style primitives under `src/components/ui/`, Radix behavior for complex controls, Lucide icons, `class-variance-authority` variants, a shared `cn` helper, and Sonner toasts are preferred when those dependencies are added.
+- Follow the mandatory Shadcn-first workflow: use installed or official Shadcn primitives under `src/components/ui/` before considering custom primitives, preserve Radix behavior for complex controls, and adapt them with Lucide icons, `class-variance-authority` variants, the shared `cn` helper, GearUp tokens, and Sonner toasts.
 - Mount one accessible `<Toaster />` in the root layout. Do not create a toaster per route.
 - Mobile-first design must work on narrow phones through desktops. Convert complex tables into cards, scrollable regions, or compact rows on small screens.
 - Use consistent public navigation and distinct role-aware dashboard shells.
