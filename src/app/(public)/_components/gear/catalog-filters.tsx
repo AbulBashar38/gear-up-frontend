@@ -1,9 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useTransition, type ChangeEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+  type ChangeEvent,
+} from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Filter, Info, LoaderCircle, RotateCcw, Search } from "lucide-react";
-import Link from "next/link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +18,10 @@ import {
   NativeSelectOption,
 } from "@/components/ui/native-select";
 import type { Category } from "@/lib/types";
-import type { CatalogFilterValues } from "../../_utils/catalog-query";
+import {
+  buildGearHref,
+  type CatalogFilterValues,
+} from "../../_utils/catalog-query";
 
 type CatalogFiltersProps = {
   categories: Category[];
@@ -33,6 +41,7 @@ export function CatalogFilters({
   const formRef = useRef<HTMLFormElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [draftStartDate, setDraftStartDate] = useState(values.startDate);
   const hasKnownCategory = categories.some(
     (category) => category.id === values.category,
   );
@@ -58,17 +67,57 @@ export function CatalogFilters({
     startTransition(() => router.replace(query ? `${pathname}?${query}` : pathname));
   }
 
-  function scheduleReplace(target: HTMLInputElement | HTMLSelectElement) {
+  function scheduleSearch(value: string) {
     if (timerRef.current) clearTimeout(timerRef.current);
-    const delay = target.tagName === "SELECT" || target.type === "date" ? 100 : 450;
-    timerRef.current = setTimeout(replaceFromForm, delay);
+    timerRef.current = setTimeout(() => {
+      const href = buildGearHref(
+        { ...values, search: value.trim() },
+        1,
+      );
+      startTransition(() => router.replace(href, { scroll: false }));
+    }, 450);
   }
 
   function handleFormChange(event: ChangeEvent<HTMLFormElement>) {
     const target = event.target;
-    if (target instanceof HTMLInputElement || target instanceof HTMLSelectElement) {
-      scheduleReplace(target);
+    if (!(target instanceof HTMLInputElement || target instanceof HTMLSelectElement)) {
+      return;
     }
+
+    if (target.name === "search") {
+      scheduleSearch(target.value);
+      return;
+    }
+
+    if (target.name === "startDate") {
+      setDraftStartDate(target.value);
+      const endDate = formRef.current?.elements.namedItem("endDate");
+      if (
+        endDate instanceof HTMLInputElement &&
+        endDate.value &&
+        target.value &&
+        endDate.value < target.value
+      ) {
+        endDate.value = "";
+      }
+    }
+  }
+
+  function clearFilters() {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    const form = formRef.current;
+    if (form) {
+      for (const control of Array.from(form.elements)) {
+        if (
+          control instanceof HTMLInputElement ||
+          control instanceof HTMLSelectElement
+        ) {
+          control.value = "";
+        }
+      }
+    }
+    setDraftStartDate("");
+    startTransition(() => router.replace(pathname, { scroll: false }));
   }
 
   return (
@@ -92,7 +141,6 @@ export function CatalogFilters({
 
           <form
             ref={formRef}
-            key={JSON.stringify(values)}
             action="/gear"
             method="get"
             onSubmit={(event) => {
@@ -240,7 +288,7 @@ export function CatalogFilters({
                 id="endDate"
                 name="endDate"
                 type="date"
-                min={values.startDate || minimumDate}
+                min={draftStartDate || minimumDate}
                 defaultValue={values.endDate}
                 className="h-10 rounded-lg bg-paper"
               />
@@ -260,13 +308,13 @@ export function CatalogFilters({
                 )}
               </Button>
               <Button
-                asChild
+                type="button"
                 variant="outline"
+                disabled={isPending}
+                onClick={clearFilters}
               >
-                <Link href="/gear">
-                  Clear all
-                  <RotateCcw aria-hidden="true" />
-                </Link>
+                Clear all
+                <RotateCcw aria-hidden="true" />
               </Button>
             </div>
           </form>
@@ -281,9 +329,9 @@ export function CatalogFilters({
             Search scope
           </AlertTitle>
           <AlertDescription className="mt-2 text-xs leading-5 text-ink/70">
-            Controls update the URL and query the complete backend catalog.
-            Date results exclude stock reserved by confirmed, paid, or picked-up
-            orders; brand matching remains exact.
+            Keyword search updates as you type. Category, brand, price, and date
+            choices wait for Apply filters. Date results exclude stock reserved
+            by confirmed, paid, or picked-up orders.
           </AlertDescription>
         </Alert>
       </div>

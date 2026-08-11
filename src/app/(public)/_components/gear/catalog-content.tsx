@@ -64,6 +64,14 @@ export async function CatalogContent({ searchParams }: CatalogContentProps) {
   return (
     <>
       <CatalogFilters
+        key={[
+          representedValues.category,
+          representedValues.brand,
+          representedValues.minPrice,
+          representedValues.maxPrice,
+          representedValues.startDate,
+          representedValues.endDate,
+        ].join("|")}
         categories={categories.ok ? categories.data : []}
         categoriesError={
           categories.ok ? undefined : categories.error.message
