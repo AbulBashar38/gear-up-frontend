@@ -49,7 +49,11 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${manrope.variable} ${barlowCondensed.variable} ${spaceMono.variable} h-full`}
     >
-      <body className="min-h-full">
+      {/* Browser extensions commonly inject attributes onto <body> before React
+          hydrates (ColorZilla's `cz-shortcut-listen`, password managers, and
+          similar), which React reports as a hydration mismatch the app cannot
+          fix. Suppressed on this element only; nested content still warns. */}
+      <body className="min-h-full" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

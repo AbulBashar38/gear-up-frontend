@@ -13,7 +13,8 @@ import { Reveal } from "./motion-primitives";
 export async function InventorySection() {
   const [categories, gear] = await Promise.all([
     listCategories(),
-    listGear({ page: 1, limit: 6 }),
+    // Eight fills the four-column grid as two complete rows.
+    listGear({ page: 1, limit: 8 }),
   ]);
 
   return (
@@ -157,7 +158,9 @@ export function InventorySkeleton() {
         <Skeleton className="h-4 w-48 rounded-none bg-ink/10" />
         <Skeleton className="mt-6 h-28 max-w-3xl rounded-none bg-ink/10" />
         <div className="mt-12 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, index) => (
+          {/* Matches the eight cards the loaded section renders, so the
+              placeholder occupies the same height and the page does not jump. */}
+          {Array.from({ length: 8 }).map((_, index) => (
             <GearCardSkeleton key={index} />
           ))}
         </div>

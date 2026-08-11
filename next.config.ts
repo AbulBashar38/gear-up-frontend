@@ -10,6 +10,14 @@ const nextConfig: NextConfig = {
         pathname: "/**",
         search: "",
       },
+      // Seeded demo catalogue imagery only. Gear uploaded through the app is
+      // always served from Cloudinary above.
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
   experimental: {
