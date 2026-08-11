@@ -109,6 +109,7 @@ export type Review = {
   rating: DecimalValue;
   comment: string | null;
   createdAt: string;
+  updatedAt: string;
   gearItem: {
     id: string;
     name: string;
@@ -124,6 +125,23 @@ export type Review = {
     startDate: string;
     endDate: string;
   };
+};
+
+export type CreateReviewInput = {
+  orderId: string;
+  rating: number;
+  comment?: string;
+};
+
+export type ReviewMutationState = {
+  status: "idle" | "success" | "error";
+  message: string;
+  fieldErrors?: FieldErrors;
+  values?: {
+    rating?: string;
+    comment?: string;
+  };
+  data?: Review;
 };
 
 export type GearCatalogQuery = {
@@ -326,6 +344,8 @@ export type AuthTokens = {
   accessToken: string;
   refreshToken: string;
 };
+
+export type RefreshedAccessToken = Pick<AuthTokens, "accessToken">;
 
 export type LoginInput = {
   email: string;

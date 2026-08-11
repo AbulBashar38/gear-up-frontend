@@ -5,6 +5,7 @@ import type {
   AuthTokens,
   CurrentUser,
   LoginInput,
+  RefreshedAccessToken,
   RegisterInput,
 } from "@/lib/types";
 import { gearUpFetch } from "./server-client";
@@ -25,6 +26,24 @@ export function registerRequest(input: RegisterInput) {
     cache: "no-store",
     fallbackMessage:
       "We couldn't set up your account just now. Try again shortly.",
+  });
+}
+
+export function refreshAccessTokenRequest(refreshToken: string) {
+  return gearUpFetch<RefreshedAccessToken>("/auth/refresh-token", {
+    method: "POST",
+    json: { refreshToken },
+    cache: "no-store",
+    fallbackMessage: "Your session has expired. Please sign in again.",
+  });
+}
+
+export function getCurrentUserWithAccessToken(accessToken: string) {
+  return gearUpFetch<CurrentUser>("/auth/me", {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    cache: "no-store",
+    fallbackMessage:
+      "We couldn't verify your refreshed GearUp session. Please sign in again.",
   });
 }
 

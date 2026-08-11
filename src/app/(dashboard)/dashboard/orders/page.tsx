@@ -50,7 +50,11 @@ export default async function OrdersPage({ searchParams }: DashboardListPageProp
       pathname="/dashboard/orders"
     >
       {result.ok && (
-        <OrderList orders={result.data} adminActions={user.role === "ADMIN"} />
+        <OrderList
+          orders={result.data}
+          adminActions={user.role === "ADMIN"}
+          customerActions={user.role === "CUSTOMER"}
+        />
       )}
     </DashboardRegisterPage>
   );

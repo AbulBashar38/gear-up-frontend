@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ClockAlert } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AuthShell } from "../_components/auth-shell";
 import { LoginForm } from "../_components/login-form";
 
@@ -19,10 +21,15 @@ function returnToSuffix(value: string | string[] | undefined) {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ returnTo?: string | string[] }>;
+  searchParams: Promise<{
+    returnTo?: string | string[];
+    reason?: string | string[];
+  }>;
 }) {
-  const { returnTo } = await searchParams;
+  const { returnTo, reason } = await searchParams;
   const suffix = returnToSuffix(returnTo);
+  const sessionExpired =
+    (Array.isArray(reason) ? reason[0] : reason) === "session-expired";
 
   return (
     <AuthShell
@@ -49,6 +56,15 @@ export default async function LoginPage({
         </>
       }
     >
+      {sessionExpired && (
+        <Alert className="mb-5 rounded-none border-signal/30 bg-signal/5">
+          <ClockAlert aria-hidden="true" />
+          <AlertTitle>Your session ended</AlertTitle>
+          <AlertDescription>
+            Sign in again to continue to your GearUp dashboard.
+          </AlertDescription>
+        </Alert>
+      )}
       <LoginForm />
     </AuthShell>
   );

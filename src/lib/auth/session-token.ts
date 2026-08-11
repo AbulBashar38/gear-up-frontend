@@ -64,3 +64,15 @@ export function decodeSessionToken(
     return null;
   }
 }
+
+/**
+ * Proxy can only make an optimistic expiry check because it cannot verify the
+ * backend signature. Tokens without a valid future `exp` are not considered a
+ * usable session hint and are left for the refresh/login flow to resolve.
+ */
+export function hasUnexpiredSessionToken(
+  claims: SessionTokenClaims | null,
+  nowSeconds = Math.floor(Date.now() / 1000),
+): claims is SessionTokenClaims & { exp: number } {
+  return typeof claims?.exp === "number" && claims.exp > nowSeconds;
+}

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, CalendarRange, Package, Store, User } from "lucide-react";
-import type { RentalOrder, Role } from "@/lib/types";
+import type { RentalOrder, Review, Role } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import {
   formatDashboardDate,
@@ -12,6 +12,7 @@ import {
   OrderStatusBadge,
   PaymentStatusBadge,
 } from "./dashboard-status-badge";
+import { OrderReviewCard } from "./order-review-card";
 
 /** Inclusive rental days — the backend charges same-day rentals as one day. */
 function inclusiveRentalDays(startDate: string, endDate: string) {
@@ -55,9 +56,13 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
 export function OrderDetail({
   order,
   role,
+  existingReview,
+  reviewLookupMessage,
 }: {
   order: RentalOrder;
   role: Role;
+  existingReview?: Review | null;
+  reviewLookupMessage?: string;
 }) {
   const rentalDays = inclusiveRentalDays(order.startDate, order.endDate);
   const showParties = role === "PROVIDER" || role === "ADMIN";
@@ -205,6 +210,16 @@ export function OrderDetail({
             </p>
           )}
         </DetailCard>
+      )}
+
+      {role === "CUSTOMER" && order.status === "RETURNED" && (
+        <OrderReviewCard
+          orderId={order.id}
+          gearItemId={order.gearItemId}
+          gearName={order.gearItem.name}
+          existingReview={existingReview}
+          lookupMessage={reviewLookupMessage}
+        />
       )}
     </div>
   );

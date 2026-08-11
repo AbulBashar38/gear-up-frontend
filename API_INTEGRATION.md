@@ -32,6 +32,7 @@ sharing one server-only client; domain and envelope types live in
 | `src/app/(auth)/validation/auth.schema.ts` | Route-owned Zod schemas matching backend login and customer/provider registration constraints |
 | `src/app/(dashboard)/validation/admin.schema.ts` | Dashboard-owned Zod schemas for admin creation, categories, gear/file coercion, statuses, and bound UUID validation |
 | `src/app/(dashboard)/validation/order.schema.ts` | Customer rental-request validation for UUID, real date-only values, non-past start, ordered dates, and positive integer quantity |
+| `src/app/(dashboard)/validation/review.schema.ts` | Returned-order review validation for UUID, 1–5 rating with one decimal place, and optional 3–2,000 character comment |
 | `src/components/shared/photo-upload.tsx` | Reusable accessible image picker with local object-URL preview, instant type/size feedback, replace, and cancel controls |
 | `src/lib/image-upload.ts` | Browser-safe accepted image MIME types, file-input accept value, and the 5 MB limit |
 | `src/lib/validations/zod-errors.ts` | Cross-route adapter from flattened Zod failures to the shared `FieldErrors` action-state shape |
@@ -43,7 +44,7 @@ sharing one server-only client; domain and envelope types live in
 | `src/services/gear.ts` | Reusable gear reads, filters, pagination, and protected create/update/delete operations |
 | `src/services/orders.ts` | Authenticated, role-scoped order reads, dashboard counts, and protected status transitions |
 | `src/services/payments.ts` | Authenticated, role-scoped payment lists and dashboard counts |
-| `src/services/reviews.ts` | Public review reads plus protected admin moderation deletion |
+| `src/services/reviews.ts` | Public review reads, exact returned-order review lookup, protected customer creation, and admin moderation deletion |
 | `src/services/users.ts` | Admin-only user reads, account-status updates, and admin-account creation |
 
 Expected API failures are returned as a discriminated result:
@@ -118,6 +119,7 @@ Only endpoints currently called by the application are listed here.
 | Implemented | Landing `ReviewsSection` | `listReviews({ page: 1, limit: 3 })` | `GET /reviews?page=1&limit=3` | Public | Rating/comment, customer, gear item, and returned-order status | Revalidates every 60 seconds with `reviews` tag; renders only real returned-order reviews and never fabricates testimonials |
 | Implemented | `/login` `LoginForm` via `loginAction` | `loginRequest()` | `POST /auth/login` | Public; `{ email, password }` | `data.accessToken`, `data.refreshToken` | `no-store`; server-side field validation then backend; inline field errors + error toast; on success sets HttpOnly `accessToken`/`refreshToken` cookies and redirects to a sanitized `returnTo` or `/dashboard` |
 | Implemented | `/register` `RegisterForm` via `registerAction` | `registerRequest()` | `POST /auth/register` | Public; `{ name, email, phone, password, role }` where role is `CUSTOMER` or `PROVIDER` | `data.accessToken`, `data.refreshToken` | `no-store`; validates name/email/phone(`^\+?[0-9\s-]{7,20}$`)/password(≥6); maps backend 400 details to fields and 409 duplicate email/phone to a toast; role selector never offers `ADMIN`; sets session cookies and redirects on success |
+| Implemented | Same-origin `/auth/refresh` Route Handler reached from protected dashboard guards | `refreshAccessTokenRequest(refreshToken)` | `POST /auth/refresh-token` | Refresh token is read only from the frontend-domain HttpOnly cookie and sent in `{ refreshToken }` | Rotated `accessToken` | `no-store`; the handler verifies the new token with `/auth/me`, replaces only the access cookie, and returns to a sanitized dashboard path; any missing/rejected refresh or account-state failure clears both cookies and terminates at `/login?reason=session-expired` |
 | Implemented | `(dashboard)/dashboard/layout.tsx`, dashboard shell, overview pages, and `/dashboard` role redirect | `getCurrentUser()` | `GET /auth/me` | Authenticated with centralized Bearer forwarding | Canonical user id, name, email, phone, role, status, and timestamps | `no-store`; React request cache deduplicates layout/page reads; missing or rejected sessions redirect to `/login` with a sanitized `returnTo`; each role overview explicitly calls `requireDashboardRole()` and redirects cross-role navigation to the actor's own dashboard |
 | Implemented | Role overviews and shared `/dashboard/orders` register | `listOrders(query)` | `GET /orders?status?&paymentStatus?&page=&limit=` | Authenticated; backend automatically scopes customer/provider/admin records | Order, gear, provider, customer, payment, status, totals, dates, and pagination metadata | `no-store`; one shared page selects role-specific copy and authorized controls; dashboard totals use `meta.total`; the register paginates through URL state |
 | Implemented | Gear-detail `RentalRequestCard`, `/dashboard/orders/new` `CustomerOrderForm`, and `createRentalOrderAction` | `createRentalOrder(input)` | `POST /orders` | Customer only; `{ gearItemId, startDate, endDate, quantity }` | Authoritative `orderId`, `PLACED` status, inclusive `rentalDays`, quantity, total price, and `PENDING` payment status | Context routes guests through login and blocks non-customer UI; the page and action independently require `CUSTOMER`; Zod rejects invalid/past/reversed dates and non-integer quantity; backend availability/stock conflicts remain inline and toast errors; success refreshes real order views |
@@ -130,6 +132,8 @@ Only endpoints currently called by the application are listed here.
 | Implemented | Shared `/dashboard/gear` plus provider/admin overviews | `listGear({ providerId?, page, limit })` | `GET /gear?providerId?&page=&limit=` | Authenticated dashboard page over a public read; provider passes the canonical current-user id, customer/admin omit it | Listing, stock, availability, category, provider, price, and metadata | One shared page renders customer discovery, provider-owned inventory, or admin platform inventory; mutations remain role-conditional and backend-authorized |
 | Implemented | Admin category manager | `listCategories()` | `GET /categories` | Public read inside an admin-guarded dashboard route | Category identity, name, and timestamps | 60-second `categories` revalidation; failures remain visibly distinct from a successful empty result |
 | Implemented | Admin review moderation register | `listReviews({ page, limit })` | `GET /reviews?page=&limit=` | Public read inside an admin-guarded dashboard route | Review, rating, customer, gear, returned order, timestamps, and metadata | 60-second `reviews` revalidation; paginated UI uses backend records only and presents protected moderation controls |
+| Implemented | Returned customer order detail `OrderReviewCard` | `findReviewForOrder(gearItemId, orderId)` via `listReviews()` | `GET /reviews?gearItemId=&page=&limit=100` | Public read only after a backend-scoped customer order resolves as `RETURNED`; the frontend scans backend pages because there is no direct order-id review filter | Existing review identity, rating, comment, customer, gear, returned order, and timestamps | 60-second `reviews` revalidation; an existing review replaces the form with its backend record; lookup failure stays visible while submission remains available and backend duplicate protection remains authoritative |
+| Implemented | Returned customer order detail `OrderReviewCard` via `createReviewAction` | `createReview(input)` | `POST /reviews` | Customer only; `{ orderId, rating, comment? }`; the action rechecks the canonical role and the backend verifies order ownership, `RETURNED` state, and one-review-per-order | Created review, linked gear/order/customer, rating/comment, and backend success message | `no-store`; Zod and backend field errors render inline plus toast; backend `409` explains non-returned or already-reviewed orders; success immediately updates `reviews`, `gear`, and `gear:<id>` tags plus order/customer paths |
 | Implemented | Admin user register `AdminUserStatusForm` via `updateUserStatusAction` | `updateUserStatus()` | `PATCH /users/:id/status` | Admin; `{ status: "ACTIVE" | "INACTIVE" | "SUSPENDED" }` | Updated user and backend message | The action revalidates the admin role, blocks self-deactivation in the UI and action, preserves backend `409` feedback, refreshes the register, and shows pending, inline, and toast feedback |
 | Implemented | `/dashboard/admins/new` `AdminCreateAdminForm` via `createAdminAction` | `createAdmin()` | `POST /users/admins` | Admin; `{ name, email, phone, password }` | Created admin identity and backend message | Server validation mirrors the backend; duplicate email/phone details map to fields/toasts; successful creation invalidates user data and returns to `/dashboard/users` |
 | Implemented | Admin category manager via category Server Actions | `createCategory()`, `updateCategory()`, `deleteCategory()` | `POST /categories`, `PATCH /categories/:id`, `DELETE /categories/:id` | Admin; create/update `{ name }`, delete UUID path | Created/updated category or deletion confirmation | Inline create/rename/delete controls use pending states, confirmation before deletion, field errors, and toasts; used-category `409` responses remain visible; `categories` and `gear` tags are invalidated after applicable writes |
@@ -217,7 +221,10 @@ Only endpoints currently called by the application are listed here.
   `/dashboard/:path*`, `/login`, and `/register`: guests are sent to
   `/login?returnTo=…`, signed-in users are bounced off the auth pages to their
   role home, and an obviously wrong-role visitor is redirected to their own
-  dashboard. It decodes the JWT payload (`{ id, name, email, role }`) with an
+  dashboard. Expired or malformed cookies are not treated as usable session
+  hints; an unexpired refresh-token hint on an auth page enters the same-origin
+  refresh adapter instead of bouncing directly back to a protected page. It
+  decodes the JWT payload (`{ id, name, email, role, exp }`) with an
   Edge-safe, secret-free decoder (`src/lib/auth/session-token.ts`) purely to
   route — it never calls the API, refreshes a token, or verifies the signature.
   Role→path rules live in `src/lib/auth/dashboard-routes.ts` (`ROLE_HOME`,
@@ -225,8 +232,13 @@ Only endpoints currently called by the application are listed here.
   data by `requireDashboardRole`/`requireDashboardRoles` and `/auth/me`; the
   proxy redirects are never the security boundary.
 - Dashboard logout deletes both frontend-domain HttpOnly cookies and redirects
-  to `/login`. Access-token refresh rotation is not yet implemented; an expired
-  access token currently requires signing in again.
+  to `/login`. When an authoritative `/auth/me` check returns `401` or `403`,
+  the dashboard guard redirects through `/auth/refresh?returnTo=…`. That Route
+  Handler exchanges the HttpOnly refresh token with `POST /auth/refresh-token`,
+  verifies the rotated access token against `/auth/me`, sets the new access
+  cookie, and resumes the sanitized dashboard path. Missing, invalid, expired,
+  inactive, or suspended sessions clear both cookies and stop at login with a
+  persistent session-ended message, preventing dashboard/login redirect loops.
 
 ## Product-contract limitations
 

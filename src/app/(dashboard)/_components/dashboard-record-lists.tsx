@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Pencil } from "lucide-react";
+import { ArrowRight, Pencil, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type {
@@ -39,9 +39,11 @@ function ListFrame({ children }: { children: React.ReactNode }) {
 export function OrderList({
   orders,
   adminActions = false,
+  customerActions = false,
 }: {
   orders: RentalOrder[];
   adminActions?: boolean;
+  customerActions?: boolean;
 }) {
   if (orders.length === 0) {
     return (
@@ -93,17 +95,22 @@ export function OrderList({
               <p className="mt-1 font-mono text-[0.58rem] uppercase tracking-[0.13em] text-ink/55">
                 #{order.id.slice(0, 8)}
               </p>
-              <Button
-                asChild
-                variant="ghost"
-                size="compact"
-                className="mt-2 -mr-2 lg:ml-auto"
-              >
-                <Link href={`/dashboard/orders/${order.id}`}>
-                  View order
-                  <ArrowRight aria-hidden="true" />
-                </Link>
-              </Button>
+              <div className="mt-2 flex flex-wrap gap-2 lg:justify-end">
+                <Button asChild variant="ghost" size="compact">
+                  <Link href={`/dashboard/orders/${order.id}`}>
+                    View order
+                    <ArrowRight aria-hidden="true" />
+                  </Link>
+                </Button>
+                {customerActions && order.status === "RETURNED" && (
+                  <Button asChild variant="outline" size="compact">
+                    <Link href={`/dashboard/orders/${order.id}`}>
+                      <Star aria-hidden="true" />
+                      Write review
+                    </Link>
+                  </Button>
+                )}
+              </div>
               {adminActions && (
                 <div className="mt-4">
                   <AdminOrderAction order={order} />

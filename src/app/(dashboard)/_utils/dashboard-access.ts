@@ -9,12 +9,16 @@ function safeReturnTo(path: string) {
   return path.startsWith("/") && !path.startsWith("//") ? path : "/dashboard";
 }
 
+function refreshSession(returnTo: string): never {
+  redirect(`/auth/refresh?returnTo=${encodeURIComponent(safeReturnTo(returnTo))}`);
+}
+
 export async function requireDashboardUser(returnTo = "/dashboard") {
   const result = await getCurrentUser();
 
   if (!result.ok) {
     if (result.error.status === 401 || result.error.status === 403) {
-      redirect(`/login?returnTo=${encodeURIComponent(safeReturnTo(returnTo))}`);
+      refreshSession(returnTo);
     }
 
     throw new Error(result.error.message);

@@ -75,7 +75,7 @@ export default async function CustomerDashboardPage() {
           </div>
           <Button asChild variant="outline" size="compact"><Link href="/dashboard/orders">View all orders</Link></Button>
         </div>
-        {orders.ok && <OrderList orders={orders.data} />}
+        {orders.ok && <OrderList orders={orders.data} customerActions />}
       </section>
     </div>
   );

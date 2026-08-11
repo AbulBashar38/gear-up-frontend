@@ -5,6 +5,7 @@ import { TriangleAlert } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { getOrder } from "@/services/orders";
+import { findReviewForOrder } from "@/services/reviews";
 import { OrderDetail } from "../../../_components/order-detail";
 import { requireDashboardUser } from "../../../_utils/dashboard-access";
 import { idSchema } from "../../../validation/order.schema";
@@ -59,5 +60,19 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
     );
   }
 
-  return <OrderDetail order={result.data} role={user.role} />;
+  const reviewResult =
+    user.role === "CUSTOMER" && result.data.status === "RETURNED"
+      ? await findReviewForOrder(result.data.gearItemId, result.data.id)
+      : null;
+
+  return (
+    <OrderDetail
+      order={result.data}
+      role={user.role}
+      existingReview={reviewResult?.ok ? reviewResult.data : undefined}
+      reviewLookupMessage={
+        reviewResult && !reviewResult.ok ? reviewResult.error.message : undefined
+      }
+    />
+  );
 }
