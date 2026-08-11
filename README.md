@@ -71,13 +71,29 @@ The repository currently has no automated test suite; lint, strict TypeScript pr
 
 The frontend never treats `session_id` as payment proof. It stores the backend order/payment references in a short-lived HttpOnly cookie before redirecting to Stripe, then polls the authenticated order while the signed webhook updates payment truth. If that context is missing, the success route asks the customer to inspect their API-backed order status and does not claim payment was received.
 
+## Demo access
+
+A dedicated review account is published on the sign-in screen so the admin
+experience can be explored without provisioning anything. The sign-in form also
+offers a one-click fill for it.
+
+| Role | Email | Password |
+| --- | --- | --- |
+| Admin | `admin+23247886@example.com` | `12345678Aa#` |
+
+This is a shared assessment account, not a personal or production login. It is
+defined in [`src/lib/demo-credentials.ts`](./src/lib/demo-credentials.ts);
+rotating it means editing that file and redeploying. It must exist as an
+`ACTIVE` admin on whichever backend the deployed frontend points at — verify it
+against the deployed stack, not only locally.
+
 ## Deployment checklist
 
 - Deploy the backend and apply all Prisma migrations, including the gear gallery migration.
 - Set the backend `APP_URL` to the deployed frontend so Stripe return URLs are correct.
 - Configure the deployed Stripe webhook and verify a real test Checkout lifecycle.
 - Configure all server-only frontend environment variables.
-- Create a dedicated grading admin, verify it against the deployed stack, and provide that non-personal email/password with the submission.
+- Create the grading admin above on the deployed backend and confirm it can sign in there.
 - Add the deployed frontend URL and record the required 7–10 minute walkthrough video.
 
-Do not commit real credentials. The deployed URL, grading account, and video link are submission artifacts and are intentionally not fabricated in this repository.
+Beyond the shared demo account documented above, do not commit real credentials. The deployed URL and video link are submission artifacts and are intentionally not fabricated in this repository.
