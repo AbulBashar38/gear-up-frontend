@@ -2,6 +2,17 @@
 
 GearUp is a role-based sports and outdoor equipment rental marketplace. Customers search gear and request rentals, providers manage inventory and fulfillment, and admins operate users, categories, listings, orders, payments, and review moderation.
 
+## Overview
+
+This repository contains the Next.js frontend for GearUp. It includes the public storefront, authentication, protected dashboards for customers, providers, and admins, Stripe checkout return handling, and server-side integration with the GearUp backend API.
+
+## Quick Links
+
+- Live Frontend: [https://gear-up-frontend-hazel.vercel.app/](https://gear-up-frontend-hazel.vercel.app/)
+- Backend API: [https://ph-backend-assignment.onrender.com/](https://ph-backend-assignment.onrender.com/)
+- Admin Email: admin+23247886@example.com
+- Admin Password: 12345678Aa#
+
 ## Stack
 
 - Next.js 16.2 App Router, React 19, strict TypeScript
@@ -46,14 +57,14 @@ The current frontend depends on the included backend extension for `GET /gear` k
 
 ## Environment variables
 
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `GEARUP_API_URL` | Yes | Server-only API base including `/api` |
-| `GEARUP_CURRENCY` | Yes | Display currency matching backend Stripe configuration |
-| `CLOUDINARY_CLOUD_NAME` | For uploads | Server-only Cloudinary cloud name |
-| `CLOUDINARY_API_KEY` | For uploads | Server-only Cloudinary API key |
-| `CLOUDINARY_API_SECRET` | For uploads | Server-only signing secret |
-| `CLOUDINARY_GEAR_FOLDER` | No | Optional upload folder |
+| Variable                 | Required    | Purpose                                                |
+| ------------------------ | ----------- | ------------------------------------------------------ |
+| `GEARUP_API_URL`         | Yes         | Server-only API base including `/api`                  |
+| `GEARUP_CURRENCY`        | Yes         | Display currency matching backend Stripe configuration |
+| `CLOUDINARY_CLOUD_NAME`  | For uploads | Server-only Cloudinary cloud name                      |
+| `CLOUDINARY_API_KEY`     | For uploads | Server-only Cloudinary API key                         |
+| `CLOUDINARY_API_SECRET`  | For uploads | Server-only signing secret                             |
+| `CLOUDINARY_GEAR_FOLDER` | No          | Optional upload folder                                 |
 
 Never prefix backend URLs, JWTs, Stripe secrets, or Cloudinary secrets with `NEXT_PUBLIC_`.
 
@@ -77,8 +88,8 @@ A dedicated review account is published on the sign-in screen so the admin
 experience can be explored without provisioning anything. The sign-in form also
 offers a one-click fill for it.
 
-| Role | Email | Password |
-| --- | --- | --- |
+| Role  | Email                        | Password      |
+| ----- | ---------------------------- | ------------- |
 | Admin | `admin+23247886@example.com` | `12345678Aa#` |
 
 This is a shared assessment account, not a personal or production login. It is

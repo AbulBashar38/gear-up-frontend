@@ -1,7 +1,9 @@
 <!-- BEGIN:nextjs-agent-rules -->
+
 # This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+
 <!-- END:nextjs-agent-rules -->
 
 # GearUp Frontend Agent Guide
@@ -10,7 +12,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 Build a polished frontend for the GearUp sports and outdoor equipment rental API in this repository. Customers discover gear and request rentals, providers manage their inventory and fulfill orders, and admins operate the platform.
 
-This is a frontend assignment. The local `backend/` directory is a read-only contract/reference unless the user explicitly asks for backend work. The local `example-frontend/` directory is the instructor's read-only teaching reference; learn from its patterns but do not edit or copy it wholesale. Never change the backend merely to make a frontend assumption work. If a required product capability is not supported, document the gap and ask before expanding scope.
+Never change the backend merely to make a frontend assumption work. If a required product capability is not supported, document the gap and ask before expanding scope.
 
 Never replace a real API operation with hardcoded success data, browser-only CRUD, an invented endpoint, or a fake payment result.
 
@@ -20,12 +22,8 @@ Resolve conflicts in this order:
 
 1. The user's current request.
 2. The assignment requirements in the supplied brief.
-3. The actual backend implementation under `backend/src/` and `backend/prisma/schema/`.
-4. `backend/GearUp Backend - Complete Assignment Scenarios.postman_collection.json`.
-5. `backend/README.md`.
-6. The installed Next.js documentation under `node_modules/next/dist/docs/`.
-7. `example-frontend/` for instructor-preferred frontend patterns only, never for GearUp API facts.
-8. Existing frontend conventions and this guide.
+3. The installed Next.js documentation under `node_modules/next/dist/docs/`.
+4. Existing frontend conventions and this guide.
 
 The route/service code wins if backend documentation is stale. Do not infer payloads or permissions from endpoint names alone; inspect the route, validation, controller, and service together.
 
@@ -53,36 +51,6 @@ Before changing framework behavior, read the relevant Next.js 16 guide. Useful s
 - Checks: `npm run lint` and `npm run build`
 
 The frontend began as a minimal Create Next App starter. Inspect `package.json` before assuming a query library, form library, component library, validation library, test runner, or Stripe browser SDK exists.
-
-### Instructor reference: what to follow
-
-The instructor's `example-frontend/` demonstrates the intended Next.js style. Adapt these patterns to `src/` and the GearUp domain:
-
-**Mandatory implementation workflow:** Before writing or restructuring any
-frontend feature, first inspect the closest relevant implementation in
-`example-frontend/`—its route group, page/component split, service, Server
-Action, form, loading state, and navigation configuration as applicable. Then
-implement the GearUp version using the actual backend contract and current
-Next.js documentation. If the example has no corresponding feature, state that
-in the working notes and use the established GearUp conventions. Never skip
-this inspection merely because a similar GearUp file already exists.
-
-**Mandatory Shadcn-first component workflow:** Before building or replacing
-any UI control, primitive, form element, overlay, navigation element, feedback
-element, or data-display pattern, check whether a suitable Shadcn component is
-already present under `src/components/ui/`. If it is not installed, check
-whether the official Shadcn registry provides a suitable component and whether
-it can be added or adapted safely for this project. Use the existing or
-official Shadcn component when it satisfies the required behavior, composing
-and styling it for the GearUp design instead of rebuilding the primitive from
-scratch. Prefer Shadcn/Radix accessibility and interaction behavior for
-controls such as forms, sliders, selects, dialogs, sheets, popovers, tabs,
-tables, pagination, skeletons, alerts, and toasts. Write a new custom primitive
-only when no appropriate Shadcn component exists or when the available
-component cannot meet a concrete product, accessibility, or technical
-requirement. In that case, state the reason in the working notes before writing
-the custom implementation. Domain-specific composed components may remain
-custom, but they should be assembled from Shadcn primitives wherever practical.
 
 - Use native `fetch` from async Server Components and server-only service functions.
 - Use Server Actions (`"use server"`) for form submissions and authenticated mutations.
@@ -168,17 +136,17 @@ Inactive or suspended users cannot log in, refresh, or access protected endpoint
 
 ### Role capabilities
 
-| Capability | Customer | Provider | Admin |
-| --- | :---: | :---: | :---: |
-| Public gear/categories/reviews | Yes | Yes | Yes |
-| Create and view own orders/payments | Yes | No | No |
-| Cancel own eligible unpaid order | Yes | No | No |
-| Create/update/delete own review | Yes | No | Delete only |
-| Create/update/delete own gear | No | Yes | No |
-| View orders/payments for owned gear | No | Yes | No |
-| Progress eligible orders | No | Yes | Yes |
-| Manage all gear/orders/payments | No | No | Yes |
-| Manage users, admins, and categories | No | No | Yes |
+| Capability                           | Customer | Provider |    Admin    |
+| ------------------------------------ | :------: | :------: | :---------: |
+| Public gear/categories/reviews       |   Yes    |   Yes    |     Yes     |
+| Create and view own orders/payments  |   Yes    |    No    |     No      |
+| Cancel own eligible unpaid order     |   Yes    |    No    |     No      |
+| Create/update/delete own review      |   Yes    |    No    | Delete only |
+| Create/update/delete own gear        |    No    |   Yes    |     No      |
+| View orders/payments for owned gear  |    No    |   Yes    |     No      |
+| Progress eligible orders             |    No    |   Yes    |     Yes     |
+| Manage all gear/orders/payments      |    No    |    No    |     Yes     |
+| Manage users, admins, and categories |    No    |    No    |     Yes     |
 
 The backend automatically scopes `GET /orders`, `GET /orders/:id`, `GET /payments`, and `GET /payments/:id` by the authenticated role. Do not invent `/customer/*`, `/provider/*`, or `/admin/*` API paths.
 
@@ -206,14 +174,14 @@ Expose buttons from this transition map plus the current role. Still handle `409
 
 Use status badges with text as well as color:
 
-| Status | Suggested visual meaning | Action owner |
-| --- | --- | --- |
-| `PLACED` | Amber, awaiting provider | Provider/admin confirms or either party cancels where permitted |
-| `CONFIRMED` | Blue, ready for payment | Customer pays or cancels; provider/admin may cancel |
-| `PAID` | Purple, paid and ready | Provider/admin marks picked up |
-| `PICKED_UP` | Green, in customer possession | Provider/admin marks returned |
-| `RETURNED` | Neutral gray, complete | Customer may review |
-| `CANCELLED` | Red, closed | No action |
+| Status      | Suggested visual meaning      | Action owner                                                    |
+| ----------- | ----------------------------- | --------------------------------------------------------------- |
+| `PLACED`    | Amber, awaiting provider      | Provider/admin confirms or either party cancels where permitted |
+| `CONFIRMED` | Blue, ready for payment       | Customer pays or cancels; provider/admin may cancel             |
+| `PAID`      | Purple, paid and ready        | Provider/admin marks picked up                                  |
+| `PICKED_UP` | Green, in customer possession | Provider/admin marks returned                                   |
+| `RETURNED`  | Neutral gray, complete        | Customer may review                                             |
+| `CANCELLED` | Red, closed                   | No action                                                       |
 
 ### Dates, quantity, and availability
 
@@ -286,36 +254,36 @@ Zod validation failures are currently HTTP `400` with `message: "Validation fail
 
 ### Authentication
 
-| Method and path | Access | Input | Frontend use |
-| --- | --- | --- | --- |
-| `POST /auth/register` | Public | `{ name, email, phone, password, role }`; role is customer or provider | Create account and establish session |
-| `POST /auth/login` | Public | `{ email, password }` | Establish session; response data has both JWTs |
-| `POST /auth/logout` | Public | No body | Clear backend cookies; frontend adapter also clears its cookies |
-| `POST /auth/refresh-token` | Public | `{ refreshToken }` or backend cookie | Refresh access JWT |
-| `GET /auth/me` | Authenticated | None | Canonical current user with id/name/email/phone/role/status/timestamps |
+| Method and path            | Access        | Input                                                                  | Frontend use                                                           |
+| -------------------------- | ------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `POST /auth/register`      | Public        | `{ name, email, phone, password, role }`; role is customer or provider | Create account and establish session                                   |
+| `POST /auth/login`         | Public        | `{ email, password }`                                                  | Establish session; response data has both JWTs                         |
+| `POST /auth/logout`        | Public        | No body                                                                | Clear backend cookies; frontend adapter also clears its cookies        |
+| `POST /auth/refresh-token` | Public        | `{ refreshToken }` or backend cookie                                   | Refresh access JWT                                                     |
+| `GET /auth/me`             | Authenticated | None                                                                   | Canonical current user with id/name/email/phone/role/status/timestamps |
 
 Password minimum is six characters. Name is required. Phone must match `^\+?[0-9\s-]{7,20}$`. Email and phone are unique; duplicates return `409`.
 
 ### Categories
 
-| Method and path | Access | Input/query | Frontend use |
-| --- | --- | --- | --- |
-| `GET /categories` | Public | None | Filters and gear forms |
-| `POST /categories` | Admin | `{ name }` | Admin category creation |
-| `PATCH /categories/:id` | Admin | `{ name }` | Admin rename |
-| `DELETE /categories/:id` | Admin | UUID path | Delete only when no gear uses category |
+| Method and path          | Access | Input/query | Frontend use                           |
+| ------------------------ | ------ | ----------- | -------------------------------------- |
+| `GET /categories`        | Public | None        | Filters and gear forms                 |
+| `POST /categories`       | Admin  | `{ name }`  | Admin category creation                |
+| `PATCH /categories/:id`  | Admin  | `{ name }`  | Admin rename                           |
+| `DELETE /categories/:id` | Admin  | UUID path   | Delete only when no gear uses category |
 
 Category name is 2–255 characters. Deleting a used category returns `409` with the associated gear count; show that message and guide the admin to reassign/delete gear first.
 
 ### Gear
 
-| Method and path | Access | Input/query | Frontend use |
-| --- | --- | --- | --- |
-| `GET /gear` | Public | `providerId?`, `category?`, `brand?`, `price?`, `minPrice?`, `maxPrice?`, `page=1`, `limit=10` | Catalog, provider inventory, admin listing |
-| `GET /gear/:id` | Public | UUID path | Detail page; includes category, provider, newest reviews |
-| `POST /gear` | Provider/Admin | Gear body below | Provider/admin create |
-| `PATCH /gear/:id` | Owner provider/Admin | Any non-empty subset of editable fields | Edit listing |
-| `DELETE /gear/:id` | Owner provider/Admin | UUID path | Delete listing after confirmation |
+| Method and path    | Access               | Input/query                                                                                    | Frontend use                                             |
+| ------------------ | -------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `GET /gear`        | Public               | `providerId?`, `category?`, `brand?`, `price?`, `minPrice?`, `maxPrice?`, `page=1`, `limit=10` | Catalog, provider inventory, admin listing               |
+| `GET /gear/:id`    | Public               | UUID path                                                                                      | Detail page; includes category, provider, newest reviews |
+| `POST /gear`       | Provider/Admin       | Gear body below                                                                                | Provider/admin create                                    |
+| `PATCH /gear/:id`  | Owner provider/Admin | Any non-empty subset of editable fields                                                        | Edit listing                                             |
+| `DELETE /gear/:id` | Owner provider/Admin | UUID path                                                                                      | Delete listing after confirmation                        |
 
 Create body:
 
@@ -337,14 +305,14 @@ The assignment mentions advanced search and availability-date filters, but this 
 
 ### Orders and Checkout
 
-| Method and path | Access | Input/query | Frontend use |
-| --- | --- | --- | --- |
-| `GET /orders` | Customer/Provider/Admin | `status?`, `paymentStatus?`, `page=1`, `limit=10` | Role-scoped order lists and dashboard counts |
-| `POST /orders` | Customer | `{ gearItemId, startDate, endDate, quantity }` | Place rental request |
-| `GET /orders/:id` | Customer/Provider/Admin | UUID path | Role-scoped order detail/payment verification |
-| `PATCH /orders/:id/status` | Customer/Provider/Admin | `{ status }`; allowed request values follow the transition rules above | Valid role/state transition |
-| `POST /orders/:id/checkout-session` | Customer owner | No body | Create/reuse hosted Stripe Checkout |
-| `POST /orders/webhook` | Stripe only | Raw signed body | Never call from frontend |
+| Method and path                     | Access                  | Input/query                                                            | Frontend use                                  |
+| ----------------------------------- | ----------------------- | ---------------------------------------------------------------------- | --------------------------------------------- |
+| `GET /orders`                       | Customer/Provider/Admin | `status?`, `paymentStatus?`, `page=1`, `limit=10`                      | Role-scoped order lists and dashboard counts  |
+| `POST /orders`                      | Customer                | `{ gearItemId, startDate, endDate, quantity }`                         | Place rental request                          |
+| `GET /orders/:id`                   | Customer/Provider/Admin | UUID path                                                              | Role-scoped order detail/payment verification |
+| `PATCH /orders/:id/status`          | Customer/Provider/Admin | `{ status }`; allowed request values follow the transition rules above | Valid role/state transition                   |
+| `POST /orders/:id/checkout-session` | Customer owner          | No body                                                                | Create/reuse hosted Stripe Checkout           |
+| `POST /orders/webhook`              | Stripe only             | Raw signed body                                                        | Never call from frontend                      |
 
 Order creation returns:
 
@@ -378,33 +346,33 @@ The backend reuses an existing open session and uses the payment ID as Stripe's 
 
 ### Payments
 
-| Method and path | Access | Input/query | Frontend use |
-| --- | --- | --- | --- |
-| `GET /payments` | Customer/Provider/Admin | `status?`, `page=1`, `limit=10` | Role-scoped payment history/counts |
-| `GET /payments/:id` | Customer/Provider/Admin | UUID path | Role-scoped payment detail |
+| Method and path     | Access                  | Input/query                     | Frontend use                       |
+| ------------------- | ----------------------- | ------------------------------- | ---------------------------------- |
+| `GET /payments`     | Customer/Provider/Admin | `status?`, `page=1`, `limit=10` | Role-scoped payment history/counts |
+| `GET /payments/:id` | Customer/Provider/Admin | UUID path                       | Role-scoped payment detail         |
 
 There is no frontend payment-create endpoint under `/payments`, no endpoint that looks up a payment by Stripe session ID, and no client confirmation endpoint. Checkout begins only at `/orders/:id/checkout-session`; webhook processing is authoritative.
 
 ### Reviews
 
-| Method and path | Access | Input/query | Frontend use |
-| --- | --- | --- | --- |
-| `GET /reviews` | Public | `gearItemId?`, `rating?`, `page=1`, `limit=10` | Public reviews |
-| `GET /reviews/:id` | Public | UUID path | Review detail/edit bootstrap |
-| `POST /reviews` | Customer | `{ orderId, rating, comment? }` | Review returned order |
-| `PATCH /reviews/:id` | Customer owner | Non-empty `{ rating?, comment? }` | Edit own review |
-| `DELETE /reviews/:id` | Customer owner/Admin | UUID path | Delete own/moderate review |
+| Method and path       | Access               | Input/query                                    | Frontend use                 |
+| --------------------- | -------------------- | ---------------------------------------------- | ---------------------------- |
+| `GET /reviews`        | Public               | `gearItemId?`, `rating?`, `page=1`, `limit=10` | Public reviews               |
+| `GET /reviews/:id`    | Public               | UUID path                                      | Review detail/edit bootstrap |
+| `POST /reviews`       | Customer             | `{ orderId, rating, comment? }`                | Review returned order        |
+| `PATCH /reviews/:id`  | Customer owner       | Non-empty `{ rating?, comment? }`              | Edit own review              |
+| `DELETE /reviews/:id` | Customer owner/Admin | UUID path                                      | Delete own/moderate review   |
 
 Rating is 1–5 in 0.1 steps. Comment, when present, is 3–2000 characters. Only a returned, owned order can be reviewed and each order can have one review; conflicts return `409`. The backend does not provide a direct `customerId` review filter, so a “my reviews” view must derive links from owned returned orders or use data already available to the authenticated flow without pretending the public list is user-scoped.
 
 ### Admin users
 
-| Method and path | Access | Input/query | Frontend use |
-| --- | --- | --- | --- |
-| `GET /users` | Admin | `search?`, `role?`, `status?`, `page=1`, `limit=10` | User management/provider selection/counts |
-| `GET /users/:id` | Admin | UUID path | User detail |
-| `POST /users/admins` | Admin | `{ name, email, phone, password }` | Create grading/operations admin |
-| `PATCH /users/:id/status` | Admin | `{ status }`; active, inactive, or suspended | Account status management |
+| Method and path           | Access | Input/query                                         | Frontend use                              |
+| ------------------------- | ------ | --------------------------------------------------- | ----------------------------------------- |
+| `GET /users`              | Admin  | `search?`, `role?`, `status?`, `page=1`, `limit=10` | User management/provider selection/counts |
+| `GET /users/:id`          | Admin  | UUID path                                           | User detail                               |
+| `POST /users/admins`      | Admin  | `{ name, email, phone, password }`                  | Create grading/operations admin           |
+| `PATCH /users/:id/status` | Admin  | `{ status }`; active, inactive, or suspended        | Account status management                 |
 
 User search covers name, email, and phone. The backend prevents an admin from making their own account inactive/suspended. Keep the control disabled for the signed-in admin and still handle `409`.
 
@@ -559,14 +527,14 @@ For cached data in Next.js 16:
 
 Typical invalidation:
 
-| Mutation | Invalidate or refresh |
-| --- | --- |
-| Gear create/update/delete | `gear`, affected `gear:<id>`, provider/admin inventory paths |
-| Category create/update/delete | `categories`; also `gear` if displayed category information changed |
-| Order create/status change | Relevant customer/provider/admin order paths; protected order reads are no-store |
-| Review create/update/delete | `reviews`, `reviews:<gearId>`, `gear:<gearId>`, relevant order path |
-| User status/admin creation | Admin user/dashboard paths; protected reads are no-store |
-| Checkout return | No cache tags; poll/refetch order/payment with no-store |
+| Mutation                      | Invalidate or refresh                                                            |
+| ----------------------------- | -------------------------------------------------------------------------------- |
+| Gear create/update/delete     | `gear`, affected `gear:<id>`, provider/admin inventory paths                     |
+| Category create/update/delete | `categories`; also `gear` if displayed category information changed              |
+| Order create/status change    | Relevant customer/provider/admin order paths; protected order reads are no-store |
+| Review create/update/delete   | `reviews`, `reviews:<gearId>`, `gear:<gearId>`, relevant order path              |
+| User status/admin creation    | Admin user/dashboard paths; protected reads are no-store                         |
+| Checkout return               | No cache tags; poll/refetch order/payment with no-store                          |
 
 Limits must be 1–100 and pages positive integers. Debounce URL updates for text search where supported, preserve the other existing query parameters, and reset `page` when a filter changes.
 
