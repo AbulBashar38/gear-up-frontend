@@ -195,7 +195,11 @@ export function PhotoUpload({
         type="file"
         accept={accept}
         multiple
-        disabled={disabled || remainingSlots === 0}
+        // A disabled named control is omitted from FormData. Keep the input
+        // enabled when the gallery is full so its already-selected files are
+        // still sent to the Server Action; the visible add buttons enforce the
+        // gallery limit.
+        disabled={disabled}
         aria-invalid={hasError}
         aria-describedby={`${hintId} ${errorId}`}
         className="sr-only"
